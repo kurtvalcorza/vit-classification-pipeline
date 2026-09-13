@@ -1,0 +1,25 @@
+{
+  "format": "dimer_hf_snapshot",
+  "formatVersion": 1,
+  "modelKey": "vit-base-p16-224",
+  "modelId": "timm/vit_base_patch16_224.orig_in21k_ft_in1k",
+  "revision": "e0bd370de6799e8d1f47a911174ff4c3708e2323",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3409,
+      "sha256": "c5171b9aefd75755fac887b960b4d1df8cfa1f90568fc03ff5a5d5b74566664d"
+    },
+    {
+      "path": "config.json",
+      "bytes": 585,
+      "sha256": "91aa54e1244ba735215d4ec117b62c1a00a9f4a744b0e0543b16b901eaf73784"
+    },
+    {
+      "path": "model.safetensors",
+      "bytes": 346284714,
+      "sha256": "669b949ea91fd19217f200cee259780bde32210c1eb9a5af3859f0dd8346b2ec"
+    }
+  ],
+  "totalBytes": 346288708
+}
