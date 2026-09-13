@@ -3,6 +3,8 @@ license: apache-2.0
 model_card_spec: "1.1"
 pipeline_tag: image-classification
 base_model: timm/vit_base_patch16_224.orig_in21k_ft_in1k
+date_published: "2022-12-22"
+date_published_source: "Hugging Face Hub repository creation date of the exact hosted checkpoint (`createdAt`, https://huggingface.co/api/models/timm/vit_base_patch16_224.orig_in21k_ft_in1k)"
 ---
 
 # ViT-B/16 orig_in21k_ft_in1k (DIMER package v0.1.0) — Image Classification
@@ -11,7 +13,6 @@ base_model: timm/vit_base_patch16_224.orig_in21k_ft_in1k
 [![Upstream GitHub](https://img.shields.io/badge/Upstream%20GitHub-huggingface%2Fpytorch--image--models-181717?style=flat&logo=github&logoColor=white)](https://github.com/huggingface/pytorch-image-models)
 [![arXiv Paper](https://img.shields.io/badge/arXiv-2010.11929-b31b1b.svg)](https://arxiv.org/abs/2010.11929)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Pipeline](https://img.shields.io/badge/Pipeline-vit--classification--pipeline-2ea44f?style=flat&logo=github)](https://github.com/kurtvalcorza/vit-classification-pipeline)
 
 > [!WARNING]
 > ⚠️ **Provided for research, training, and evaluation purposes only.** Model weights are redistributed unmodified under their upstream license, which controls your use, including any commercial use or redistribution; the accompanying code and notebooks are released under this repository's license. All of it is supplied **"as is"**, without warranty of any kind, and has not been validated for production, clinical, or safety-critical use. Running the notebooks downloads third-party weights and datasets governed by their own licenses and consumes compute on your own Colab/Kaggle account. To the maximum extent permitted by law, the maintainers of this repository and the DIMER platform accept no liability for any damages arising from their use. Hosting implies no affiliation with or endorsement by the original authors.
@@ -28,7 +29,7 @@ This pipeline provides a ready-to-run interactive Google Colab notebook that exe
 
 ---
 
-###### Description
+#### Description
 
 `timm/vit_base_patch16_224.orig_in21k_ft_in1k` is the original Vision Transformer ViT-B/16 checkpoint from "An Image is Worth 16x16 Words" (Dosovitskiy et al., arXiv:2010.11929): per the pinned upstream README it was "Trained on ImageNet-21k and fine-tuned on ImageNet-1k in JAX by paper authors, ported to PyTorch by Ross Wightman", published in the `timm` library and pinned here to revision `e0bd370de6799e8d1f47a911174ff4c3708e2323`. Architecturally it is a plain transformer encoder over image patches: a 16×16 strided convolution (`patch_embed.proj`) turns a 224×224 image into 196 patch embeddings of width 768, a learned class token is prepended, learned position embeddings are added, 12 pre-norm multi-head self-attention blocks follow, and a 1000-way linear head reads the class token (`global_pool: token`, CLS pooling) — 86.6 M parameters and 16.9 GMACs at 224 px per the upstream README. At inference the network maps one normalized 3×224×224 tensor to 1000 logits in a single forward pass; no adaptation, fine-tuning, or in-context conditioning happens in this repository. What this repository adds is packaging: the `ViTClassificationPipeline` class in `src/vit_classification_pipeline/pipeline.py`, digest verification of the local snapshot (`verify_snapshot`), staged download by immutable revision (`stage_missing_files`), input validation with named ceilings, a fixed output contract, the `top_k_accuracy` metric helper, and the `validate_inputs` / `evaluation_report` stage helpers the standalone tutorial calls.
 
