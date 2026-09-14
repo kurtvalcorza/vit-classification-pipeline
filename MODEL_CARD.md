@@ -61,7 +61,7 @@ ImageNet-1k and ImageNet-21k images were collected from web image searches (Deng
 
 ###### Environment
 
-Operating environment: Python 3.12 with `torch==2.14.0`, `torchvision==0.29.0`, `timm==1.0.29`, `pillow==11.3.0` (exact pins in `pyproject.toml`). CUDA is optional; `from_pretrained` picks `cuda:0` when available, else CPU, and runs in float32 on both. On this repository's smoke run (Windows venv, CPU only with `CUDA_VISIBLE_DEVICES=-1` and `device="cpu"`, 346 MB snapshot) loading the verified snapshot took 3.19 s, the first 224-px prediction 0.22 s including transform and warm-up, and a second prediction 0.06 s; the CUDA path has not been executed by this repository. Data environment: inputs are assumed to be natural photographs whose subject is one of the 1000 classes, framed roughly as in ImageNet and tolerant of the 10 % border removed by the center crop; line drawings, medical scans, satellite tiles, heavy occlusion or unusual viewpoints fall outside that assumption and degrade accuracy in ways the pipeline does not measure.
+Operating environment: Python 3.12 with `torch==2.14.0`, `torchvision==0.29.0`, `torchaudio==2.11.0`, `timm==1.0.29`, `pillow==11.3.0` (exact pins in `pyproject.toml`). CUDA is optional; `from_pretrained` picks `cuda:0` when available, else CPU, and runs in float32 on both. On this repository's smoke run (Windows venv, CPU only with `CUDA_VISIBLE_DEVICES=-1` and `device="cpu"`, 346 MB snapshot) loading the verified snapshot took 3.19 s, the first 224-px prediction 0.22 s including transform and warm-up, and a second prediction 0.06 s; the CUDA path has not been executed by this repository. Data environment: inputs are assumed to be natural photographs whose subject is one of the 1000 classes, framed roughly as in ImageNet and tolerant of the 10 % border removed by the center crop; line drawings, medical scans, satellite tiles, heavy occlusion or unusual viewpoints fall outside that assumption and degrade accuracy in ways the pipeline does not measure.
 
 #### Metrics
 
@@ -119,7 +119,7 @@ The pipeline must not be used for surveillance, biometric or demographic profili
 
 ## Runtime
 
-- Pins: `torch==2.14.0`, `torchvision==0.29.0`, `timm==1.0.29`, `huggingface-hub==0.36.2`, `safetensors==0.8.0`, `numpy==2.5.3`, `pillow==11.3.0`; Python 3.12.
+- Pins: `torch==2.14.0`, `torchvision==0.29.0`, `torchaudio==2.11.0`, `timm==1.0.29`, `huggingface-hub==0.36.2`, `safetensors==0.8.0`, `numpy==2.5.3`, `pillow==11.3.0`; Python 3.12.
 - Precision: float32 on both CPU and CUDA; preprocessing resize 248 → center-crop 224 (`crop_pct 0.9`, bicubic), mean/std 0.5/0.5/0.5 from the snapshot `config.json`; fixed input size, CLS-token pooling.
 - Measured (Windows venv, CPU, `CUDA_VISIBLE_DEVICES=-1`, `from_pretrained(device="cpu")`): device `cpu`, source `local-snapshot`, load 3.19 s, first predict 0.22 s, second predict 0.06 s, total 3.40 s; top-1 on a synthetic 256×256 gradient image `whistle` (index 902) at score 0.0238, top-5 all below 0.024 — meaningless by construction.
 - Tests: `pytest -q -o addopts= tests` — 24 passed, offline, no weights required (13 pipeline, 6 role-helper, 5 notebook-parity).
