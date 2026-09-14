@@ -3,6 +3,8 @@ license: apache-2.0
 model_card_spec: "1.1"
 pipeline_tag: image-classification
 base_model: timm/vit_base_patch16_224.orig_in21k_ft_in1k
+date_published: "2022-12-22"
+date_published_source: "Hugging Face Hub repository creation date of the exact hosted checkpoint (`createdAt`, https://huggingface.co/api/models/timm/vit_base_patch16_224.orig_in21k_ft_in1k)"
 ---
 
 # ViT-B/16 orig_in21k_ft_in1k (DIMER package v0.1.0) — Image Classification
@@ -11,7 +13,6 @@ base_model: timm/vit_base_patch16_224.orig_in21k_ft_in1k
 [![Upstream GitHub](https://img.shields.io/badge/Upstream%20GitHub-huggingface%2Fpytorch--image--models-181717?style=flat&logo=github&logoColor=white)](https://github.com/huggingface/pytorch-image-models)
 [![arXiv Paper](https://img.shields.io/badge/arXiv-2010.11929-b31b1b.svg)](https://arxiv.org/abs/2010.11929)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Pipeline](https://img.shields.io/badge/Pipeline-vit--classification--pipeline-2ea44f?style=flat&logo=github)](https://github.com/kurtvalcorza/vit-classification-pipeline)
 
 > [!WARNING]
 > ⚠️ **Provided for research, training, and evaluation purposes only.** Model weights are redistributed unmodified under their upstream license, which controls your use, including any commercial use or redistribution; the accompanying code and notebooks are released under this repository's license. All of it is supplied **"as is"**, without warranty of any kind, and has not been validated for production, clinical, or safety-critical use. Running the notebooks downloads third-party weights and datasets governed by their own licenses and consumes compute on your own Colab/Kaggle account. To the maximum extent permitted by law, the maintainers of this repository and the DIMER platform accept no liability for any damages arising from their use. Hosting implies no affiliation with or endorsement by the original authors.
@@ -28,7 +29,7 @@ This pipeline provides a ready-to-run interactive Google Colab notebook that exe
 
 ---
 
-###### Description
+#### Description
 
 `timm/vit_base_patch16_224.orig_in21k_ft_in1k` is the original Vision Transformer ViT-B/16 checkpoint from "An Image is Worth 16x16 Words" (Dosovitskiy et al., arXiv:2010.11929): per the pinned upstream README it was "Trained on ImageNet-21k and fine-tuned on ImageNet-1k in JAX by paper authors, ported to PyTorch by Ross Wightman", published in the `timm` library and pinned here to revision `e0bd370de6799e8d1f47a911174ff4c3708e2323`. Architecturally it is a plain transformer encoder over image patches: a 16×16 strided convolution (`patch_embed.proj`) turns a 224×224 image into 196 patch embeddings of width 768, a learned class token is prepended, learned position embeddings are added, 12 pre-norm multi-head self-attention blocks follow, and a 1000-way linear head reads the class token (`global_pool: token`, CLS pooling) — 86.6 M parameters and 16.9 GMACs at 224 px per the upstream README. At inference the network maps one normalized 3×224×224 tensor to 1000 logits in a single forward pass; no adaptation, fine-tuning, or in-context conditioning happens in this repository. What this repository adds is packaging: the `ViTClassificationPipeline` class in `src/vit_classification_pipeline/pipeline.py`, digest verification of the local snapshot (`verify_snapshot`), staged download by immutable revision (`stage_missing_files`), input validation with named ceilings, a fixed output contract, the `top_k_accuracy` metric helper, and the `validate_inputs` / `evaluation_report` stage helpers the standalone tutorial calls.
 
@@ -60,7 +61,7 @@ ImageNet-1k and ImageNet-21k images were collected from web image searches (Deng
 
 ###### Environment
 
-Operating environment: Python 3.12 with `torch==2.14.0`, `torchvision==0.29.0`, `timm==1.0.29`, `pillow==11.3.0` (exact pins in `pyproject.toml`). CUDA is optional; `from_pretrained` picks `cuda:0` when available, else CPU, and runs in float32 on both. On this repository's smoke run (Windows venv, CPU only with `CUDA_VISIBLE_DEVICES=-1` and `device="cpu"`, 346 MB snapshot) loading the verified snapshot took 3.19 s, the first 224-px prediction 0.22 s including transform and warm-up, and a second prediction 0.06 s; the CUDA path has not been executed by this repository. Data environment: inputs are assumed to be natural photographs whose subject is one of the 1000 classes, framed roughly as in ImageNet and tolerant of the 10 % border removed by the center crop; line drawings, medical scans, satellite tiles, heavy occlusion or unusual viewpoints fall outside that assumption and degrade accuracy in ways the pipeline does not measure.
+Operating environment: Python 3.12 with `torch==2.14.0`, `torchvision==0.29.0`, `torchaudio==2.11.0`, `timm==1.0.29`, `pillow==11.3.0` (exact pins in `pyproject.toml`). CUDA is optional; `from_pretrained` picks `cuda:0` when available, else CPU, and runs in float32 on both. On this repository's smoke run (Windows venv, CPU only with `CUDA_VISIBLE_DEVICES=-1` and `device="cpu"`, 346 MB snapshot) loading the verified snapshot took 3.19 s, the first 224-px prediction 0.22 s including transform and warm-up, and a second prediction 0.06 s; the CUDA path has not been executed by this repository. Data environment: inputs are assumed to be natural photographs whose subject is one of the 1000 classes, framed roughly as in ImageNet and tolerant of the 10 % border removed by the center crop; line drawings, medical scans, satellite tiles, heavy occlusion or unusual viewpoints fall outside that assumption and degrade accuracy in ways the pipeline does not measure.
 
 #### Metrics
 
@@ -118,7 +119,7 @@ The pipeline must not be used for surveillance, biometric or demographic profili
 
 ## Runtime
 
-- Pins: `torch==2.14.0`, `torchvision==0.29.0`, `timm==1.0.29`, `huggingface-hub==0.36.2`, `safetensors==0.8.0`, `numpy==2.5.3`, `pillow==11.3.0`; Python 3.12.
+- Pins: `torch==2.14.0`, `torchvision==0.29.0`, `torchaudio==2.11.0`, `timm==1.0.29`, `huggingface-hub==0.36.2`, `safetensors==0.8.0`, `numpy==2.5.3`, `pillow==11.3.0`; Python 3.12.
 - Precision: float32 on both CPU and CUDA; preprocessing resize 248 → center-crop 224 (`crop_pct 0.9`, bicubic), mean/std 0.5/0.5/0.5 from the snapshot `config.json`; fixed input size, CLS-token pooling.
 - Measured (Windows venv, CPU, `CUDA_VISIBLE_DEVICES=-1`, `from_pretrained(device="cpu")`): device `cpu`, source `local-snapshot`, load 3.19 s, first predict 0.22 s, second predict 0.06 s, total 3.40 s; top-1 on a synthetic 256×256 gradient image `whistle` (index 902) at score 0.0238, top-5 all below 0.024 — meaningless by construction.
 - Tests: `pytest -q -o addopts= tests` — 24 passed, offline, no weights required (13 pipeline, 6 role-helper, 5 notebook-parity).
