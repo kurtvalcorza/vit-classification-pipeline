@@ -99,7 +99,7 @@ Before changing the registry status from `Candidate` to `Release-grade`:
      `inaturalist-open-data.s3.amazonaws.com` into `weights/inat-birds/`, six species of 30 read, and the seeded
      stratified draw of 108 / 24 / 48 records with `check_split_disjoint` reporting no shared photograph, the observer
      overlap counted (31 of 117 observers in more than one split in the recorded run) and the three dataset digests
-     `__DIG_TRAIN__` / `__DIG_VAL__` / `__DIG_TEST__`; `outputs/…_train.csv` written; the four dataset refusal probes each
+     `1e4cca7f…` / `d176b3ff…` / `0e787f09…`; `outputs/…_train.csv` written; the four dataset refusal probes each
      raising `ValueError`;
    - Section 5: the ceilings (`NUM_CLASSES` 1000, `MAX_IMAGE_SIDE` 4096, `MAX_BATCH` 64) and the contract (`INPUT_SIZE`
      224, `FEATURE_DIM` 768, `DECISION_RULE` `argmax`, `TRANSFORMER_BLOCKS` 12, `PARAMETER_COUNT` 86,567,656) surfaced;
@@ -142,7 +142,7 @@ A known-failing default path in the supported runtime blocks release (REL11).
 
 | Notebook | Commit / notebook blob | Date (UTC) | Executor | Outcome |
 |---|---|---|---|---|
-| `vit_classification_colab.ipynb` (`E2E`) | `__LOCAL_ROW__` | 2026-09-19 | Local pre-flight harness (Windows, CPython 3.12.10, CPU, `google.colab` shim, pins pre-installed) | PASS — pre-flight only, **not** promotion evidence |
+| `vit_classification_colab.ipynb` (`E2E`) | `9f24c9e` / `c1fdbadd` | 2026-09-19 | Local pre-flight harness (Windows, CPython 3.12.10, CPU, `google.colab` shim, pins pre-installed) | PASS — pre-flight only, **not** promotion evidence |
 | `vit_classification_colab.ipynb` (`TASK-INFERENCE`, superseded) | `83067a1` / `5b786a1e5767` | 2026-09-14 | Kaggle CPU (`kurtvalcorza/dimer-nb2-vit-classification` v1) | PASSED — 8/8 code cells, 435.0 s, 346 MB staged; evidence for the earlier inference-only notebook, not for the `E2E` blob |
 
 ## Recorded executions
@@ -154,7 +154,7 @@ runtime, not general estimates.
 
 | Date (UTC) | Commit / notebook blob | Executor | Path exercised | Wall | Outcome |
 |---|---|---|---|---|---|
-| 2026-09-19 | `__LOCAL_ROW__` | Local pre-flight harness (Windows, CPython 3.12.10, CPU float32, `torch 2.14.0+cu130` with `CUDA_VISIBLE_DEVICES=-1`, `timm 1.0.29`) | `__LOCAL_EXEC__` |
+| 2026-09-19 | `9f24c9e` / `c1fdbadd` | Local pre-flight harness (Windows, CPython 3.12.10, CPU float32, `torch 2.14.0+cu130` with `CUDA_VISIBLE_DEVICES=-1`, `timm 1.0.29`) | Default sample path (install skipped, pins pre-installed → three carried modules → inline manifest assert → `stage_missing_files` fetched 0 of 3 entries because the snapshot was pre-staged → `verify_snapshot` 3 files → `from_pretrained` on CPU at 224 × 224 → `fetch_corpus` served from the pre-staged cache after its 180 digest checks (0.3 s) → six species of 30 read, 108 / 24 / 48 drawn with `check_split_disjoint` clean, 31 of 117 observers in more than one split, digests `1e4cca7f…` / `d176b3ff…` / `0e787f09…` → four dataset refusals → input manifest with the oversized-image refusal → `predict` of three test photographs (0.11 s) with all four sanity checks `True` and the ImageNet top-5 lists printed (chipping sparrow → `ruffed grouse` 0.261; goldfinch → `goldfinch` 0.999; song sparrow → `brambling` 0.366) → majority floor → 5-NN vote → frozen-policy probe → unfrozen-policy `adapt` → validation + test evaluation → predictions before/after (a fresh probe pipeline for the frozen column) → adapter export → reload parity incl. `predict`) | 74.7 s | **PASSED** — 11/11 code cells; majority floor 16.7 % / macro-F1 0.048; cosine 5-NN 75.0 % / 0.752 (6.9 s); frozen policy (linear probe, 300 steps, 7.9 s incl. features) 79.2 % / 0.789, log-loss 0.678, validation 91.7 % / log-loss 0.162; `adapt` with the unfreeze: 14,175,744 block + 4,614 head parameters, 4 epochs, 38.5 s, validation log-loss 0.162 (probe) → 0.165 → 0.166 → 0.163 → 0.166 with accuracy 91.7 % throughout, selected `frozen backbone + linear probe` at `best_epoch` 0; **selected policy on the test split 79.2 % / macro-F1 0.789, log-loss 0.678 (Δ +0.0 accuracy, +0.0 macro-F1 vs the probe — the probe is the selected model)**; per-class recall 0.88 / 0.88 / 0.75 / 0.88 / 0.50 / 0.88 (goldfinch, chipping sparrow, junco, house finch, song sparrow, white-throated sparrow); six predictions printed — none changed (`test-005`, a chipping sparrow, labelled house finch by both); per-batch report `not-measurable`; adapter 18,632 B / 2 tensors, SHA-256 `d216f083…`; reload parity exact (probabilities identical, test accuracy 0.791667 both ways, `predict` identical); six exports written. Pre-flight; hosted clean-runtime run still required |
 | 2026-09-14 | `83067a1` / `5b786a1e5767` (`TASK-INFERENCE`, superseded) | Kaggle CPU (`kurtvalcorza/dimer-nb2-vit-classification` v1) | Default sample path of the inference-only notebook: one synthetic gradient image, `stage_missing_files` fetching the three manifest entries from the Hub, `verify_snapshot` over 3 files, `predict` top-5 with the ceilings printed, `not-measurable` report, CSV + JSON exports | 435.0 s | **PASSED** — 8/8 code cells, 346 MB staged; history only |
 
 ## Current status
