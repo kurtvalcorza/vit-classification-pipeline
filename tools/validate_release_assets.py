@@ -1,4 +1,4 @@
-"""Static release-asset validation for the ViT-B/16 classification DIMER pipeline.
+"""Static release-asset validation for the ViT-B/16 ImageNet-1k classification DIMER pipeline.
 
 Checks the STANDALONE tutorial notebook (DIMER Notebook Specification 2.0 §4), the tutorial
 registry, model card, README, STATUS.md and weight documentation for source conformance and
@@ -23,35 +23,65 @@ ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = "vit_classification_pipeline"
 REPO_NAME = "vit-classification-pipeline"
 NOTEBOOK_NAME = "vit_classification_colab.ipynb"
-EXPECTED_PROFILE = "TASK-INFERENCE"
+EXPECTED_PROFILE = "E2E"
 EXPECTED_MODEL_ID = "timm/vit_base_patch16_224.orig_in21k_ft_in1k"
 PIPELINE_CLASS = "ViTClassificationPipeline"
-# INF1: the exact load expression the model cell must use (a template's `model_load` may extend it).
 MODEL_LOAD_EXPR = f"{PIPELINE_CLASS}.from_pretrained(weights_dir=WEIGHTS_DIR)"
-# Additional 40-hex revisions a document may legitimately cite (none by default).
-KNOWN_SHAS: frozenset[str] = frozenset(())
-# Colab form gates that must default to the non-interactive sample path.
+KNOWN_SHAS: frozenset[str] = frozenset()  # the 180 photo digests live in the carried samples module, not in prose
 BYOD_GATES = ("USE_BYOD",)
-# Machine-readable artifacts the notebook must write (OUT1-OUT3, DAT24, EVAL21).
 EXPECTED_OUTPUTS = (
+    "outputs/vit_classification_train.csv",
     "outputs/vit_classification_input_manifest.json",
     "outputs/vit_classification_evaluation_report.json",
+    "outputs/vit_classification_predictions.csv",
+    "outputs/vit_classification_adapter",
     "outputs/vit_classification_result.json",
-    "outputs/vit_classification_top_k.csv",
 )
-# Profile-specific code the notebook must exercise through the carried module's public API.
 CODE_MARKERS = (
-    "input_manifest = validate_inputs(image, top_k=5, names=[image_name])",
+    # Stage 4: pinned corpus, validation, stratified split, observer overlap, CSV, refusal probes
+    "USE_BYOD = False",
+    "corpus = read_corpus(fetch_corpus(cache_dir='weights/inat-birds'))",
+    "splits = build_sample_dataset(corpus, seed=SPLIT_SEED)",
+    "records = load_byod_dataset(byod_path)",
+    "dataset_manifests = {name: validate_dataset(part) for name, part in splits.items()}",
+    "classes = class_names(train_records)",
+    "disjoint = check_split_disjoint(splits)",
+    "overlap = observer_overlap(splits)",
+    "write_dataset_csv(train_records, 'outputs/vit_classification_train.csv')",
+    # Stage 5: the ImageNet-1k inference contract with its manifest, rejection probe and sanity checks
+    "input_manifest = validate_inputs([r['image'] for r in probe_records], top_k=5, names=[r['id'] for r in probe_records])",
     "validate_inputs(Image.new('RGB', (MAX_IMAGE_SIDE + 1, 8)))",
-    "result = pipe.predict(image, top_k=5)",
-    "report = evaluation_report(result, targets, sample_kind=sample_kind)",
-    "targets = None if ground_truth is None else [ground_truth]",
-    "print({'ceilings': {'NUM_CLASSES': NUM_CLASSES, 'MAX_IMAGE_SIDE': MAX_IMAGE_SIDE, 'MAX_BATCH': MAX_BATCH}})",
-    "GROUND_TRUTH_INDEX = -1",
-    "image = Image.fromarray(array, mode='RGB')",
-    "hashlib.sha256(np.asarray(image.convert('RGB')).tobytes()).hexdigest()",
-    "result['decision_rule']",
-    "writer.writerow(['image', 'rank', 'index', 'label', 'score'])",
+    "imagenet_result = pipe.predict([r['image'] for r in probe_records], top_k=5)",
+    "'contract': {'INPUT_SIZE': INPUT_SIZE, 'FEATURE_DIM': FEATURE_DIM, 'DECISION_RULE': DECISION_RULE, 'TRANSFORMER_BLOCKS': TRANSFORMER_BLOCKS, 'PARAMETER_COUNT': PARAMETER_COUNT}",
+    "'ranked_descending'",
+    "'argmax_is_rank_one'",
+    "'imagenet_top5'",
+    # Stage 6: majority floor, k-NN baseline and the frozen policy
+    "floor = majority_baseline([r['label'] for r in train_records], [r['label'] for r in test_records], classes)",
+    "baseline_knn = pipe.knn_baseline(train_records, test_records, k=5)",
+    "probe_result = pipe.adapt(train_records, val_records, probe_steps=PROBE_STEPS, probe_lr=PROBE_LR, trainable_blocks=0)",
+    "frozen_test = pipe.evaluate(test_records)",
+    "assert frozen_test['accuracy'] > floor['accuracy'] and probe_result['policy'].startswith('frozen')",
+    # Stage 7: the unfrozen policy with explicit hyperparameters
+    "adapt_result = pipe.adapt(",
+    "trainable_blocks=TRAINABLE_BLOCKS",
+    "lr=LEARNING_RATE",
+    "'selected_policy': adapt_result['policy']",
+    # Stage 8: held-out evaluation, comparison, assertion
+    "adapted_test = pipe.evaluate(test_records)",
+    "adapted_val = pipe.evaluate(val_records)",
+    "'delta_vs_frozen'",
+    "assert adapted_test['accuracy'] > floor['accuracy']",
+    # Stage 9: predictions before/after, batch report, artifact, reload parity incl. predict, provenance
+    "after = pipe.classify([r['image'] for r in show])",
+    "single_report = evaluation_report(",
+    "pipe.save_artifact(artifact_dir, metadata=",
+    "reloaded = ViTClassificationPipeline.from_artifact(artifact_dir, weights_dir=WEIGHTS_DIR, device=pipe.device)",
+    "'predict_identical': reloaded.predict(",
+    "assert parity['probabilities_identical'] and parity['classes_identical'] and parity['predict_identical'] and abs(adapted_test['accuracy'] - reloaded_test['accuracy']) < 1e-9",
+    "weight_entry = next(entry for entry in snapshot['files'] if entry['path'] == WEIGHTS_FILE)",
+    "'weight_format': 'safetensors, digest-verified'",
+    "'corpus': {'name': CORPUS_NAME, 'release': CORPUS_RELEASE, 'base_url': CORPUS_BASE_URL",
     "'model_revision': MODEL_REVISION",
     "'model_license': MODEL_LICENSE",
     "timm.__version__",
@@ -59,15 +89,19 @@ CODE_MARKERS = (
 )
 # Profile-specific learner-facing statements.
 MARKDOWN_MARKERS = (
-    "**Capability:** ImageNet-1k single-label image classification (1000 classes)",
-    "**No adaptation occurs:**",
-    "The decision rule is `argmax` over the 1000 softmax scores",
-    "**not a calibrated probability**",
-    "the pipeline ships no acceptance threshold",
-    "**ordered by descending score**",
-    "the verdict is `not-measurable`",
-    "`sample-sanity`",
-    "object detection, segmentation, multi-label tagging, OCR, open-vocabulary classification",
+    "**Capability:** ImageNet-1k single-label image classification (argmax plus top-k softmax scores)",
+    "a new linear head on the frozen 768-d pre-logits with an optional unfreeze of the last transformer blocks",
+    "**The label space is fixed to the 1000 ImageNet-1k classes:**",
+    "**supervised adaptation to a label space the checkpoint does not have, under an explicit frozen-vs-unfrozen policy**",
+    "**majority floor**",
+    "**cosine 5-NN vote**",
+    "**frozen policy**",
+    "**unfrozen policy**",
+    "**lowest validation log-loss**",
+    "The ImageNet head is never trained or exported",
+    "no dispersion estimate",
+    "object detection, segmentation, multi-label tagging, OCR, open-vocabulary or zero-shot classification",
+    "CC0 by its own iNaturalist licence code",
 )
 # Direct-library use that must stay inside the carried module cell (G2: the notebook calls the
 # pipeline API, it does not reimplement it). Checked on every code cell except the embedded one.
@@ -75,13 +109,21 @@ FORBIDDEN_OUTSIDE_MODULE = (
     "from huggingface_hub import",
     "import huggingface_hub",
     "hf_hub_download(",
-    "import timm.",
-    "from timm import",
-    "from timm.",
     "timm.create_model(",
-    "from torchvision import",
-    "from transformers import",
-    "torch.softmax(",
+    "from timm",
+    "import timm.",
+    "urllib.request",
+    "from safetensors",
+    "load_file(",
+    "save_file(",
+    ".backward(",
+    "torch.optim",
+    "pipe._model",
+    "cross_entropy(",
+    "torch.nn.Linear(",
+    "forward_features(",
+    "forward_head(",
+    ".logits",
 )
 
 # ---------------------------------------------------------------------------
@@ -154,7 +196,7 @@ COMMON_MARKDOWN_MARKERS = (
     "**Learning objectives:**",
     "## Prerequisites",
     "Do not upload confidential or restricted",
-    "- **External access:** the Hugging Face Hub only",
+    "- **External access:** the Hugging Face Hub",
     "## 1. Install the pinned runtime",
     "## 2. Pipeline code (carried verbatim from",
     "## 3. Pin, stage and verify the model",
@@ -168,15 +210,19 @@ COMMON_MARKDOWN_MARKERS = (
 # Patterns that must never appear in tutorial code (comment-stripped), in any cell.
 FORBIDDEN_PATTERNS = (
     ("credential in clone URL", re.compile(r"https://[^/'\"\s]*@github\.com/|x-access-token:")),
-    ("repository clone (ST1)", re.compile(r"\bgit\b[^\n]*\bclone\b|github\.com/kurtvalcorza")),
-    ("mutable git dependency (MOD14)", re.compile(r"git\+https?://(?![^\n]*@[0-9a-f]{40}\b)")),
+    ("repository clone (ST1)", re.compile(r"\bgit\b[^\n]*\bclone\b|github\.com")),
     ("editable self-install", re.compile(r"""['"](?:-e|--editable)['"]|pip install (?:-e|--editable)\b""")),
     ("repository package import (ST1)", re.compile(rf"^\s*(?:from|import)\s+{PACKAGE}\b", re.M)),
     ("mutable model reference (MOD14)", re.compile(r"revision\s*=\s*['\"](?:main|latest)['\"]")),
     ("trust_remote_code enabled", re.compile(r"trust_remote_code\s*[=:]\s*True")),
     (
         "unsafe deserialization",
-        re.compile(r"\bpickle\.load|\btorch\.load\s*\(|getattr\(\s*torch\s*,\s*['\"]load['\"]"),
+        re.compile(
+            r"\bpickle\.load"
+            r"|\btorch\.load\s*\((?![^)]*weights_only\s*=\s*True)"
+            r"|weights_only\s*=\s*False"
+            r"|getattr\(\s*torch\s*,\s*['\"]load['\"]"
+        ),
     ),
     ("archive extractall", re.compile(r"\.extractall\s*\(")),
     ("notebook magic or shell escape", re.compile(r"(?m)^\s*[%!]|get_ipython\(\)")),
@@ -252,9 +298,7 @@ def _load_tool(name: str):
 
 def _package_identity() -> tuple[str, str]:
     """Read MODEL_ID / MODEL_REVISION from the package source without importing torch."""
-    template = _load_tool("notebook_template").TEMPLATE
-    entry = ROOT / template.get("package_dir", f"src/{PACKAGE}") / template.get("entry_module", "pipeline.py")
-    text = _read(entry)
+    text = _read(ROOT / "src" / PACKAGE / "pipeline.py")
     model_id = re.search(r'^MODEL_ID = "([^"]+)"$', text, re.M)
     revision = re.search(r'^MODEL_REVISION = "([^"]+)"$', text, re.M)
     _check(
@@ -449,8 +493,9 @@ def _validate_embedded_modules(path: Path, notebook: dict, build) -> list[int]:
         [cell["metadata"]["dimer"]["embedded_module"] for _, cell in tagged] == expected_rels,
         f"{path.name}: the cells tagged metadata.dimer.embedded_module must be exactly {expected_rels}, in order (ST2)",
     )
-    for (index, cell), module in zip(tagged, context["modules"], strict=True):
-        rel = f"{context['pkg_rel']}/{module}"
+    for (index, cell), module, rel in zip(
+        tagged, context["modules"], context["module_rels"], strict=True
+    ):
         _check(
             cell["metadata"]["dimer"].get("module_sha256") == context["per_module_sha256"][rel],
             f"{path.name}: cell {index} module_sha256 tag does not match {rel}",
@@ -491,7 +536,7 @@ def _validate_parity(path: Path, notebook: dict, code_cells: list[tuple[int, str
     _check(inline is not None and json.loads(inline.group(1)) == manifest, f"{path.name}: inline MANIFEST != committed manifest (PAR2)")
     pins_block = re.search(r"^PINS = \[(.*?)^\]", code, re.M | re.S)
     _check(pins_block is not None, f"{path.name}: install cell must carry PINS = [...] (ENV2)")
-    _check(re.findall(r"'([^']+)'", pins_block.group(1)) == build._pins(ROOT, template), f"{path.name}: inline PINS != declared runtime pins (PAR2)")
+    _check(re.findall(r"'([^']+)'", pins_block.group(1)) == build._pins(ROOT), f"{path.name}: inline PINS != pyproject runtime pins (PAR2)")
     recorded = notebook["metadata"]["dimer"]["generated_from"]["revision"]
     rendered = build.to_bytes(build.render(ROOT, template, recorded))
     current = path.read_bytes().replace(b"\r\n", b"\n")  # autocrlf checkouts are CRLF
@@ -536,8 +581,7 @@ def _validate_notebook_content(
     missing_md = [marker for marker in COMMON_MARKDOWN_MARKERS + MARKDOWN_MARKERS if marker not in markdown]
     _check(not missing_md, f"{path.name}: missing learner-facing markers: {missing_md}")
     _check(f"**Profile:** `{EXPECTED_PROFILE}`" in markdown, f"{path.name}: markdown must state the profile")
-    ref = _load_tool("notebook_template").TEMPLATE.get("model_host", {}).get("reference_url", f"https://huggingface.co/{model_id}")
-    _check(ref in markdown, f"{path.name}: references must link {ref}")
+    _check(f"https://huggingface.co/{model_id}" in markdown, f"{path.name}: references must link {model_id}")
 
 
 def validate_notebooks() -> None:
