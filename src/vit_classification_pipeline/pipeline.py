@@ -443,9 +443,10 @@ class ViTClassificationPipeline:
 
         head, classes = self._require_head()
         batch_images = self._validate(images, DEFAULT_TOP_K)
+        head_device = next(head.parameters()).device  # the head lives on the model device while it trains
         with torch.inference_mode():
-            logits = head(self._pre_logits(batch_images))
-            probabilities = torch.softmax(logits, dim=-1)
+            logits = head(self._pre_logits(batch_images).to(head_device))
+            probabilities = torch.softmax(logits, dim=-1).cpu()
         return {
             "labels": [classes[int(i)] for i in probabilities.argmax(dim=-1)],
             "probabilities": [[float(v) for v in row] for row in probabilities.tolist()],
