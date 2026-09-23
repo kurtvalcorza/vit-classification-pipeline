@@ -99,7 +99,7 @@ Overconfidence out of distribution: an unrelated image still yields a top-1 labe
 
 ###### Use cases
 
-The pipeline must not be used for surveillance, biometric or demographic profiling, or social scoring — its label space cannot do these, and adapting it to try would be a misuse. It must not support unlawful discrimination in employment, housing, credit, insurance, education or healthcare access, nor deceptive or manipulative applications such as fabricating evidence of what an image contains. Any use that violates the Apache-2.0 terms of the upstream weights or the DIMER deployment terms is prohibited. The developers identify no further prohibited use beyond these because the model's output is a coarse object label.
+The pipeline must not be used for surveillance, biometric or demographic profiling, or social scoring — its label space cannot do these, and adapting it to try would be a misuse. It must not support unlawful discrimination in employment, housing, credit, insurance, education or healthcare access, nor deceptive or manipulative applications such as fabricating evidence of what an image contains. Any use that violates the Apache-2.0 terms of the upstream weights or the terms of the deployment that runs the pipeline is prohibited. The developers identify no further prohibited use beyond these because the model's output is a coarse object label.
 
 ## Immutable provenance
 
