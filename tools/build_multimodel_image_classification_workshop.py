@@ -1,5 +1,5 @@
+# ruff: noqa: E501,I001
 """Generate the DIMER multi-model image-classification workshop notebook."""
-# ruff: noqa: E501 -- generator metadata contains descriptive literals
 from __future__ import annotations
 
 import argparse
