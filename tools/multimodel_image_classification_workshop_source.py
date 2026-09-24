@@ -1,5 +1,5 @@
+# ruff: noqa: E501,I001
 """Source cells for the DIMER multi-model image-classification workshop."""
-# ruff: noqa: E501 -- generated/embedded notebook source intentionally contains long literals
 CELLS = [
   {
     "kind": "markdown",
