@@ -130,3 +130,12 @@ def test_committed_notebook_is_clean():
         if cell["cell_type"] == "code":
             assert cell["execution_count"] is None
             assert cell["outputs"] == []
+
+
+def test_probe_recipe_lets_selection_find_a_minimum():
+    # At lr 1e-2 every probe fit the 108 training images within 10 steps and was selected at its first checkpoint.
+    text = "\n".join("".join(c["source"]) for c in load()["cells"] if c["cell_type"] == "code")
+    assert 'PROBE_LR = 0.001 ' in text and 'PROBE_STEPS = 1000 ' in text
+    assert 'ap.add_argument("--lr",type=float,default=1e-3)' in text
+    assert 'ap.add_argument("--steps",type=int,default=1000)' in text
+    assert '"selected_at_first_checkpoint"' in text and '"selected_at_step_cap"' in text

@@ -535,9 +535,9 @@ Recommended default:
 ```text
 classifier: Linear(feature_dim, 6)
 optimizer: AdamW
-learning rate: 1e-2
+learning rate: 1e-3
 weight decay: 1e-4
-maximum steps: 300
+maximum steps: 1000
 seed: 0
 loss: cross-entropy
 backbone: frozen
@@ -568,6 +568,10 @@ evaluate validation log-loss every 10 steps
 Selection criterion:
 
 > lowest validation log-loss
+
+The learning rate MUST be low enough that the selected step is not the first checkpoint. With 108 training images and 768–2,048 standardized features, a learning rate of `1e-2` fit every probe to the training set within 10 steps: validation log-loss rose from the first checkpoint onward, all four `STANDARD` probes were selected at step 10, and ResNet-50 was left overconfident (validation log-loss 2.22, worse than a uniform six-way guess at 1.79). At `1e-3` the four probes reached their validation minima at steps 50, 30, 1000 and 1000 (MobileNetV4, ResNet-50, ConvNeXt-Tiny, ViT-B/16), with ResNet-50 validation log-loss 0.81. These values were compared on the validation split only.
+
+The notebook MUST flag a selection on the first checkpoint or on the step cap, because either means the rule saw no interior minimum.
 
 The selected probe is frozen before the test split is opened.
 
