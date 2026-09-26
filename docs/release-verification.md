@@ -177,6 +177,56 @@ runtime. As for the other notebooks, this table is the evidence record: `metadat
 stays `pending` as authored, because editing it would change the blob these runs verify, and the registry status
 stays **Candidate** until a reviewer promotes it.
 
-## Current status
+## Primary ViT tutorial status
 
 **Release-grade.** The `E2E` notebook blob `50462c07` (committed at `8b26ec6`) executed top-to-bottom in a clean Kaggle Tesla T4 runtime on 2026-09-19 (11/11 ok (1 restart after install cell), 276.0 s, 188 files, 365 MB fetched from the Hub and digest-verified inside the notebook) with no repository checkout — the REL1/REL10 supported-runtime evidence this file gates on. The local pre-flight rows above are what preceded it and remain history. Any later change to the carried modules or to the notebook produces a new blob, and the registry returns to **Candidate** until a clean run of that blob is recorded here.
+
+## Multi-model guided follow-up — 2026-09-26
+
+Assessment uses the current fleet NOTEBOOK_SPEC 2.2 (Git blob `046d866eac7cc67b1539a4ba370ebc965341c87b`) and this repository's comparative notebook spec. The historic default STANDARD Colab run at notebook blob `c40bc9351916` remains valid for that artifact. This revision changes baseline evaluation timing and exported provenance, so it requires a new exact-revision hosted run. Its **Candidate** status does not alter the primary ViT tutorial's separate record above.
+
+Confirmed gaps and dispositions:
+
+| Gap | Fix / evidence |
+|---|---|
+| GDL5/7–9/11–12: objectives, predictions, stage interpretation and infrastructure separation incomplete | Observable objectives, architecture/metric explanations, pre-comparison predictions, worked checkpoints and collapsed carrier/runner cells added |
+| GDL10: rerunning probe training after canonical freeze overwrites adapter files | Optional activity now requires two separate fresh runtimes, saved validation tables, only a step-budget change and a stop before freeze/test; cap selection no longer implies proven ongoing improvement |
+| Early majority metrics expose test labels before freeze | Section 6 uses validation; fixed-rule test scoring moves to Section 14 after the frozen adapter evaluation |
+| BYOD export claims six classes / 48 test images regardless of data | Actual class count and held-out image count are exported |
+| BYOD prose implies grouped splits can be supplied | Documented that only automatic image-level stratification is implemented; external split folders/columns are not honored |
+| REL12 and optional-tier execution evidence incomplete | Kept pending with concrete checks below; no release promotion |
+
+Local baseline: release validator passed and 10/10 comparative notebook tests passed with `PYTHONPATH=src`. After: 18/18 targeted tests pass, release validator/generator parity pass, and changed Python files pass Ruff. New tests execute the notebook's actual BYOD directory/ZIP loading, image validation, split and manifest paths using 16 unique synthetic images across two classes; four invalid datasets are rejected (missing label, duplicate ID, missing image, too few per class). A sentinel proves the early baseline does not read test rows, then its fixed rule is scored against a different test distribution. The export-cell test checks actual BYOD counts using stand-in model results; it does not establish trained-model or reload correctness. No foundation models were loaded locally.
+
+Reproduce in an environment with the repository's lightweight test dependencies:
+
+```powershell
+$env:PYTHONPATH='src'
+python -m pytest --noconftest -o addopts= tests/test_multimodel_image_classification_workshop.py tests/test_workshop_learning_boundaries.py
+python tools/validate_release_assets.py
+python tools/build_multimodel_image_classification_workshop.py --check
+```
+
+`--noconftest` isolates these checks from model fixtures; this is not the full model-backed suite.
+
+Remaining release evidence:
+
+1. Run the exact revised notebook in a fresh supported Colab T4 runtime with default STANDARD settings. Retain commit/blob, runtime/package/device inventory, executed notebook, adapter reload results and report ZIP digest. Confirm validation-only majority output in Section 6 and test majority output after freeze in Section 14.
+2. In another fresh runtime, set `USE_BYOD=True` and `BYOD_PATH` to a representative compatible directory or ZIP with `labels.csv` (`id,file,label`), at least eight independent images per class and 2–100 classes. Run the entire real-model path through feature extraction, training, selection, freeze, test, adapter reload and export. Record input/report digests and actual class/split counts. Synthetic parser fixtures are not this evidence.
+3. In a separate negative run, remove the `label` column; require refusal at acquisition before models. Save the diagnostic and input digest. Do not count the intentional rejection as successful Run all.
+4. Qualify FULL and the DINOv2 extension separately before claiming those paths verified. Exercise the optional two-runtime activity separately from canonical Run all; use only validation outcomes.
+
+The remaining hosted and full-model BYOD gates prevent an unqualified gold-standard/release-grade claim for this revised comparative notebook.
+
+
+## Maintainer-supplied Colab execution — 2026-09-26
+
+The maintainer reported that this notebook passed an end-to-end Colab run and authorized merging its open PR. The supplied [executed notebook](execution-evidence/2026-09-26/DIMER_MultiModel_Image_Classification_Workshop.ipynb) is preserved byte-for-byte as evidence.
+
+- Reviewed source commit: `1384256eb06be045a260cdf7f386bf75e946c1c5`.
+- Executed-file SHA-256: `26c8195731af5493b50f5f6b7571a07056053a0c857660a30fd106e3bca4c698`.
+- Independently inspected: 23 executed code cells; zero saved error outputs; terminal completion and exports present.
+- Configuration/source comparison: STANDARD tier, DINOv2 extension disabled; only an added Colab title comment differs from reviewed code. Python ASTs match.
+- Evidence boundary: saved outputs were inspected; execution was not independently repeated. This submission establishes the recorded path, not optional FULL/BYOD paths. Fresh-runtime/restart details beyond the maintainer's explicit prior confirmations are not inferred.
+
+This record supersedes the pending rerun item for the source/configuration above. It does not promote the whole pipeline or close untested optional-path qualification.

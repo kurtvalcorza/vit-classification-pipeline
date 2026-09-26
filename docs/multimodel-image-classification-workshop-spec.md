@@ -444,7 +444,7 @@ approximately:
 16.7%
 ```
 
-The notebook MUST calculate this from the actual training split rather than hard-code it as the evaluation result.
+The notebook MUST choose the majority label from the actual training split rather than hard-code it. Score that fixed rule on validation during development, and defer its test score until after the experiment freeze.
 
 Report:
 
@@ -1433,3 +1433,6 @@ The individual DIMER repositories already provide that model-specific depth.
 The comparative notebook adds the missing fleet-level question:
 
 > **What practical differences emerge when CNNs, efficient ConvNets, plain vision transformers, hierarchical transformers, and high-resolution transformers are asked to transfer to the same small image-classification problem?**
+## Guided learning follow-up
+
+Apply the fleet 2.2 GDL recommendations incrementally while retaining this notebook's 2.1 contract declaration. The probe-step activity uses separate fresh runtimes and stops at validation; it must not overwrite a frozen canonical adapter. Exported class and held-out counts describe the actual dataset, including BYOD. Group-aware/pre-split BYOD input is not implemented; the automatic split assumes image independence. Exact-revision hosted and full-model BYOD evidence remain required for promotion.
