@@ -217,3 +217,16 @@ Remaining release evidence:
 4. Qualify FULL and the DINOv2 extension separately before claiming those paths verified. Exercise the optional two-runtime activity separately from canonical Run all; use only validation outcomes.
 
 The remaining hosted and full-model BYOD gates prevent an unqualified gold-standard/release-grade claim for this revised comparative notebook.
+
+
+## Maintainer-supplied Colab execution — 2026-09-26
+
+The maintainer reported that this notebook passed an end-to-end Colab run and authorized merging its open PR. The supplied [executed notebook](execution-evidence/2026-09-26/DIMER_MultiModel_Image_Classification_Workshop.ipynb) is preserved byte-for-byte as evidence.
+
+- Reviewed source commit: `1384256eb06be045a260cdf7f386bf75e946c1c5`.
+- Executed-file SHA-256: `26c8195731af5493b50f5f6b7571a07056053a0c857660a30fd106e3bca4c698`.
+- Independently inspected: 23 executed code cells; zero saved error outputs; terminal completion and exports present.
+- Configuration/source comparison: STANDARD tier, DINOv2 extension disabled; only an added Colab title comment differs from reviewed code. Python ASTs match.
+- Evidence boundary: saved outputs were inspected; execution was not independently repeated. This submission establishes the recorded path, not optional FULL/BYOD paths. Fresh-runtime/restart details beyond the maintainer's explicit prior confirmations are not inferred.
+
+This record supersedes the pending rerun item for the source/configuration above. It does not promote the whole pipeline or close untested optional-path qualification.
