@@ -15,7 +15,7 @@ def build_notebook():
     for index, cell in enumerate(CELLS):
         base = {
             "id": f"dimer-image-workshop-{index:02d}",
-            "metadata": {},
+            "metadata": cell.get("metadata", {}),
             "source": cell["source"].splitlines(keepends=True),
         }
         if cell["kind"] == "markdown":
