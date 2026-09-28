@@ -170,8 +170,9 @@ with the committed blob before it was recorded here.
 |---|---|---|---|---|---|
 | 2026-09-26 | `b9b94c9` / `5874024ac9b8` | Google Colab, Tesla T4, Python 3.13.15 kernel (model environments on Python 3.12) | `STANDARD` tier (MobileNetV4-Conv-Small, ResNet-50, ConvNeXt-Tiny, ViT-B/16), built-in corpus, notebook unmodified | not recorded | **PASSED** — 23/23 code cells executed without error; 108 / 24 / 48 split, dataset digest `176d8cfa4d9f…`; test accuracy / log-loss MobileNetV4 0.521 / 2.70, ResNet-50 0.500 / 4.30, ConvNeXt-Tiny 0.729 / 1.49, ViT-B/16 0.792 / 0.98; reload parity 0.0 for every adapter; report bundle SHA-256 `45791b13036d…`. The run exposed a probe-recipe flaw: at learning rate `1e-2` every probe was selected at its first checkpoint (step 10) and ResNet-50's validation log-loss was 2.22, worse than a uniform six-way guess. Fixed in `e9237d0` (spec §17–18) |
 | 2026-09-26 | `e9237d0` / `c40bc9351916` | Google Colab, Tesla T4, Python 3.13.15 kernel (model environments on Python 3.12) | `STANDARD` tier, built-in corpus, notebook unmodified | not recorded | **PASSED** — 23/23 code cells executed without error; probes selected at steps 50 / 30 / 1000 / 1000 (none at the first checkpoint; ConvNeXt-Tiny and ViT-B/16 at the step cap); test accuracy / macro-F1 / log-loss MobileNetV4 0.500 / 0.504 / 1.52, ResNet-50 0.500 / 0.480 / 1.78, ConvNeXt-Tiny 0.708 / 0.710 / 1.17, ViT-B/16 0.771 / 0.770 / 0.89 (identical to the local CPU pre-flight to at least five decimals); reload parity 0.0 for every adapter; report bundle SHA-256 `b62c47e16c26…` |
+| 2026-09-28 | `1ef3d0f` / `2cccb9c64fdb` (revision `0.2.0-candidate`) | Google Colab, Tesla T4, Python 3.13.15 kernel (model environments on Python 3.12) | `STANDARD` tier, built-in corpus, notebook unmodified, activity comparison left at its default (skipped) | not recorded | **PASSED** — 24/24 code cells executed in order without error; 108 / 24 / 48 split, dataset digest `176d8cfa4d9f…`, 31 of 117 observers in more than one split; probes selected at steps 50 / 30 / 1000 / 1000; validation accuracy 0.625 / 0.708 / 0.958 / 0.958; test accuracy / macro-F1 / log-loss MobileNetV4 0.500 / 0.504 / 1.52, ResNet-50 0.500 / 0.480 / 1.78, ConvNeXt-Tiny 0.708 / 0.710 / 1.17, ViT-B/16 0.771 / 0.770 / 0.89 (identical to the `e9237d0` run), each scored over n = 48; majority floor 0.167; disagreement table over all 48 test images (15 unanimous correct, 5 unanimous wrong, 32 disagreements); reload parity 0.0 for every adapter; experiment `20260928T020445Z-6f8082`, 50 files in the report, bundle SHA-256 `f8aa524b5c50…` |
 
-Notebook blob `c40bc9351916` (from `e9237d0`) has a passing Google Colab T4 run of the default `STANDARD` path. The
+Notebook blob `2cccb9c64fdb` (revision `0.2.0-candidate`, from `1ef3d0f`) has a passing Google Colab T4 run of the default `STANDARD` path; the earlier blob `c40bc9351916` (from `e9237d0`) also passed. The
 `FULL` tier (SwinV2-Tiny, EVA-02 Base 448) and the optional DINOv2 baseline have not been exercised on a hosted
 runtime. As for the other notebooks, this table is the evidence record: `metadata.dimer.clean_runtime_evidence`
 stays `pending` as authored, because editing it would change the blob these runs verify, and the registry status
@@ -265,3 +266,24 @@ Code cells changed, so no earlier hosted run describes this revision. **Status: 
 - separate `FULL` and DINOv2 qualification.
 
 The review's learner-observation recommendation remains open.
+
+## Maintainer-supplied Colab execution of revision 0.2.0 — 2026-09-28
+
+The maintainer supplied an executed Colab copy of revision `0.2.0-candidate`. It is preserved byte-for-byte as [evidence](execution-evidence/2026-09-28/DIMER_MultiModel_Image_Classification_Workshop.ipynb).
+
+- Reviewed source: commit `1ef3d0f`, notebook blob `2cccb9c64fdb`. All 56 cell ids and sources match the committed notebook exactly.
+- Executed-file SHA-256: `53bd2c326db500559cafd80fb1b69534b5985e9919d5c34c4d72452710610bf7`.
+- Runtime: Google Colab, Tesla T4; host Python 3.13.15, NumPy 2.1.3, pandas 2.2.3, Matplotlib 3.10.0, Pillow 11.3.0.
+- Execution: 24/24 code cells ran in order, with no saved error outputs. The terminal completion summary and the report export are present.
+- Results: identical to the recorded `e9237d0` run to the printed precision (table above). The new checks behaved as intended on this path. Every model was scored over exactly the 48 test images. The disagreement table covers the full test grid. The export holds only `outputs/20260928T020445Z-6f8082/` (50 files, bundle SHA-256 `f8aa524b5c50dc23dbc981cbb7369ee81a957d47d946b9923339dd257466ea73`).
+- Evidence boundary: saved outputs were inspected; the execution was not independently repeated.
+
+This closes the "fresh Colab T4 `STANDARD` run" item above. The following remain open:
+
+- BYOD with alphabetic and numeric-looking labels through export on a hosted runtime (covered by the notebook-cell tests only);
+- a documented invalid-input rejection on a hosted runtime;
+- the two-runtime activity using the saved records;
+- `FULL` and DINOv2 qualification;
+- the learner-observation recommendation.
+
+**Status: Candidate.**
