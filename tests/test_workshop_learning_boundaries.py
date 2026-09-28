@@ -83,7 +83,7 @@ def test_real_byod_path_validates_splits_and_exports_actual_manifest(tmp_path, m
     assert {key: len(value) for key, value in ns['splits'].items()} == {
         'train': 10, 'validation': 2, 'test': 4,
     }
-    manifest = json.loads((tmp_path / 'outputs/data/dataset_manifest.json').read_text())
+    manifest = json.loads((ns['OUTPUT_ROOT'] / 'data/dataset_manifest.json').read_text())
     assert manifest['class_names'] == ['a', 'b']
     assert manifest['duplicate_decoded_pixels_across_splits'] == 0
 
@@ -98,17 +98,20 @@ def test_real_byod_rejects_invalid_input_before_models(tmp_path, monkeypatch, ma
     path = fixture(tmp_path / 'input', malformed)
     with pytest.raises(ValueError, match=message):
         acquire(tmp_path, monkeypatch, path)
-    assert not (tmp_path / 'outputs/data/dataset_manifest.json').exists()
+    assert not list(tmp_path.rglob('dataset_manifest.json'))
 
 
 def test_export_reports_actual_byod_classes_and_test_size(tmp_path, monkeypatch):
     ns = acquire(tmp_path, monkeypatch, fixture(tmp_path / 'input'))
     # Model results are stand-ins only for executing the export cell's data contract.
+    freeze_path = ns['OUTPUT_ROOT'] / 'frozen/frozen_experiment.json'
+    freeze_path.write_text('{}')
     ns.update(SELECTED_MODELS=[], CORE_MODELS=[], MODEL_SPECS={},
               majority_label='a', majority_metrics={'accuracy': 0.5, 'macro_f1': 1/3},
-              test_table=pd.DataFrame(), core_test_table=pd.DataFrame())
+              test_table=pd.DataFrame(), core_test_table=pd.DataFrame(),
+              RUNTIME_RECORD={}, RUNNER_SHA256={}, freeze_path=freeze_path)
     exec(cell(47), ns)
-    manifest = json.loads((tmp_path / 'outputs/provenance/experiment_manifest.json').read_text())
+    manifest = json.loads((ns['OUTPUT_ROOT'] / 'provenance/experiment_manifest.json').read_text())
     assert manifest['adaptation']['n_classes'] == 2
     assert 'six-class' not in manifest['adaptation']['method']
     assert '4-image held-out' in manifest['evidence_scope']

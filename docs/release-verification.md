@@ -170,8 +170,9 @@ with the committed blob before it was recorded here.
 |---|---|---|---|---|---|
 | 2026-09-26 | `b9b94c9` / `5874024ac9b8` | Google Colab, Tesla T4, Python 3.13.15 kernel (model environments on Python 3.12) | `STANDARD` tier (MobileNetV4-Conv-Small, ResNet-50, ConvNeXt-Tiny, ViT-B/16), built-in corpus, notebook unmodified | not recorded | **PASSED** — 23/23 code cells executed without error; 108 / 24 / 48 split, dataset digest `176d8cfa4d9f…`; test accuracy / log-loss MobileNetV4 0.521 / 2.70, ResNet-50 0.500 / 4.30, ConvNeXt-Tiny 0.729 / 1.49, ViT-B/16 0.792 / 0.98; reload parity 0.0 for every adapter; report bundle SHA-256 `45791b13036d…`. The run exposed a probe-recipe flaw: at learning rate `1e-2` every probe was selected at its first checkpoint (step 10) and ResNet-50's validation log-loss was 2.22, worse than a uniform six-way guess. Fixed in `e9237d0` (spec §17–18) |
 | 2026-09-26 | `e9237d0` / `c40bc9351916` | Google Colab, Tesla T4, Python 3.13.15 kernel (model environments on Python 3.12) | `STANDARD` tier, built-in corpus, notebook unmodified | not recorded | **PASSED** — 23/23 code cells executed without error; probes selected at steps 50 / 30 / 1000 / 1000 (none at the first checkpoint; ConvNeXt-Tiny and ViT-B/16 at the step cap); test accuracy / macro-F1 / log-loss MobileNetV4 0.500 / 0.504 / 1.52, ResNet-50 0.500 / 0.480 / 1.78, ConvNeXt-Tiny 0.708 / 0.710 / 1.17, ViT-B/16 0.771 / 0.770 / 0.89 (identical to the local CPU pre-flight to at least five decimals); reload parity 0.0 for every adapter; report bundle SHA-256 `b62c47e16c26…` |
+| 2026-09-28 | `1ef3d0f` / `2cccb9c64fdb` (revision `0.2.0-candidate`) | Google Colab, Tesla T4, Python 3.13.15 kernel (model environments on Python 3.12) | `STANDARD` tier, built-in corpus, notebook unmodified, activity comparison left at its default (skipped) | not recorded | **PASSED** — 24/24 code cells executed in order without error; 108 / 24 / 48 split, dataset digest `176d8cfa4d9f…`, 31 of 117 observers in more than one split; probes selected at steps 50 / 30 / 1000 / 1000; validation accuracy 0.625 / 0.708 / 0.958 / 0.958; test accuracy / macro-F1 / log-loss MobileNetV4 0.500 / 0.504 / 1.52, ResNet-50 0.500 / 0.480 / 1.78, ConvNeXt-Tiny 0.708 / 0.710 / 1.17, ViT-B/16 0.771 / 0.770 / 0.89 (identical to the `e9237d0` run), each scored over n = 48; majority floor 0.167; disagreement table over all 48 test images (15 unanimous correct, 5 unanimous wrong, 32 disagreements); reload parity 0.0 for every adapter; experiment `20260928T020445Z-6f8082`, 50 files in the report, bundle SHA-256 `f8aa524b5c50…` |
 
-Notebook blob `c40bc9351916` (from `e9237d0`) has a passing Google Colab T4 run of the default `STANDARD` path. The
+Notebook blob `2cccb9c64fdb` (revision `0.2.0-candidate`, from `1ef3d0f`) has a passing Google Colab T4 run of the default `STANDARD` path; the earlier blob `c40bc9351916` (from `e9237d0`) also passed. The
 `FULL` tier (SwinV2-Tiny, EVA-02 Base 448) and the optional DINOv2 baseline have not been exercised on a hosted
 runtime. As for the other notebooks, this table is the evidence record: `metadata.dimer.clean_runtime_evidence`
 stays `pending` as authored, because editing it would change the blob these runs verify, and the registry status
@@ -230,3 +231,59 @@ The maintainer reported that this notebook passed an end-to-end Colab run and au
 - Evidence boundary: saved outputs were inspected; execution was not independently repeated. This submission establishes the recorded path, not optional FULL/BYOD paths. Fresh-runtime/restart details beyond the maintainer's explicit prior confirmations are not inferred.
 
 This record supersedes the pending rerun item for the source/configuration above. It does not promote the whole pipeline or close untested optional-path qualification.
+
+
+## Multi-model workshop: Notebook Review Framework v1 findings — revision 0.2.0-candidate (2026-09-27)
+
+A review under the Notebook Review Framework v1 examined commit `c92326b` (notebook blob `c50a1eb6`) and concluded **Needs revision**. It reported three major findings, three minor findings, one suggestion and one wording item. The review and its probes are archived in [`reviews/2026-09-27-notebook-review/`](reviews/2026-09-27-notebook-review/). Revision `0.2.0-candidate` (notebook blob `2cccb9c64fdb`) addresses every item.
+
+`tests/test_image_workshop_review_fixes.py` executes the notebook's own cells end to end on a small BYOD fixture:
+
+- acquisition, split, cache verification, the real probe-training and probe-inference programs (PyTorch and SafeTensors on CPU), freeze, test, galleries, export and the activity comparison;
+- only the pretrained-backbone feature extractor is replaced, by a program with the same command-line and file contract that writes deterministic synthetic features.
+
+These are contract checks, not backbone runs.
+
+| Finding | Correction in 0.2.0 | Acceptance check |
+|---|---|---|
+| **ICR-01** (major): accepted BYOD labels broke at scoring (`0`, `001`, `NA`) or were truncated to 128 characters in the feature cache | Labels and IDs are text identifiers everywhere. `labels.csv` is read with `csv`; the feature cache stores `dtype=str`, which is not truncated; prediction files are read with `dtype=str` and no missing-value parsing. Ambiguous text (empty, leading or trailing space, control characters) is refused at acquisition. After extraction, each cache is checked against the validated dataset's IDs, labels and splits. Probe training requires every class in train and validation | Alphabetic, numeric, leading-zero, missing-token and 130-character Unicode label sets run through acquisition, cache, training, freeze, test and export unchanged; padded or control-character labels are refused before any cache exists |
+| **ICR-02** (major): metrics were computed over whatever rows a prediction file held | `evaluate_prediction_csv` takes the authoritative split. It requires one row per expected image and no others, the dataset's label, columns in the frozen class order, finite probabilities within [0, 1] that sum to 1, and a prediction that is the highest-probability class. It reports `n_images`. The disagreement table starts from the full test grid | Missing, duplicate or extra rows, a changed truth, probabilities of 2.0, unnormalised or missing probabilities, a non-argmax prediction and reordered class columns are each rejected. A permuted file realigns by ID with identical scores |
+| **ICR-03** (major): the freeze bound adapter tensors but not the manifest's class order, the feature cache or the runners | The freeze records each adapter's manifest digest and `class_order`, each feature-cache digest (the manifest also carries it), the dataset table, the three runner digests, and each environment's pins and signature. The test cell recomputes all of these and refuses on any difference. The inference program itself rechecks the feature, manifest and adapter digests before predicting. A freeze is never replaced, and the test runs once | A reversed `class_order`, changed feature values, changed split membership, adapter bytes, the inference runner, an environment signature, and a probe setting each stop scoring before any runner call. The inference program alone refuses a changed manifest. An unchanged re-freeze keeps the file; a second test is refused |
+| **ICR-04** (minor): overlapping error-gallery captions | Each gallery column has the image with its rule and wrapped truth, then one model per line below it, marked ✓/✗. Gallery images are de-duplicated. The representative gallery adapts to the class count (up to 24, with a note) | Every caption line is at most 40 characters, including for 130-character labels; each model appears once per image; IDs are unique |
+| **ICR-05** (minor): BYOD limits and privacy appeared late | Section 4 now carries the full contract table, label policy, privacy warning and a list of what the report exports, before the acquisition cell. Section 18 points back to it | Static order check |
+| **ICR-06** (minor): directory-based export could include earlier runs' files | Each run of the controls cell creates `outputs/<experiment ID>/`. Runners, specs, the dataset table and BYOD extraction are per experiment. The ZIP holds only that folder, with `provenance/inventory.json` | A stale `test/eva.csv` in an earlier experiment stays out of the next report; the earlier report is byte-identical afterwards |
+| **ICR-07** (suggestion): underspecified activity handoff | Section 12 writes a validation-only `activity/validation_record.json` with a digest. A new comparison cell loads two records, refuses tampered records or any difference other than `probe_steps`, and joins by model | Records hold no test result. A seed change is refused, a tampered record is refused, and a matched pair yields the per-model table |
+| **ICR-08** (wording): selection narrative implied every probe found a minimum | Section 10 now says some probes were selected at the step cap in the reference run, and that a cap selection does not establish a minimum | Static wording check |
+
+The generator source and the notebook had drifted since `c92326b`, because the AI-disclosure edit was made to the notebook only, so `test_generator_parity` failed on `main`. The disclosure now lives in `tools/multimodel_image_classification_workshop_source.py`, which restores parity. Three existing boundary tests were updated for the per-experiment output folder and the new export inputs.
+
+Code cells changed, so no earlier hosted run describes this revision. **Status: Candidate.** The following exact-revision evidence is required:
+
+- a fresh Colab T4 `STANDARD` run;
+- BYOD with alphabetic and numeric-looking labels through export;
+- a documented invalid-input rejection;
+- the two-runtime activity using the saved records;
+- separate `FULL` and DINOv2 qualification.
+
+The review's learner-observation recommendation remains open.
+
+## Maintainer-supplied Colab execution of revision 0.2.0 — 2026-09-28
+
+The maintainer supplied an executed Colab copy of revision `0.2.0-candidate`. It is preserved byte-for-byte as [evidence](execution-evidence/2026-09-28/DIMER_MultiModel_Image_Classification_Workshop.ipynb).
+
+- Reviewed source: commit `1ef3d0f`, notebook blob `2cccb9c64fdb`. All 56 cell ids and sources match the committed notebook exactly.
+- Executed-file SHA-256: `53bd2c326db500559cafd80fb1b69534b5985e9919d5c34c4d72452710610bf7`.
+- Runtime: Google Colab, Tesla T4; host Python 3.13.15, NumPy 2.1.3, pandas 2.2.3, Matplotlib 3.10.0, Pillow 11.3.0.
+- Execution: 24/24 code cells ran in order, with no saved error outputs. The terminal completion summary and the report export are present.
+- Results: identical to the recorded `e9237d0` run to the printed precision (table above). The new checks behaved as intended on this path. Every model was scored over exactly the 48 test images. The disagreement table covers the full test grid. The export holds only `outputs/20260928T020445Z-6f8082/` (50 files, bundle SHA-256 `f8aa524b5c50dc23dbc981cbb7369ee81a957d47d946b9923339dd257466ea73`).
+- Evidence boundary: saved outputs were inspected; the execution was not independently repeated.
+
+This closes the "fresh Colab T4 `STANDARD` run" item above. The following remain open:
+
+- BYOD with alphabetic and numeric-looking labels through export on a hosted runtime (covered by the notebook-cell tests only);
+- a documented invalid-input rejection on a hosted runtime;
+- the two-runtime activity using the saved records;
+- `FULL` and DINOv2 qualification;
+- the learner-observation recommendation.
+
+**Status: Candidate.**

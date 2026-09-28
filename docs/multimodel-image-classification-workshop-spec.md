@@ -608,7 +608,9 @@ It MUST contain:
 - selected probe weight digest;
 - evaluation metric definitions.
 
-The test section MUST load this record.
+Since revision 0.2.0 the record is written in the experiment's own folder (`outputs/<experiment ID>/frozen/`), and it MUST also bind every file that decides a test prediction: each adapter's `manifest.json` (including `class_order`) as well as its tensors, each cached feature file (whose IDs, labels and split membership MUST first be checked against the validated dataset), the dataset table, the three runner programs, and each environment's Python version, pins and build signature.
+
+The test section MUST load this record, recompute that identity from the current files and settings, and refuse to score on any difference. The inference program MUST recheck the feature, manifest and adapter digests before predicting. A completed freeze MUST NOT be replaced, and the test of a frozen experiment runs once; a changed file or setting is a new experiment.
 
 ---
 
@@ -745,7 +747,7 @@ Show several held-out photographs selected using predefined rules:
 4. highest-confidence incorrect prediction if available;
 5. one example from each class where practical.
 
-Selection MUST be based on deterministic rules, not hand-picked after viewing results.
+Selection MUST be based on deterministic rules, not hand-picked after viewing results. The same image MUST NOT be shown twice. Captions MUST stay readable with long labels: list one model per line (wrapped) rather than all predictions on one title line. The representative class gallery MUST adapt to the number of classes rather than assume six.
 
 ---
 
@@ -786,7 +788,9 @@ selection_metric
 files
 ```
 
-The artifact MUST NOT include the full pretrained backbone.
+The artifact MUST NOT include the full pretrained backbone. Since revision 0.2.0 the manifest also records `features_sha256`, the digest of the feature cache the probe was trained on.
+
+The report bundle MUST contain only the current experiment's folder, with an inventory (`provenance/inventory.json`) that lists every file and its SHA-256. Earlier experiments and their reports MUST be kept, and reusable photos, environments and checkpoints stay outside the result folder.
 
 ---
 
@@ -934,6 +938,10 @@ Required columns:
 - `file`
 - `label`
 
+Labels and IDs are identifiers and MUST be preserved exactly through every CSV and NPZ boundary: numeric-looking labels (`0`, `001`), literal missing-value tokens (`NA`, `null`) and long Unicode labels are valid and distinct, and nothing may be converted to a number, parsed as missing, or truncated to a fixed width. Ambiguous text (empty, leading or trailing whitespace, line breaks or control characters) MUST be rejected at acquisition, before any model is downloaded.
+
+The complete contract (container limits, 2–100 classes, at least 8 images per class, a 4096-pixel side limit, the 2 GiB expanded-ZIP limit, image-level splitting and its group-independence caveat), the hosted-runtime privacy warning and a description of what the report exports MUST appear immediately before the upload cell.
+
 ---
 
 # 32. BYOD validation
@@ -1028,6 +1036,8 @@ The notebook MUST state:
 # 36. Common evaluator
 
 The workshop SHALL own one common evaluator.
+
+Before computing any metric it MUST check each prediction file against the authoritative split: exactly one row for every expected image ID and no other, the dataset's own label for each image, probability columns in the frozen class order, probabilities that are finite, within [0, 1] and sum to 1, and a predicted class that is the highest-probability class. A file that fails MUST be rejected, never repaired. The disagreement table MUST be built on the full expected test grid and report its denominator.
 
 For classes:
 
