@@ -15,7 +15,9 @@ NOTEBOOK = (
 
 
 def cell(index):
-    return ''.join(json.loads(NOTEBOOK.read_text(encoding='utf-8'))['cells'][index]['source'])
+    # Addressed by the stable generated id: the 0.3.0 carrier cell (id 'uvcarrier') shifted later positions.
+    cells = json.loads(NOTEBOOK.read_text(encoding='utf-8'))['cells']
+    return ''.join(next(c for c in cells if c['id'] == f'dimer-image-workshop-{index:02d}')['source'])
 
 
 def test_baseline_does_not_access_test_until_after_freeze():

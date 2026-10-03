@@ -1,0 +1,12 @@
+# Isolated "common" environment of DIMER_MultiModel_Image_Classification_Workshop.ipynb (2026-10-03).
+# Exact pins carried over from the notebook's former per-environment pip install (ENV_PINS["common"] in section 7).
+# Used by MobileNetV4, ResNet-50, ConvNeXt-Tiny, ViT-B/16, EVA-02 and DINOv2 feature extraction, and by every
+# probe-training and test-scoring stage.
+torch==2.14.0
+torchaudio==2.11.0
+torchvision==0.29.0
+timm==1.0.29
+huggingface-hub==0.36.2
+safetensors==0.8.0
+numpy==2.5.3
+pillow==11.3.0

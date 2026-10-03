@@ -171,6 +171,7 @@ with the committed blob before it was recorded here.
 | 2026-09-26 | `b9b94c9` / `5874024ac9b8` | Google Colab, Tesla T4, Python 3.13.15 kernel (model environments on Python 3.12) | `STANDARD` tier (MobileNetV4-Conv-Small, ResNet-50, ConvNeXt-Tiny, ViT-B/16), built-in corpus, notebook unmodified | not recorded | **PASSED** — 23/23 code cells executed without error; 108 / 24 / 48 split, dataset digest `176d8cfa4d9f…`; test accuracy / log-loss MobileNetV4 0.521 / 2.70, ResNet-50 0.500 / 4.30, ConvNeXt-Tiny 0.729 / 1.49, ViT-B/16 0.792 / 0.98; reload parity 0.0 for every adapter; report bundle SHA-256 `45791b13036d…`. The run exposed a probe-recipe flaw: at learning rate `1e-2` every probe was selected at its first checkpoint (step 10) and ResNet-50's validation log-loss was 2.22, worse than a uniform six-way guess. Fixed in `e9237d0` (spec §17–18) |
 | 2026-09-26 | `e9237d0` / `c40bc9351916` | Google Colab, Tesla T4, Python 3.13.15 kernel (model environments on Python 3.12) | `STANDARD` tier, built-in corpus, notebook unmodified | not recorded | **PASSED** — 23/23 code cells executed without error; probes selected at steps 50 / 30 / 1000 / 1000 (none at the first checkpoint; ConvNeXt-Tiny and ViT-B/16 at the step cap); test accuracy / macro-F1 / log-loss MobileNetV4 0.500 / 0.504 / 1.52, ResNet-50 0.500 / 0.480 / 1.78, ConvNeXt-Tiny 0.708 / 0.710 / 1.17, ViT-B/16 0.771 / 0.770 / 0.89 (identical to the local CPU pre-flight to at least five decimals); reload parity 0.0 for every adapter; report bundle SHA-256 `b62c47e16c26…` |
 | 2026-09-28 | `1ef3d0f` / `2cccb9c64fdb` (revision `0.2.0-candidate`) | Google Colab, Tesla T4, Python 3.13.15 kernel (model environments on Python 3.12) | `STANDARD` tier, built-in corpus, notebook unmodified, activity comparison left at its default (skipped) | not recorded | **PASSED** — 24/24 code cells executed in order without error; 108 / 24 / 48 split, dataset digest `176d8cfa4d9f…`, 31 of 117 observers in more than one split; probes selected at steps 50 / 30 / 1000 / 1000; validation accuracy 0.625 / 0.708 / 0.958 / 0.958; test accuracy / macro-F1 / log-loss MobileNetV4 0.500 / 0.504 / 1.52, ResNet-50 0.500 / 0.480 / 1.78, ConvNeXt-Tiny 0.708 / 0.710 / 1.17, ViT-B/16 0.771 / 0.770 / 0.89 (identical to the `e9237d0` run), each scored over n = 48; majority floor 0.167; disagreement table over all 48 test images (15 unanimous correct, 5 unanimous wrong, 32 disagreements); reload parity 0.0 for every adapter; experiment `20260928T020445Z-6f8082`, 50 files in the report, bundle SHA-256 `f8aa524b5c50…` |
+| 2026-10-03 | `e8d1dea` / `86f36b4733cc` (revision `0.3.0-candidate`) | Colab CLI 0.7.4, fresh Colab Tesla T4 (host Python 3.13.15; model environments CPython 3.12.12 from the hash locks) | `STANDARD` tier, built-in corpus, notebook unmodified, default path only; CLI sequential execution (`colab exec -f`), not a browser Run all | 204.6 s (whole run, incl. environment builds and downloads) | **PASSED** — 25/25 code cells executed in order without error; 108 / 24 / 48 split, dataset digest `176d8cfa4d9f…`, 31 of 117 observers in more than one split; probes selected at steps 50 / 30 / 1000 / 1000; validation accuracy 0.625 / 0.708 / 0.958 / 0.958; test accuracy / macro-F1 / log-loss MobileNetV4 0.500 / 0.504 / 1.52, ResNet-50 0.500 / 0.480 / 1.78, ConvNeXt-Tiny 0.708 / 0.710 / 1.17, ViT-B/16 0.771 / 0.770 / 0.89 (identical to the 2026-09-28 run), each scored over n = 48; majority floor 0.167; 15 unanimous correct, 5 unanimous wrong, 32 disagreements; reload parity 0.0 for every adapter; experiment `20261003T231450Z-b88746`, 50 files in the report, bundle SHA-256 `56d0b7cf951f…` |
 
 Notebook blob `2cccb9c64fdb` (revision `0.2.0-candidate`, from `1ef3d0f`) has a passing Google Colab T4 run of the default `STANDARD` path; the earlier blob `c40bc9351916` (from `e9237d0`) also passed. The
 `FULL` tier (SwinV2-Tiny, EVA-02 Base 448) and the optional DINOv2 baseline have not been exercised on a hosted
@@ -285,5 +286,37 @@ This closes the "fresh Colab T4 `STANDARD` run" item above. The following remain
 - the two-runtime activity using the saved records;
 - `FULL` and DINOv2 qualification;
 - the learner-observation recommendation.
+
+**Status: Candidate.**
+
+## Multi-model workshop: 2026-10-03 uv isolated environment — revision 0.3.0-candidate
+
+Notebook blob `2cccb9c64fdb` (revision `0.2.0-candidate`, base `c3f5030`) → `86f36b4733cc` (revision `0.3.0-candidate`). Code cells changed, so the 2026-09-28 Colab run above does not describe this blob. **A hosted re-run is pending. Status: Candidate.**
+
+What changed:
+
+- Section 7 builds each model environment from a hash lock. It verifies a pinned `uv` 0.12.15 wheel by size and SHA-256 and runs `uv venv --managed-python --python 3.12.12`. Then it runs `uv pip install --require-hashes --only-binary :all:`. Before, it ran `pip install uv` into the kernel when `uv` was missing and installed unhashed direct pins with the environment's `pip`. Nothing is installed into the kernel any more, and Run all needs no restart.
+- The two locks (`tools/image-workshop-common-requirements.lock`, `tools/image-workshop-swin-requirements.lock`) are compiled by `uv pip compile --generate-hashes` for CPython 3.12 on `x86_64-manylinux_2_28`. They are carried byte-for-byte in a new carrier cell (`uvcarrier`) and verified by SHA-256. The direct pins are unchanged.
+- Model processes no longer inherit `PYTHONPATH`, `PYTHONHOME` or `PYTHONSTARTUP` from the kernel. `MPLBACKEND=Agg` is kept.
+- The embedded photo manifest is a parenthesised run of 1,000-character pieces. Its `ast.literal_eval` value is asserted equal to the source literal. No notebook line exceeds 2,000 characters; the longest was 16,211.
+- **User-visible:** the notebook now runs on **Linux x86_64 only** (Google Colab, Kaggle, Linux Jupyter). Section 7 refuses Windows and macOS kernels.
+
+The ICR-01 to ICR-08 fixes are unchanged, and their tests pass. `tests/test_image_workshop_uv.py` covers the new contract.
+
+## Colab CLI execution of revision 0.3.0 — 2026-10-03
+
+Notebook blob `86f36b4733cc` (revision `0.3.0-candidate`, commit `e8d1dea`) was executed on a fresh Colab Tesla T4 by the Colab CLI. The executed notebook is preserved byte-for-byte as [evidence](execution-evidence/2026-10-03/DIMER_MultiModel_Image_Classification_Workshop_e8d1dea_colab-cli-t4.ipynb).
+
+- Source: fetched from GitHub at the full commit SHA `e8d1dea58015005579313d24edd8c23c5e4637bb`; its git blob `86f36b4733ccf24b8ff9d4ff8ac1fb65f4f0d89f` was checked before the VM was allocated. All 57 cell ids and sources of the executed copy match the committed notebook.
+- Executed-file SHA-256: `f77b32e5dcaaceb3f06e454bec82b0c94e005c1564167f669ea141b7a24bc881`.
+- Executor: Colab CLI 0.7.4, fresh Colab Tesla T4 (session released afterwards). Host Python 3.13.15, NumPy 2.1.3, pandas 2.2.3, Matplotlib 3.10.0, Pillow 11.3.0. Both carried hash locks verified; the common model environment was built as CPython 3.12.12 by the pinned `uv`, with no kernel install and no restart.
+- Execution: 25/25 code cells ran in order in one kernel (CLI log `Executing cell 1..25/25`), with no error outputs; 204.6 s for the whole session.
+- Results: every quality metric equals the 2026-09-28 Colab run of blob `2cccb9c64fdb` (split, dataset digest, observer overlap, selected steps, validation and test accuracy / macro-F1 / log-loss, majority floor, disagreement counts, reload parity). The output diff (difflib on normalised lines) shows only:
+  - `feature_seconds` and `images_per_second`: wall-clock timings, which vary between runs;
+  - two new log lines from the uv environment build (`Carried hash locks verified`, `Creating the common environment`): new code in this revision;
+  - `notebook_revision` `0.2.0-candidate` → `0.3.0-candidate`, and the report bundle SHA-256 (`f8aa524b5c50…` → `56d0b7cf951f…`): the bundle carries the experiment id, the timings and the revision string.
+- Evidence boundary: Colab CLI sequential execution, not a browser Run all; the default `STANDARD` path only. Forms were not rendered, and BYOD, the activity comparison, `FULL` and DINOv2 were not exercised.
+
+This closes the hosted re-run item for revision `0.3.0-candidate`. The items listed open under the 2026-09-28 record remain open.
 
 **Status: Candidate.**
