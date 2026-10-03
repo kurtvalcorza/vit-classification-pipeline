@@ -287,3 +287,17 @@ This closes the "fresh Colab T4 `STANDARD` run" item above. The following remain
 - the learner-observation recommendation.
 
 **Status: Candidate.**
+
+## Multi-model workshop: 2026-10-03 uv isolated environment — revision 0.3.0-candidate
+
+Notebook blob `2cccb9c64fdb` (revision `0.2.0-candidate`, base `c3f5030`) → `86f36b4733cc` (revision `0.3.0-candidate`). Code cells changed, so the 2026-09-28 Colab run above does not describe this blob. **A hosted re-run is pending. Status: Candidate.**
+
+What changed:
+
+- Section 7 builds each model environment from a hash lock. It verifies a pinned `uv` 0.12.15 wheel by size and SHA-256 and runs `uv venv --managed-python --python 3.12.12`. Then it runs `uv pip install --require-hashes --only-binary :all:`. Before, it ran `pip install uv` into the kernel when `uv` was missing and installed unhashed direct pins with the environment's `pip`. Nothing is installed into the kernel any more, and Run all needs no restart.
+- The two locks (`tools/image-workshop-common-requirements.lock`, `tools/image-workshop-swin-requirements.lock`) are compiled by `uv pip compile --generate-hashes` for CPython 3.12 on `x86_64-manylinux_2_28`. They are carried byte-for-byte in a new carrier cell (`uvcarrier`) and verified by SHA-256. The direct pins are unchanged.
+- Model processes no longer inherit `PYTHONPATH`, `PYTHONHOME` or `PYTHONSTARTUP` from the kernel. `MPLBACKEND=Agg` is kept.
+- The embedded photo manifest is a parenthesised run of 1,000-character pieces. Its `ast.literal_eval` value is asserted equal to the source literal. No notebook line exceeds 2,000 characters; the longest was 16,211.
+- **User-visible:** the notebook now runs on **Linux x86_64 only** (Google Colab, Kaggle, Linux Jupyter). Section 7 refuses Windows and macOS kernels.
+
+The ICR-01 to ICR-08 fixes are unchanged, and their tests pass. `tests/test_image_workshop_uv.py` covers the new contract.
