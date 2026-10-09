@@ -1,4 +1,4 @@
-"""Per-repository template for tools/build_notebook.py (NOTEBOOK_SPEC 2.0 §4 standalone carrier).
+"""Per-repository template for tools/build_notebook.py (NOTEBOOK_SPEC 2.2 §4 standalone carrier).
 
 Only the task-specific prose and stage cells live here. Runtime install, the embedded pipeline
 modules (pipeline.py, metrics.py, samples.py), and the model pin/stage/verify cells are produced by
@@ -46,7 +46,7 @@ TEMPLATE = {
         "**unfrozen policy**), scores the held-out split with the selected model, prints predictions before and after, "
         "exports the head and any trained blocks as safetensors with a manifest, and reloads that artifact into a fresh "
         "pipeline to verify parity. The default path needs no repository clone, no DIMER worker or service, no credential, "
-        "no upload dialog and no configuration edit (NOTEBOOK_SPEC 2.0 §5). On CPU the whole path takes about two "
+        "no upload dialog and no configuration edit (NOTEBOOK_SPEC 2.2 §5). On CPU the whole path takes about two "
         "minutes of model time after the downloads; a CUDA runtime is used automatically when present."
     ),
     "byod": (
@@ -662,6 +662,6 @@ TEMPLATE = {
         "- An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale (Dosovitskiy et al., 2020): https://arxiv.org/abs/2010.11929\n"
         "- iNaturalist open data (CC0 photographs credited to their observers in the carried records): https://www.inaturalist.org/pages/developers\n"
         "- timm documentation: https://huggingface.co/docs/timm\n"
-        "- DIMER Notebook Specification 2.0 and Model Card Specification 1.1 (fleet specs in the ml-worker repository)"
+        "- DIMER Notebook Specification 2.2 and Model Card Specification 1.1 (fleet specs in the ml-worker repository)"
     ),
 }
