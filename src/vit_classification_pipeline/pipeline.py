@@ -282,6 +282,10 @@ class ViTClassificationPipeline:
     adapter: dict[str, Any] | None = field(default=None, repr=False)
     _head: Any = field(default=None, repr=False)
     _model: Any = field(default=None, repr=False)
+    # Pinned-base values of every block tensor adapt() or load_artifact() has changed, kept the first time
+    # each is about to change: every adaptation starts from the verified base, never from a previous run
+    # (review finding VIT-M2).
+    _base_state: dict[str, Any] = field(default_factory=dict, repr=False)
 
     @classmethod
     def from_pretrained(
@@ -385,6 +389,26 @@ class ViTClassificationPipeline:
                 "this operation needs a pipeline built with from_pretrained() or from_artifact()"
             )
         return self._model
+
+    def _remember_base(self, names: Sequence[str]) -> None:
+        state = self._require_model().state_dict()
+        for name in names:
+            if name not in self._base_state:
+                self._base_state[name] = state[name].detach().clone()
+
+    def restore_base(self) -> list[str]:
+        """Put the pipeline back to the pinned base: copy the base values into every block tensor an
+        earlier adapt() or load_artifact() changed and drop the head, so `features`, `knn_baseline`,
+        `predict` and a new adapt() read the untouched checkpoint. Returns the restored tensor names."""
+        model = self._require_model()
+        restored = sorted(self._base_state)
+        if restored:
+            merged = dict(model.state_dict())
+            merged.update(self._base_state)
+            model.load_state_dict(merged, strict=True)
+            model.eval()
+        self._head, self.classes, self.adapter = None, None, None
+        return restored
 
     def _require_head(self) -> tuple[Any, list[str]]:
         if self._head is None or not self.classes:
@@ -525,7 +549,10 @@ class ViTClassificationPipeline:
         clipping 1.0, seeded shuffling, no augmentation; the patch embedding, the position embedding, the
         earlier blocks and the final norm stay frozen), scored on validation after every epoch. The epoch with
         the lowest validation log-loss (mean negative log-probability of the gold label) is kept — it may be
-        the probe itself; accuracy and macro-F1 are reported beside it at every epoch."""
+        the probe itself; accuracy and macro-F1 are reported beside it at every epoch. Every call starts
+        from the pinned base: block tensors an earlier adapt() or load_artifact() changed are restored
+        before the probe's features are computed, so epoch 0 is a probe on the frozen backbone whatever
+        ran before."""
         from .samples import class_names, validate_dataset
 
         if not isinstance(probe_steps, int) or not 1 <= probe_steps <= 5_000:
@@ -548,6 +575,12 @@ class ViTClassificationPipeline:
 
         torch.manual_seed(seed)
         model = self._require_model()
+        # The weights as this call found them: a failed call puts them back (the transactional contract),
+        # while a successful one starts from the pinned base.
+        current = model.state_dict()
+        previous_state = {k: current[k].detach().clone() for k in self._base_state}
+        restored = self.restore_base()
+        self._remember_base(names)
         started = time.perf_counter()
         device = torch.device(self.device)
         index = {c: i for i, c in enumerate(classes)}
@@ -654,6 +687,7 @@ class ViTClassificationPipeline:
                 # exactly as it was, frozen, with no head or adapter attached.
                 restore = dict(model.state_dict())
                 restore.update(initial_blocks)
+                restore.update(previous_state)  # a failed call leaves the weights as they were before it
                 model.load_state_dict(restore, strict=True)
                 model.eval()
                 for param in model.parameters():
@@ -694,6 +728,8 @@ class ViTClassificationPipeline:
             "n_train": len(train_checked),
             "n_val": len(val_checked),
             "seed": seed,
+            "started_from": "pinned base"
+            + (f" (restored {len(restored)} block tensors changed by an earlier run)" if restored else ""),
             "history": history,
             "seconds": round(time.perf_counter() - started, 2),
         }
@@ -847,7 +883,10 @@ class ViTClassificationPipeline:
         head.eval()
         for p in head.parameters():
             p.requires_grad_(False)
+        self.restore_base()
         if block_tensors:
+            self._remember_base(sorted(block_tensors))
+            state = model.state_dict()
             merged = dict(state)
             merged.update({k: v.to(state[k].dtype) for k, v in block_tensors.items()})
             model.load_state_dict(merged, strict=True)

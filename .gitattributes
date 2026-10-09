@@ -2,3 +2,6 @@
 weights/** -text
 # Executed-notebook evidence is recorded byte-for-byte; never convert its line endings.
 docs/execution-evidence/2026-10-03/** -text
+
+# Execution evidence is recorded byte-for-byte (SHA-256 cited in docs/release-verification.md); never convert its line endings.
+docs/execution-evidence/** -text

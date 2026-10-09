@@ -1,0 +1,70 @@
+[colab] Parsing notebook '/home/kurt/colab-runs/vit-classification-pipeline-2351f94-7e62dd/vit_classification_colab_2351f94_colab-cli-t4.ipynb'...
+[colab] Executing cell 1/13 - Infrastructure: build (or reuse) the isolated environment and route later cells to it...
+{'isolated_environment': '/content/dimer_isolated_env_06d568a9c4fe', 'reused': False, 'isolated_python': '3.12.12', 'kernel_python': '3.13.15', 'locked_packages': 45, 'setup_seconds': 52}
+{'routed_to': '/content/dimer_isolated_env_06d568a9c4fe/bin/python', 'worker_pid': 1909, 'worker_reused': False}
+[colab] Executing cell 2/13 - Infrastructure: record the runtime...
+{'notebook_source': {'repository': 'vit-classification-pipeline', 'repository_revision': '7086c87dadb30d126bafbf007ecf5a5d2337b0c3', 'embedded_module': 'src/vit_classification_pipeline/pipeline.py', 'embedded_modules': ['src/vit_classification_pipeline/metrics.py', 'src/vit_classification_pipeline/pipeline.py', 'src/vit_classification_pipeline/samples.py'], 'module_sha256': 'f02fdc7b582e7de2b31e2c4e5cda2e089c8c3df2dc86940b950819b2c64e71e0', 'generator': 'build_notebook.py/2.2', 'notebook_spec': '2.2'}, 'python': '3.12.12', 'executable': '/content/dimer_isolated_env_06d568a9c4fe/bin/python', 'torch': '2.14.0+cu130', 'timm': '1.0.29', 'cuda': True}
+[colab] Executing cell 3/13 - vit_classification-08...
+[colab] Executing cell 4/13 - vit_classification-10...
+[colab] Executing cell 5/13 - vit_classification-12...
+[colab] Executing cell 6/13 - Infrastructure: stage and digest-verify the pinned snapshot, then load the model...
+{'model_id': 'timm/vit_base_patch16_224.orig_in21k_ft_in1k', 'revision': 'e0bd370de6799e8d1f47a911174ff4c3708e2323', 'license': 'apache-2.0', 'files': 3, 'total_bytes': 346288708}
+{'weights_dir': '/content/weights/vit-base-p16-224', 'fetched': ['README.md', 'config.json', 'model.safetensors']}
+{'verified_files': 3, 'revision': 'e0bd370de6799e8d1f47a911174ff4c3708e2323'}
+{'device': 'cuda:0', 'source': 'local-snapshot'}
+[colab] Executing cell 7/13 - vit_classification-16...
+{'data_source': "iNaturalist CC0 bird photographs (six species) (iNaturalist open-data bucket, research-grade CC0 photos selected 2026-09-19; CC0 1.0 (each photo's own license_code on iNaturalist; observers credited in the records))", 'raw': {'photographs': 180, 'species': 6}, 'splits': {'train': 108, 'validation': 24, 'test': 48}, 'classes': ['american_goldfinch', 'chipping_sparrow', 'dark_eyed_junco', 'house_finch', 'song_sparrow', 'white_throated_sparrow'], 'observer_overlap': {'observers': 117, 'in_more_than_one_split': 31}, 'fetch_seconds': 68.9, 'corpus_bytes': 19183071}
+{'train': {'n': 108, 'label_counts': {'american_goldfinch': 18, 'chipping_sparrow': 18, 'dark_eyed_junco': 18, 'house_finch': 18, 'song_sparrow': 18, 'white_throated_sparrow': 18}, 'image_side': {'min': 342, 'max': 500}, 'digest': '1e4cca7f06bb7139...'}}
+{'validation': {'n': 24, 'label_counts': {'american_goldfinch': 4, 'chipping_sparrow': 4, 'dark_eyed_junco': 4, 'house_finch': 4, 'song_sparrow': 4, 'white_throated_sparrow': 4}, 'image_side': {'min': 484, 'max': 500}, 'digest': 'd176b3ffe79c959f...'}}
+{'test': {'n': 48, 'label_counts': {'american_goldfinch': 8, 'chipping_sparrow': 8, 'dark_eyed_junco': 8, 'house_finch': 8, 'song_sparrow': 8, 'white_throated_sparrow': 8}, 'image_side': {'min': 500, 'max': 500}, 'digest': '0e787f098949f60a...'}}
+{'example': {'id': 'train-000', 'label': 'white_throated_sparrow', 'observer': 'ethologist', 'inat_observation_url': 'https://www.inaturalist.org/observations/194541980'}, 'size': (375, 500)}
+{'probe': 'duplicate id', 'rejected': "duplicate id 'same'"}
+{'probe': 'oversized image', 'rejected': 'records[0]: image side outside 1..MAX_IMAGE_SIDE=4096 px: (4097, 8)'}
+{'probe': 'single class', 'rejected': '1 distinct labels; 2..100 are required'}
+{'probe': 'too small', 'rejected': '3 records; 8..20000 are required'}
+[colab] Executing cell 8/13 - vit_classification-19...
+{'ceilings': {'NUM_CLASSES': 1000, 'MAX_IMAGE_SIDE': 4096, 'MAX_BATCH': 64}, 'contract': {'INPUT_SIZE': 224, 'FEATURE_DIM': 768, 'DECISION_RULE': 'argmax', 'TRANSFORMER_BLOCKS': 12, 'PARAMETER_COUNT': 86567656}}
+{'probe_ids': ['test-000', 'test-001', 'test-002'], 'decision_rule': 'argmax', 'seconds': 0.306, 'device': 'cuda:0', 'checks': {'one_prediction_per_image': True, 'ranked_descending': True, 'argmax_is_rank_one': True, 'scores_in_unit_interval': True}, 'findings': 1}
+{'id': 'test-000', 'gold_species': 'chipping_sparrow', 'imagenet_top5': [(82, 'ruffed grouse', 0.261), (86, 'partridge', 0.164), (330, 'wood rabbit', 0.152), (85, 'quail', 0.059), (356, 'weasel', 0.046)]}
+{'id': 'test-001', 'gold_species': 'american_goldfinch', 'imagenet_top5': [(11, 'goldfinch', 0.999), (12, 'house finch', 0.0), (14, 'indigo bunting', 0.0), (10, 'brambling', 0.0), (17, 'jay', 0.0)]}
+{'id': 'test-002', 'gold_species': 'song_sparrow', 'imagenet_top5': [(10, 'brambling', 0.366), (12, 'house finch', 0.069), (13, 'junco', 0.03), (95, 'jacamar', 0.022), (20, 'water ouzel', 0.021)]}
+{'note': 'ImageNet-1k names goldfinch (11), house finch (12) and junco (13); it has no class for the three sparrows, and the head answers anyway'}
+[colab] Executing cell 9/13 - vit_classification-22...
+{'majority_floor': {'accuracy': 0.1667, 'macro_f1': 0.0476, 'n': 48}, 'baseline': "majority training label ('american_goldfinch') predicted for every image"}
+{'knn_baseline': {'accuracy': 0.75, 'macro_f1': 0.7516, 'n': 48}, 'baseline': 'cosine 5-NN vote over the frozen features of the training images', 'seconds': 3.1}
+{'frozen_policy': 'frozen backbone + linear probe', 'probe_final_loss': 0.0157, 'validation': {'n': 24, 'accuracy': 0.9167, 'macro_f1': 0.9153, 'log_loss': 0.1621}, 'seconds': 3.9}
+{'frozen_policy_test': {'accuracy': 0.7917, 'macro_f1': 0.7885, 'n': 48}, 'log_loss': 0.678, 'verdict': 'measured-small-sample', 'per_class_recall': {'american_goldfinch': 0.88, 'chipping_sparrow': 0.88, 'dark_eyed_junco': 0.75, 'house_finch': 0.88, 'song_sparrow': 0.5, 'white_throated_sparrow': 0.88}}
+{'definitions': {'accuracy': 'fraction of images whose predicted label equals the gold label', 'macro_f1': 'unweighted mean over classes of the per-class F1 (precision-recall harmonic mean)', 'per_class': 'precision, recall, F1 and support for every class of the gold label set', 'confusion': 'rows are gold classes, columns predicted classes, in the order of `classes`', 'log_loss': 'mean negative log-probability the head assigns to the gold label (the selection signal)'}}
+{'frozen_vs_floor': 'above floor'}
+[colab] Executing cell 10/13 - vit_classification-25...
+{'epoch': 0, 'stage': 'linear probe (frozen backbone)', 'train_loss': 0.0157, 'val_log_loss': 0.1621, 'val_accuracy': 0.9167, 'val_macro_f1': 0.9153}
+{'epoch': 1, 'stage': 'unfrozen last 2 blocks', 'train_loss': 0.0143, 'val_log_loss': 0.1648, 'val_accuracy': 0.9167, 'val_macro_f1': 0.9153}
+{'epoch': 2, 'stage': 'unfrozen last 2 blocks', 'train_loss': 0.0071, 'val_log_loss': 0.1655, 'val_accuracy': 0.9167, 'val_macro_f1': 0.9153}
+{'epoch': 3, 'stage': 'unfrozen last 2 blocks', 'train_loss': 0.0046, 'val_log_loss': 0.1634, 'val_accuracy': 0.9167, 'val_macro_f1': 0.9153}
+{'epoch': 4, 'stage': 'unfrozen last 2 blocks', 'train_loss': 0.0032, 'val_log_loss': 0.166, 'val_accuracy': 0.9167, 'val_macro_f1': 0.9153}
+{'selected_policy': 'frozen backbone + linear probe', 'best_epoch': 0, 'selection': 'lowest validation log-loss (epoch 0 = linear probe)', 'trainable_head': 4614, 'trainable_blocks': 14175744, 'total_parameters': 86567656, 'started_from': 'pinned base', 'seconds': 11.0}
+[colab] Executing cell 11/13 - vit_classification-28...
+{'accuracy': {'majority_floor': 0.1667, 'knn5': 0.75, 'frozen_policy': 0.7917, 'selected_policy': 0.7917}}
+{'macro_f1': {'majority_floor': 0.0476, 'knn5': 0.7516, 'frozen_policy': 0.7885, 'selected_policy': 0.7885}}
+{'log_loss': {'frozen_policy': 0.678, 'selected_policy': 0.678}}
+{'per_class_recall': {'american_goldfinch': {'knn5': 0.88, 'frozen': 0.88, 'selected': 0.88}, 'chipping_sparrow': {'knn5': 0.75, 'frozen': 0.88, 'selected': 0.88}, 'dark_eyed_junco': {'knn5': 0.62, 'frozen': 0.75, 'selected': 0.75}, 'house_finch': {'knn5': 0.88, 'frozen': 0.88, 'selected': 0.88}, 'song_sparrow': {'knn5': 0.5, 'frozen': 0.5, 'selected': 0.5}, 'white_throated_sparrow': {'knn5': 0.88, 'frozen': 0.88, 'selected': 0.88}}}
+{'delta_vs_frozen': {'accuracy': 0.0, 'macro_f1': 0.0}}
+{'selected_policy': 'frozen backbone + linear probe'}
+{'verdicts': {'frozen_vs_floor': 'above floor', 'selected_vs_floor': 'above floor', 'selected_vs_frozen_accuracy': 'no gain'}}
+{'confusion_selected': [[7, 0, 0, 1, 0, 0], [0, 7, 0, 1, 0, 0], [0, 1, 6, 0, 0, 1], [0, 1, 0, 7, 0, 0], [0, 1, 1, 2, 4, 0], [1, 0, 0, 0, 0, 7]], 'classes': ['american_goldfinch', 'chipping_sparrow', 'dark_eyed_junco', 'house_finch', 'song_sparrow', 'white_throated_sparrow']}
+{'verdicts': {'frozen_vs_floor': 'above floor', 'selected_vs_floor': 'above floor', 'selected_vs_frozen_accuracy': 'no gain'}}
+{'report': 'outputs/vit_classification_evaluation_report.json'}
+[colab] Executing cell 12/13 - vit_classification-31...
+{'id': 'test-000', 'gold': 'chipping_sparrow', 'frozen_label': 'chipping_sparrow', 'frozen_top_probability': 0.5739, 'selected_label': 'chipping_sparrow', 'selected_top_probability': 0.5739}
+{'id': 'test-001', 'gold': 'american_goldfinch', 'frozen_label': 'american_goldfinch', 'frozen_top_probability': 0.9988, 'selected_label': 'american_goldfinch', 'selected_top_probability': 0.9988}
+{'id': 'test-002', 'gold': 'song_sparrow', 'frozen_label': 'song_sparrow', 'frozen_top_probability': 0.9205, 'selected_label': 'song_sparrow', 'selected_top_probability': 0.9205}
+{'id': 'test-003', 'gold': 'white_throated_sparrow', 'frozen_label': 'white_throated_sparrow', 'frozen_top_probability': 0.5678, 'selected_label': 'white_throated_sparrow', 'selected_top_probability': 0.5678}
+{'id': 'test-004', 'gold': 'dark_eyed_junco', 'frozen_label': 'dark_eyed_junco', 'frozen_top_probability': 0.4775, 'selected_label': 'dark_eyed_junco', 'selected_top_probability': 0.4775}
+{'id': 'test-005', 'gold': 'chipping_sparrow', 'frozen_label': 'house_finch', 'frozen_top_probability': 0.6592, 'selected_label': 'house_finch', 'selected_top_probability': 0.6592}
+{'batch_report_verdict': 'not-measurable', 'selected_policy': 'frozen backbone + linear probe', 'predictions_changed': 0, 'of': 6}
+{'artifact': 'outputs/vit_classification_adapter', 'format': 'org.valcorza.vit-base-p16-224.adapter.v1', 'policy': 'frozen backbone + linear probe', 'classes': ['american_goldfinch', 'chipping_sparrow', 'dark_eyed_junco', 'house_finch', 'song_sparrow', 'white_throated_sparrow'], 'tensors': 2, 'bytes': 18632, 'sha256': '36ee675ecfb456f1...'}
+{'reload_parity': {'probabilities_identical': True, 'accuracy_in_memory': 0.791667, 'accuracy_reloaded': 0.791667, 'classes_identical': True, 'predict_identical': True}, 'reloaded_policy': 'frozen backbone + linear probe', 'reloaded_best_epoch': 0}
+['vit_classification_adapter', 'vit_classification_evaluation_report.json', 'vit_classification_input_manifest.json', 'vit_classification_predictions.csv', 'vit_classification_result.json', 'vit_classification_train.csv']
+[colab] Executing cell 13/13 - vit_classification-34...
+{'experiment': 'skipped (RUN_EXPERIMENT = False); the default path above is complete'}
+[colab] Saving notebook with outputs to '/home/kurt/colab-runs/vit-classification-pipeline-2351f94-7e62dd/vit_classification_colab_2351f94_colab-cli-t4_output.ipynb'...
