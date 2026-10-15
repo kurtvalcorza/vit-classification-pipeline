@@ -326,12 +326,12 @@ This closes the hosted re-run item for revision `0.3.0-candidate`. The items lis
 
 Notebook blob `86f36b4733cc` (revision `0.3.0-candidate`, base `6c7b057`) → revision `0.4.0-candidate`, from the W21 capstone-round review (findings ICR2-M1, ICR2-m1 to m6, ICR2-S1), assessed against NOTEBOOK_SPEC **2.5** (ml-worker `bfe4150`). Code cells changed, so the 2026-10-03 Colab CLI run above does not describe this blob. **A hosted re-run is pending. Status: Candidate.**
 
-Owner decision ICR2-M1 = C (Kurt): disclose each checkpoint's pretraining label sets **and** add ImageNet-1k-only counterparts for a matched comparison.
+Owner decision ICR2-M1 = C (Kurt): disclose each checkpoint's pretraining label sets **and** add ImageNet-1k-only counterparts for a comparison with matched supervised label vocabulary.
 
 What changed:
 
 - **Pretraining labels (ICR2-M1).** Section 2 tabulates, per checkpoint, its supervised label sets and which target species are classes in them, from the synset lists in `timm/data/_info`: all six species are ImageNet-12k/21k/22k classes; ImageNet-1k has house finch exactly and a broader "junco, snowbird" class (n01534433). The title, opening cell, Section 15, Section 21, exercises A to D and the conclusion template no longer credit the accuracy gap to architecture or size.
-- **ImageNet-1k-only counterparts (ICR2-M1, option C).** `RUN_IN1K_COUNTERPARTS = True` (default) adds `timm/convnext_tiny.fb_in1k` at `b43a6303c9fc…` and `timm/vit_base_patch16_224.augreg_in1k` at `458542882691…` (Apache-2.0; pinned by size and SHA-256 like the core models), run with the same probe recipe after the core models. Section 14 prints a matched table of the ImageNet-1k-only checkpoints and each core checkpoint against its counterpart. The core rows and their computation are unchanged; the counterparts match architecture and size but not the whole pretraining recipe, which the notebook states.
+- **ImageNet-1k-only counterparts (ICR2-M1, option C).** `RUN_IN1K_COUNTERPARTS = True` (default) adds `timm/convnext_tiny.fb_in1k` at `b43a6303c9fc…` and `timm/vit_base_patch16_224.augreg_in1k` at `458542882691…` (Apache-2.0; pinned by size and SHA-256 like the core models), run with the same probe recipe after the core models. Section 14 prints a table of the ImageNet-1k-only checkpoints and each core checkpoint against its counterpart. The core rows and their computation are unchanged; the counterparts match architecture and size but not the whole pretraining recipe, which the notebook states.
 - **Runner.** The feature runner now always sets `custom_load=False` in the pretrained-config overlay. The ViT `augreg_in1k` config sets `custom_load: true`, which makes timm 1.0.29 read the pinned safetensors file as an original JAX `.npz` and fail; all previously pinned configs already had `custom_load: false`, so their loading is unchanged (checked on CPU: the loaded weights equal the file for both counterparts).
 - **DAT9 (ICR2-m1).** Sections 0 and 21 state that overlap between the public iNaturalist photos and the pretraining images cannot be ruled out.
 - **KND10 (ICR2-m2).** Sections 0, 10 and 21 say the probe recipe is fixed and not tuned per model, and that results hold under this recipe only.
@@ -346,5 +346,21 @@ Expected unchanged on a hosted run: the 108 / 24 / 48 split, the dataset digest 
 Verification (not clean-runtime evidence): generator `--check`, release-asset validation and ruff pass; the review's 7 acceptance checks fail before and pass after; new tests in `tests/test_multimodel_workshop_icr2_fixes.py` run the notebook's own cells with stand-in predictions and synthetic BYOD folders.
 
 Open: a hosted default run of this blob; REL12 hosted BYOD accept and refuse runs (the refusal rendering on Colab is not yet observed); the two-runtime activity; `FULL` and DINOv2.
+
+**Status: Candidate.**
+
+### Follow-up after the peer review of PR #13 (still revision 0.4.0-candidate)
+
+A peer review of the first ICR2 commit found the scientific framing still overstated in places. Changes, all wording, displays or additive exports; no core computation changed:
+
+- The ImageNet-1k-only group is now a "comparison with matched supervised label vocabulary". The two core-versus-counterpart pairs (ConvNeXt-Tiny 28.59 M parameters and ViT-B/16 86.57 M in each pair, with identical weight-file sizes) are the planned teaching contrasts. The notebook says that neither the group nor the pairs isolates architecture or label coverage, and prints each pair's resolved preprocessing.
+- Exact-label wording: all six exact species labels occur in the larger label sets; ImageNet-1k contains house finch exactly and a broader junco class, and the other four exact labels are absent.
+- "Independent test" became "held-out tutorial split". The notebook notes that reuse across revisions makes comparisons exploratory.
+- McNemar p-values are labelled nominal and exploratory. The notebook explains observer dependence, balanced 8-per-species sampling and multiplicity. The planned contrasts keep their nominal p; other pairs show a Holm-adjusted p and stay descriptive. The conclusion template separates "more correct on this sample" from evidence of higher accuracy in general.
+- Validation scores are described as optimistic selection results, and the seed as a reproducibility control. Section 11 prints both boundary notes (first step, step cap) without a causal diagnosis.
+- Throughput is labelled as observed end-to-end extraction throughput at the listed batch size, with device. The accuracy-per-million-parameters ratio was removed.
+- One `NOTEBOOK_SPEC` constant (2.5) feeds the frozen identity, which still said 2.1, the provenance and the completion summary. The provenance cell checks that they agree.
+- `test/aggregate_metrics.csv` and the computational trade-off table cover every tested checkpoint. Confusion matrices include the counterparts.
+- Simple reference instead of "floor", plus the uniform-probability log-loss ln(6) ≈ 1.792; "checks exact duplicate content"; per-species denominators (1 photo = 12.5 points of a species' recall).
 
 **Status: Candidate.**

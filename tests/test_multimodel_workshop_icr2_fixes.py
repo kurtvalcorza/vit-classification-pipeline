@@ -151,6 +151,11 @@ def scored_stand_in(tmp_path, monkeypatch, correct_by_key):
         ns["test_predictions"][key] = pd.DataFrame({"id": ids, "truth": truth, "prediction": pred})
         ns["test_metrics"][key] = {"accuracy": float(np.mean(correct)), "macro_f1": 0.5, "log_loss": 1.0}
     ns["SELECTED_MODELS"] = list(correct_by_key)
+    ns["feature_metadata"] = {
+        key: {"parameters": 1_000_000, "device": "cpu",
+              "data_config": {"input_size": [3, 224, 224], "interpolation": "bicubic", "crop_pct": 0.875}}
+        for key in correct_by_key
+    }
     ns["OUTPUT_ROOT"] = tmp_path / "out"
     (ns["OUTPUT_ROOT"] / "test").mkdir(parents=True)
     return ns
@@ -167,14 +172,22 @@ def test_matched_and_paired_tables_on_stand_in_predictions(tmp_path, monkeypatch
     matched = ns["matched_in1k_table"]
     assert list(matched["model"]) == [ns["MODEL_SPECS"][k]["display_name"] for k in
                                       ("mobilenet", "resnet", "convnext_in1k", "vit_in1k")]
-    assert "3. Each core checkpoint against its ImageNet-1k-only counterpart" in out
+    assert "2. Comparison with matched supervised label vocabulary" in out
+    assert "3. Planned teaching contrasts" in out and "4. Resolved preprocessing" in out
+    assert "nominal and exploratory" in out and "NOMINAL and EXPLORATORY" in out
+    assert len(ns["planned_contrasts_table"]) == 2
     paired = ns["paired_table"]
     assert len(paired) == 15
+    assert int(paired["planned contrast"].sum()) == 2
+    holm = paired["Holm-adjusted p (non-planned pairs)"]
+    assert holm[paired["planned contrast"]].isna().all() and holm[~paired["planned contrast"]].notna().all()
+    nominal = paired.loc[~paired["planned contrast"], "nominal exact McNemar p"]
+    assert (holm[~paired["planned contrast"]].to_numpy() >= nominal.to_numpy() - 1e-4).all()
     row = paired[(paired["model A"] == "ConvNeXt-Tiny") & (paired["model B"] == "ViT-B/16")].iloc[0]
     assert row["only A right"] == int((correct["convnext"] & ~correct["vit"]).sum())
     assert row["only B right"] == int((~correct["convnext"] & correct["vit"]).sum())
     assert (tmp_path / "out/test/paired_comparisons.csv").is_file()
-    assert "Bonferroni" in out
+    assert "Holm adjustment" in out and "not show" in out
 
 
 def test_intervals_refuse_a_count_that_disagrees_with_the_metric(tmp_path, monkeypatch):
@@ -256,6 +269,27 @@ def test_an_undecodable_image_is_an_error_not_a_refusal(tmp_path, monkeypatch):
     path = byod_dataset(tmp_path / "input", padded=False, missing=False, undecodable=True)
     with pytest.raises(OSError):
         acquire(tmp_path, monkeypatch, path)
+
+
+def test_holm_adjustment_matches_the_step_down_rule():
+    (holm,) = functions(BY_ID["icr2-paired-comparison"], "holm_adjust")
+    assert holm([0.01, 0.04, 0.03]) == pytest.approx([0.03, 0.06, 0.06])
+    assert holm([0.5, 0.9]) == pytest.approx([1.0, 1.0])
+
+
+def test_peer_review_wording_and_spec_constant():
+    controls = numbered(4)
+    assert 'NOTEBOOK_SPEC = "2.5"' in controls
+    assert NB["metadata"]["dimer"]["notebook_spec"] == "2.5"
+    code = "\n".join("".join(c["source"]) for c in NB["cells"] if c["cell_type"] == "code")
+    assert '"notebook_spec":"2.1"' not in code and '"notebook_spec":"2.5"' not in code
+    assert code.count('"notebook_spec":NOTEBOOK_SPEC') == 3
+    for phrase in ("independent test", "independent held-out", "accuracy_per_M", "learning rate too high",
+                   "beat another", "trained to name", "were not.", "matched comparison"):
+        assert phrase not in MARKDOWN + code, phrase
+    assert "comparison with matched supervised label vocabulary" in MARKDOWN
+    assert "the other four exact species labels are absent" in MARKDOWN
+    assert "observed end-to-end extraction throughput at the listed batch size" in code
 
 
 # --- ICR2-m1, m2, m5, m6, S1 ------------------------------------------------------------------------------

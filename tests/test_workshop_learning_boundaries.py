@@ -107,7 +107,7 @@ def test_export_reports_actual_byod_classes_and_test_size(tmp_path, monkeypatch)
     ns = acquire(tmp_path, monkeypatch, fixture(tmp_path / 'input'))
     # Model results are stand-ins only for executing the export cell's data contract.
     freeze_path = ns['OUTPUT_ROOT'] / 'frozen/frozen_experiment.json'
-    freeze_path.write_text('{}')
+    freeze_path.write_text('{"notebook_spec": "2.5"}')
     ns.update(SELECTED_MODELS=[], CORE_MODELS=[], MODEL_SPECS={},
               majority_label='a', majority_metrics={'accuracy': 0.5, 'macro_f1': 1/3},
               test_table=pd.DataFrame(), core_test_table=pd.DataFrame(),
