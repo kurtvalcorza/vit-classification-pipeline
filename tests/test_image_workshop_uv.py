@@ -220,7 +220,10 @@ def test_split_long_literals_round_trips_and_leaves_short_lines_alone():
 def test_revision_log_keeps_every_review_fix():
     revisions = NB["metadata"]["dimer"]["review_revisions"]
     latest = revisions[-1]
-    assert latest["revision"] == NB["metadata"]["workshop_revision"] == "0.3.0-candidate"
+    assert latest["revision"] == NB["metadata"]["workshop_revision"] == "0.4.0-candidate"
     assert latest["fixes_kept"] == [f"ICR-0{i}" for i in range(1, 9)]
+    # The uv revision stays in the log below the ICR2 revision that followed it.
+    uv_revision = next(r for r in revisions if r["revision"] == "0.3.0-candidate")
+    assert uv_revision["fixes_kept"] == latest["fixes_kept"]
     assert f'NOTEBOOK_REVISION = "{latest["revision"]}"' in CODE["Notebook controls"]
     assert "Linux x86_64 only" in NB["metadata"]["dimer"]["runtime_environment"]["platform"]

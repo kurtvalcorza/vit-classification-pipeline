@@ -35,8 +35,10 @@ LOCKS = {
 }
 PIECE_LIMIT = 1000
 LINE_LIMIT = 2000
-REVISION = "0.3.0-candidate"
+REVISION = "0.4.0-candidate"
+PRIOR_REVISION = "0.3.0-candidate"
 ICR_FIXES = ["ICR-01", "ICR-02", "ICR-03", "ICR-04", "ICR-05", "ICR-06", "ICR-07", "ICR-08"]
+ICR2_FIXES = ["ICR2-M1", "ICR2-m1", "ICR2-m2", "ICR2-m3", "ICR2-m4", "ICR2-m5", "ICR2-m6", "ICR2-S1"]
 STRING_ASSIGNMENT = re.compile(r'^(?P<indent>\s*)(?P<name>[A-Za-z_][A-Za-z0-9_]*) = (?P<literal>"[^"\\]*")$')
 
 
@@ -160,9 +162,10 @@ def build_notebook():
                 "credentials_required": False,
                 "dataset": "six-species CC0 iNaturalist bird corpus",
                 "default_tier": "STANDARD",
+                "notebook_kind": "WORKSHOP",
                 "notebook_mode": "WORKSHOP",
                 "notebook_profile": "E2E",
-                "notebook_spec": "2.1",
+                "notebook_spec": "2.5",
                 "release_status": "candidate",
                 "standalone": True,
                 "worker_required": False,
@@ -189,10 +192,19 @@ def build_notebook():
                         "fixed": ICR_FIXES,
                     },
                     {
-                        "revision": REVISION,
+                        "revision": PRIOR_REVISION,
                         "date": "2026-10-03",
                         "base_commit": "c3f5030f58871447700dea5a0fecdec0446a9191",
                         "change": "uv isolated environment: the model environments are hash-locked CPython 3.12.12 venvs built by a pinned uv wheel and installed with --require-hashes --only-binary :all:; no kernel install and no restart; no cell line over 2,000 characters; Linux x86_64 only",
+                        "fixes_kept": ICR_FIXES,
+                    },
+                    {
+                        "review": "W21 capstone-round review 2026-10-15 (ICR2), blob 86f36b47",
+                        "revision": REVISION,
+                        "date": "2026-10-15",
+                        "base_commit": "6c7b05749043741a037c9d0fae5e458af43532cf",
+                        "change": "owner decision ICR2-M1 = C: per-checkpoint pretraining label-set disclosure and reworded framing, plus ImageNet-1k-only ConvNeXt-Tiny and ViT-B/16 counterparts (RUN_IN1K_COUNTERPARTS, on by default) with a matched comparison; DAT9 overlap statement; fixed-recipe wording; nominal Wilson intervals and paired exact McNemar tables; BYOD refusals as one message without a traceback; labelled quoted numbers; NOTEBOOK_SPEC 2.5",
+                        "fixed": ICR2_FIXES,
                         "fixes_kept": ICR_FIXES,
                     },
                 ],
