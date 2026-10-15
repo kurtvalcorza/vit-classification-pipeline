@@ -74,7 +74,8 @@ def test_generator_parity():
 
 def test_metadata():
     meta = load()["metadata"]["dimer"]
-    assert meta["notebook_spec"] == "2.1"
+    assert meta["notebook_spec"] == "2.5"
+    assert meta["notebook_kind"] == "WORKSHOP"
     assert meta["notebook_profile"] == "E2E"
     assert meta["notebook_mode"] == "WORKSHOP"
     assert meta["standalone"] is True

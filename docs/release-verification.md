@@ -173,6 +173,7 @@ with the committed blob before it was recorded here.
 | 2026-09-26 | `e9237d0` / `c40bc9351916` | Google Colab, Tesla T4, Python 3.13.15 kernel (model environments on Python 3.12) | `STANDARD` tier, built-in corpus, notebook unmodified | not recorded | **PASSED** — 23/23 code cells executed without error; probes selected at steps 50 / 30 / 1000 / 1000 (none at the first checkpoint; ConvNeXt-Tiny and ViT-B/16 at the step cap); test accuracy / macro-F1 / log-loss MobileNetV4 0.500 / 0.504 / 1.52, ResNet-50 0.500 / 0.480 / 1.78, ConvNeXt-Tiny 0.708 / 0.710 / 1.17, ViT-B/16 0.771 / 0.770 / 0.89 (identical to the local CPU pre-flight to at least five decimals); reload parity 0.0 for every adapter; report bundle SHA-256 `b62c47e16c26…` |
 | 2026-09-28 | `1ef3d0f` / `2cccb9c64fdb` (revision `0.2.0-candidate`) | Google Colab, Tesla T4, Python 3.13.15 kernel (model environments on Python 3.12) | `STANDARD` tier, built-in corpus, notebook unmodified, activity comparison left at its default (skipped) | not recorded | **PASSED** — 24/24 code cells executed in order without error; 108 / 24 / 48 split, dataset digest `176d8cfa4d9f…`, 31 of 117 observers in more than one split; probes selected at steps 50 / 30 / 1000 / 1000; validation accuracy 0.625 / 0.708 / 0.958 / 0.958; test accuracy / macro-F1 / log-loss MobileNetV4 0.500 / 0.504 / 1.52, ResNet-50 0.500 / 0.480 / 1.78, ConvNeXt-Tiny 0.708 / 0.710 / 1.17, ViT-B/16 0.771 / 0.770 / 0.89 (identical to the `e9237d0` run), each scored over n = 48; majority floor 0.167; disagreement table over all 48 test images (15 unanimous correct, 5 unanimous wrong, 32 disagreements); reload parity 0.0 for every adapter; experiment `20260928T020445Z-6f8082`, 50 files in the report, bundle SHA-256 `f8aa524b5c50…` |
 | 2026-10-03 | `e8d1dea` / `86f36b4733cc` (revision `0.3.0-candidate`) | Colab CLI 0.7.4, fresh Colab Tesla T4 (host Python 3.13.15; model environments CPython 3.12.12 from the hash locks) | `STANDARD` tier, built-in corpus, notebook unmodified, default path only; CLI sequential execution (`colab exec -f`), not a browser Run all | 204.6 s (whole run, incl. environment builds and downloads) | **PASSED** — 25/25 code cells executed in order without error; 108 / 24 / 48 split, dataset digest `176d8cfa4d9f…`, 31 of 117 observers in more than one split; probes selected at steps 50 / 30 / 1000 / 1000; validation accuracy 0.625 / 0.708 / 0.958 / 0.958; test accuracy / macro-F1 / log-loss MobileNetV4 0.500 / 0.504 / 1.52, ResNet-50 0.500 / 0.480 / 1.78, ConvNeXt-Tiny 0.708 / 0.710 / 1.17, ViT-B/16 0.771 / 0.770 / 0.89 (identical to the 2026-09-28 run), each scored over n = 48; majority floor 0.167; 15 unanimous correct, 5 unanimous wrong, 32 disagreements; reload parity 0.0 for every adapter; experiment `20261003T231450Z-b88746`, 50 files in the report, bundle SHA-256 `56d0b7cf951f…` |
+| 2026-10-15 | `ed4b542` / `be5203b841ea` (revision `0.4.0-candidate`) | Colab CLI 0.7.4, fresh Colab Tesla T4 (host Python 3.13.15; model environments CPython 3.12.12 from the hash locks) | `STANDARD` tier plus the two ImageNet-1k-only counterparts (on by default), built-in corpus, notebook unmodified, default path only; CLI sequential execution (`colab exec -f`), not a browser Run all | 234.0 s (whole run, incl. environment builds and downloads) | **PASSED** — 27/27 code cells executed in order without error; 108 / 24 / 48 split, dataset digest `176d8cfa4d9f…`, 31 of 117 observers in more than one split; core probes selected at steps 50 / 30 / 1000 / 1000, test accuracy / macro-F1 / log-loss MobileNetV4 0.500 / 0.504 / 1.52, ResNet-50 0.500 / 0.480 / 1.78, ConvNeXt-Tiny 0.708 / 0.710 / 1.17, ViT-B/16 0.771 / 0.770 / 0.89 (identical to the 2026-10-03 run); ImageNet-1k-only counterparts (first run): ConvNeXt-Tiny `fb_in1k` selected at step 40, test 27/48 = 0.562 (nominal Wilson 95% [0.423, 0.693]) / macro-F1 0.556 / log-loss 1.13, ViT-B/16 `augreg_in1k` selected at step 50, test 22/48 = 0.458 [0.326, 0.597] / 0.459 / 1.48; planned paired contrasts (nominal exact McNemar): ConvNeXt-Tiny in12k vs in1k 8 vs 1 discordant, p = 0.0391; ViT-B/16 in21k vs in1k 16 vs 1, p = 0.0003; majority floor 0.167; 15 unanimous correct, 5 unanimous wrong, 32 disagreements (core models); reload parity 0.0 for all six adapters; experiment `20261015T015616Z-b1127b`, 67 files in the report, bundle SHA-256 `9fc4c6b56dff…` |
 
 Notebook blob `2cccb9c64fdb` (revision `0.2.0-candidate`, from `1ef3d0f`) has a passing Google Colab T4 run of the default `STANDARD` path; the earlier blob `c40bc9351916` (from `e9237d0`) also passed. The
 `FULL` tier (SwinV2-Tiny, EVA-02 Base 448) and the optional DINOv2 baseline have not been exercised on a hosted
@@ -319,5 +320,72 @@ Notebook blob `86f36b4733cc` (revision `0.3.0-candidate`, commit `e8d1dea`) was 
 - Evidence boundary: Colab CLI sequential execution, not a browser Run all; the default `STANDARD` path only. Forms were not rendered, and BYOD, the activity comparison, `FULL` and DINOv2 were not exercised.
 
 This closes the hosted re-run item for revision `0.3.0-candidate`. The items listed open under the 2026-09-28 record remain open.
+
+**Status: Candidate.**
+
+## Multi-model workshop: ICR2 review fixes — revision 0.4.0-candidate (2026-10-15)
+
+Notebook blob `86f36b4733cc` (revision `0.3.0-candidate`, base `6c7b057`) → revision `0.4.0-candidate`, from the W21 capstone-round review (findings ICR2-M1, ICR2-m1 to m6, ICR2-S1), assessed against NOTEBOOK_SPEC **2.5** (ml-worker `bfe4150`). Code cells changed, so the 2026-10-03 Colab CLI run above does not describe this blob. **A hosted re-run is pending. Status: Candidate.**
+
+Owner decision ICR2-M1 = C (Kurt): disclose each checkpoint's pretraining label sets **and** add ImageNet-1k-only counterparts for a comparison with matched supervised label vocabulary.
+
+What changed:
+
+- **Pretraining labels (ICR2-M1).** Section 2 tabulates, per checkpoint, its supervised label sets and which target species are classes in them, from the synset lists in `timm/data/_info`: all six species are ImageNet-12k/21k/22k classes; ImageNet-1k has house finch exactly and a broader "junco, snowbird" class (n01534433). The title, opening cell, Section 15, Section 21, exercises A to D and the conclusion template no longer credit the accuracy gap to architecture or size.
+- **ImageNet-1k-only counterparts (ICR2-M1, option C).** `RUN_IN1K_COUNTERPARTS = True` (default) adds `timm/convnext_tiny.fb_in1k` at `b43a6303c9fc…` and `timm/vit_base_patch16_224.augreg_in1k` at `458542882691…` (Apache-2.0; pinned by size and SHA-256 like the core models), run with the same probe recipe after the core models. Section 14 prints a table of the ImageNet-1k-only checkpoints and each core checkpoint against its counterpart. The core rows and their computation are unchanged; the counterparts match architecture and size but not the whole pretraining recipe, which the notebook states.
+- **Runner.** The feature runner now always sets `custom_load=False` in the pretrained-config overlay. The ViT `augreg_in1k` config sets `custom_load: true`, which makes timm 1.0.29 read the pinned safetensors file as an original JAX `.npz` and fail; all previously pinned configs already had `custom_load: false`, so their loading is unchanged (checked on CPU: the loaded weights equal the file for both counterparts).
+- **DAT9 (ICR2-m1).** Sections 0 and 21 state that overlap between the public iNaturalist photos and the pretraining images cannot be ruled out.
+- **KND10 (ICR2-m2).** Sections 0, 10 and 21 say the probe recipe is fixed and not tuned per model, and that results hold under this recipe only.
+- **Paired evidence (ICR2-m3).** Section 14 prints nominal Wilson 95% intervals (independent photos assumed); Section 15 prints paired discordant counts with an exact McNemar p for every pair of tested checkpoints (illustrative, no multiple-comparison correction, written to `test/paired_comparisons.csv`). The Section 21 interval sentence is reworded.
+- **BYOD refusals (ICR2-m4, DAT20).** A contract problem is refused with one message listing every problem found (file or `labels.csv` line and rule) and a recovery step, with no traceback; Run all stops there. Undecodable images still stop with their own error.
+- **REL13 (ICR2-m5).** The learning-rate-0.01 result is labelled as recorded at `b9b94c9` / blob `5874024a` and not re-run; the step-cap statement names the 2026-10-03 run of `e8d1dea` / `86f36b47`.
+- **Declaration (ICR2-m6).** `metadata.dimer.notebook_spec` 2.5, `notebook_kind` `WORKSHOP`; the opening cell, provenance and completion summary say the same.
+- **Majority tie (ICR2-S1).** Section 6 prints a notice when the majority label is a tie-break.
+
+Expected unchanged on a hosted run: the 108 / 24 / 48 split, the dataset digest and every core-model metric of the 2026-10-03 run (inferred from the diff: each model runs in its own process with the same inputs and seed; not re-executed). New numbers (the counterparts, intervals and paired tables) come only from a hosted run of this blob.
+
+Verification (not clean-runtime evidence): generator `--check`, release-asset validation and ruff pass; the review's 7 acceptance checks fail before and pass after; new tests in `tests/test_multimodel_workshop_icr2_fixes.py` run the notebook's own cells with stand-in predictions and synthetic BYOD folders.
+
+Open: a hosted default run of this blob; REL12 hosted BYOD accept and refuse runs (the refusal rendering on Colab is not yet observed); the two-runtime activity; `FULL` and DINOv2.
+
+**Status: Candidate.**
+
+### Follow-up after the peer review of PR #13 (still revision 0.4.0-candidate)
+
+A peer review of the first ICR2 commit found the scientific framing still overstated in places. Changes, all wording, displays or additive exports; no core computation changed:
+
+- The ImageNet-1k-only group is now a "comparison with matched supervised label vocabulary". The two core-versus-counterpart pairs (ConvNeXt-Tiny 28.59 M parameters and ViT-B/16 86.57 M in each pair, with identical weight-file sizes) are the planned teaching contrasts. The notebook says that neither the group nor the pairs isolates architecture or label coverage, and prints each pair's resolved preprocessing.
+- Exact-label wording: all six exact species labels occur in the larger label sets; ImageNet-1k contains house finch exactly and a broader junco class, and the other four exact labels are absent.
+- "Independent test" became "held-out tutorial split". The notebook notes that reuse across revisions makes comparisons exploratory.
+- McNemar p-values are labelled nominal and exploratory. The notebook explains observer dependence, balanced 8-per-species sampling and multiplicity. The planned contrasts keep their nominal p; other pairs show a Holm-adjusted p and stay descriptive. The conclusion template separates "more correct on this sample" from evidence of higher accuracy in general.
+- Validation scores are described as optimistic selection results, and the seed as a reproducibility control. Section 11 prints both boundary notes (first step, step cap) without a causal diagnosis.
+- Throughput is labelled as observed end-to-end extraction throughput at the listed batch size, with device. The accuracy-per-million-parameters ratio was removed.
+- One `NOTEBOOK_SPEC` constant (2.5) feeds the frozen identity, which still said 2.1, the provenance and the completion summary. The provenance cell checks that they agree.
+- `test/aggregate_metrics.csv` and the computational trade-off table cover every tested checkpoint. Confusion matrices include the counterparts.
+- Simple reference instead of "floor", plus the uniform-probability log-loss ln(6) ≈ 1.792; "checks exact duplicate content"; per-species denominators (1 photo = 12.5 points of a species' recall).
+
+**Status: Candidate.**
+
+## Colab CLI execution of revision 0.4.0 — 2026-10-15
+
+Notebook blob `be5203b841ea` (revision `0.4.0-candidate`, commit `ed4b542`) was executed on a fresh Colab Tesla T4 by the Colab CLI. The executed notebook is preserved byte-for-byte as [evidence](execution-evidence/2026-10-15/DIMER_MultiModel_Image_Classification_Workshop_ed4b542_colab-cli-t4.ipynb).
+
+- Source: fetched from GitHub at the full commit SHA `ed4b54297b67bb1c1e66cf9b079b3a512a8fecf6`; its git blob `be5203b841ea6a208c546a413f1051165a04ea43` was checked before the VM was allocated. All 60 cell ids and sources of the executed copy match the committed notebook.
+- Executed-file SHA-256: `6ac6bef4c4f70964db0316f26631f82f55a7607de4c383dd81109f0b880595ff`.
+- Executor: Colab CLI 0.7.4, fresh Colab Tesla T4 (session `suite-vit-ed4b542-4df8`, released afterwards), 2026-10-15 01:56–02:00 UTC. Host Python 3.13.15, NumPy 2.1.3, pandas 2.2.3, Matplotlib 3.10.0, Pillow 11.3.0. Both carried hash locks verified; the common model environment was built as CPython 3.12.12 by the pinned `uv`, with no kernel install and no restart.
+- Execution: 27/27 code cells ran in order in one kernel (CLI log `Executing cell 1..27/27`), with no error outputs; 234.0 s for the whole session. The provenance cell's spec-consistency check (frozen identity, manifest and constant all `2.5`) passed; the completion summary reports `notebook_spec` 2.5.
+- ImageNet-1k-only counterparts, first hosted run: `timm/convnext_tiny.fb_in1k` at `b43a6303c9fc…` and `timm/vit_base_patch16_224.augreg_in1k` at `458542882691…` were downloaded, size- and SHA-256-verified by the feature runner (which raises on a mismatch), and loaded through the `custom_load=False` state-dict path; both extracted features on `cuda:0` (768-d) and trained probes (selected at steps 40 and 50, validation accuracy 0.833 and 0.708, reload parity 0.0). They appear in `test/aggregate_metrics.csv` (the test table), the six confusion matrices and the trade-off table.
+  - ConvNeXt-Tiny (ImageNet-1k only): 27/48 = 0.562, nominal Wilson 95% [0.423, 0.693], macro-F1 0.556, log-loss 1.127.
+  - ViT-B/16 (ImageNet-1k only): 22/48 = 0.458, nominal Wilson 95% [0.326, 0.597], macro-F1 0.459, log-loss 1.481.
+  - Planned contrasts, nominal exact McNemar: ConvNeXt-Tiny (ImageNet-12k → 1k) vs its counterpart 34 vs 27 correct, discordant 8 / 1, p = 0.0391; ViT-B/16 (ImageNet-21k → 1k) vs its counterpart 37 vs 22, discordant 16 / 1, p = 0.0003. The other 13 pairs are descriptive with Holm-adjusted p. The Wilson bounds and both p-values were recomputed independently from the printed counts and agree.
+- Results vs the 2026-10-03 run of blob `86f36b4733cc`: every core-model quality metric is identical (split, dataset digest, observer overlap, selected steps, validation and test accuracy / macro-F1 / log-loss, majority floor, disagreement counts over the core models, reload parity), as predicted in the 0.4.0 record above. The output diff (difflib on normalised lines) shows only:
+  - the two counterparts' rows, extraction and probe lines, the label-set disclosure table, the Wilson / matched-vocabulary / planned-contrast / preprocessing tables, the all-pairs McNemar table, and two more confusion matrices: new in this revision (ICR2-M1 option C, ICR2-m3);
+  - `feature_seconds` and `images_per_second`: wall-clock timings; the throughput table now also prints batch size and device, and the accuracy-per-million-parameters column is gone (peer-review follow-up);
+  - the feature-runner SHA-256 (`d94e26e8…` → `79dc6b8a…`): the `custom_load=False` overlay;
+  - the majority-tie notice and the uniform-probability log-loss (ICR2-S1, follow-up);
+  - `notebook_revision` `0.3.0` → `0.4.0-candidate`, `notebook_spec` 2.1 → 2.5 (ICR2-m6), the experiment id, and the report bundle (50 → 67 files, SHA-256 `56d0b7cf951f…` → `9fc4c6b56dff…`): more models and the new exports.
+- Evidence boundary: Colab CLI sequential execution, not a browser Run all; the default path only. Forms were not rendered, and BYOD (including the ICR2-m4 refusal rendering), the activity comparison, `FULL` and DINOv2 were not exercised.
+
+This closes the hosted re-run item for revision `0.4.0-candidate`. The other open items above remain open.
 
 **Status: Candidate.**
