@@ -526,7 +526,13 @@ def test_activity_records_compare_only_a_single_change(tmp_path, monkeypatch, pl
         },
     )
     table = changed["step_budget_comparison"]
-    assert list(table["model"]) == ["MobileNetV4-Conv-Small", "ViT-B/16"]
+    # The ImageNet-1k-only counterparts run by default (ICR2-M1) and are joined by model.
+    assert list(table["model"]) == [
+        "MobileNetV4-Conv-Small",
+        "ViT-B/16",
+        "ConvNeXt-Tiny (ImageNet-1k only)",
+        "ViT-B/16 (ImageNet-1k only)",
+    ]
     assert "difference_changed_minus_reference" in table
 
     other_seed = start(tmp_path, monkeypatch, steps=10, seed=5)
