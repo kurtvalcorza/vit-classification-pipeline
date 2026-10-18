@@ -839,7 +839,7 @@ TEMPLATE = {
                 "\n"
                 "[6] iNaturalist, \"iNaturalist open data\" (CC0 photographs credited to their observers in the carried records). [Online]. Available: https://www.inaturalist.org/pages/developers\n"
                 "\n"
-                "[7] K. Valcorza, \"vit-classification-pipeline: README, model card and weight provenance,\" GitHub repository. [Online]. Available: https://github.com/kurtvalcorza/vit-classification-pipeline (README.md, MODEL_CARD.md, docs/WEIGHTS.md, docs/vit-preregistration.md)\n"
+                "[7] K. Valcorza, \"vit-classification-pipeline,\" GitHub repository: README, model card and weight provenance. [Online]. Available: https://github.com/kurtvalcorza/vit-classification-pipeline/blob/main/README.md, https://github.com/kurtvalcorza/vit-classification-pipeline/blob/main/MODEL_CARD.md and https://github.com/kurtvalcorza/vit-classification-pipeline/blob/main/docs/WEIGHTS.md\n"
                 "\n"
                 "[8] DIMER, \"Notebook Specification 2.5\" and \"Model Card Specification 1.1,\" ml-worker repository (fleet specifications)."
     ),
