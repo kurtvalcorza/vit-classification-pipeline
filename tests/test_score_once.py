@@ -240,7 +240,9 @@ def test_recorded_evaluation_equals_the_executed_evidence():
         grid_row = [r for r in rows if r.get("name") == name and r.get("status") == "complete"]
         assert len(grid_row) == 1
         assert grid_row[0]["val_log_loss"] == rec["grid_val_log_loss"][name] and grid_row[0]["val_accuracy"] == rec["grid_val_accuracy"][name]
-    fresh = _row(rows, "fresh_test")["fresh_test"]
+    scored = [r["fresh_test"] for r in rows if isinstance(r.get("fresh_test"), dict) and "selected" in r["fresh_test"]]
+    assert len(scored) == 1
+    fresh = scored[0]
     recf = rec["fresh_test"]
     for system in ("selected", "frozen_probe"):
         assert fresh[system]["n"] == recf["n"] == 96
