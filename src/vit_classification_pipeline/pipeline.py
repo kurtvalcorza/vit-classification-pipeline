@@ -61,6 +61,22 @@ ARTIFACT_WEIGHTS_NAME = "adapter.safetensors"
 ARTIFACT_MANIFEST_NAME = "manifest.json"
 
 
+def numeric_settings(device: str) -> dict[str, Any]:
+    """The precision actually in force (recorded beside every result, row 108 F7)."""
+    import torch
+
+    on_gpu = str(device).startswith("cuda") and torch.cuda.is_available()
+    gpu = torch.cuda.get_device_name(0) if on_gpu else None
+    return {
+        "device": str(device),
+        "gpu_name": gpu,
+        "dtype": "float32",
+        "float32_matmul_precision": torch.get_float32_matmul_precision(),
+        "cudnn_allow_tf32": bool(torch.backends.cudnn.allow_tf32),
+        "cuda_matmul_allow_tf32": bool(torch.backends.cuda.matmul.allow_tf32),
+    }
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with open(path, "rb") as fh:
@@ -324,6 +340,9 @@ class ViTClassificationPipeline:
                 f"no verified snapshot at {root} and allow_download=False; "
                 f"stage it with: hf download {MODEL_ID} --revision {MODEL_REVISION} --local-dir {root}"
             )
+        # Row 108 F7: true float32 on every GPU (TF32 is on by default for cuDNN on Ampere and newer).
+        torch.backends.cudnn.allow_tf32 = False
+        torch.backends.cuda.matmul.allow_tf32 = False
         resolved_device = device or ("cuda:0" if torch.cuda.is_available() else "cpu")
         model = model.eval().to(resolved_device)
         data_config = resolve_model_data_config(model)

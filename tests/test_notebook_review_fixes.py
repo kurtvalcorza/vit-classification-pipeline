@@ -305,8 +305,9 @@ def test_vit_m1_upload_outside_colab_cancelled_and_bad_path_are_explained(notebo
         colab.files, google.colab = files, colab
         for name, module in (("google", google), ("google.colab", colab), ("google.colab.files", files)):
             monkeypatch.setitem(sys.modules, name, module)
-        with pytest.raises(Exception, match=message):
+        with pytest.raises(Exception, match=message) as info:
             exec(_section_4(notebook, ""), _section_4_namespace([]))
+        assert type(info.value).__name__ == "RunStopped" and info.value.dimer_stop
 
 
 # --- VIT-m2: quality outcomes are reported verdicts -------------------------------------------------------------
@@ -337,8 +338,8 @@ def test_vit_m2_a_result_at_the_floor_is_recorded_and_does_not_stop_the_notebook
         def adapt(self, *a, **k):
             return {"policy": "frozen backbone + linear probe", "probe_final_loss": 0.1, "history": [{"val": {"accuracy": 0.5}}], "trainable_names": []}
 
-        def evaluate(self, records):
-            return next(scores)
+        def evaluate(self, records, per_record=False):
+            return {**next(scores), "per_record": []}
 
         def save_artifact(self, path, metadata=None):
             Path(path).mkdir(parents=True)
@@ -355,7 +356,7 @@ def test_vit_m2_a_result_at_the_floor_is_recorded_and_does_not_stop_the_notebook
     }
     exec(_cell(notebook, "floor = majority_baseline("), ns)
     assert ns["frozen_verdict"] == "at or below floor" and ns["probe_fingerprint"] == "fp-probe"
-    # Section 8's recorded verdicts are exercised with stand-ins in tests/test_score_once.py (row 108).
+    # Section 8 at the floor (a BYOD set): tests/test_score_once.py::test_f14_a_byod_set_at_the_floor_... (row 108).
 
 
 def test_vit_m2_policy_identity_stays_a_hard_check(notebook):

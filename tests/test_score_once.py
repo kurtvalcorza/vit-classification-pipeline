@@ -146,27 +146,55 @@ def test_a_grid_run_on_another_split_or_with_other_settings_does_not_match():
     assert not grid_check(rows, {**PREREGISTERED_SETTINGS, "epochs": 5}, SPLITS)["complete"]
 
 
-# ---- the reading rule, fixed before any fresh score
-def test_paired_bootstrap_and_verdict():
+# ---- the reading rule (amendment 1): one primary endpoint, observer-cluster bootstrap
+def test_cluster_bootstrap_primary_endpoint_and_verdict():
     rows = [{"id": str(i), "correct": i % 2 == 0, "nll": 0.5} for i in range(96)]
-    same = paired_bootstrap(rows, rows)
-    assert same["accuracy_ci95"] == [0.0, 0.0] and same["n_boot"] == protocol.BOOTSTRAP_N
-    assert reading_verdict(same, same_model=True) == "same model (probe kept)"
+    observers = [f"o{i % 79}" for i in range(96)]
+    same = paired_bootstrap(rows, rows, clusters=observers)
+    assert same["primary_accuracy_ci95"] == [0.0, 0.0] and same["n_clusters"] == 79
+    assert same["resampling_unit"] == "observer" and same["n_boot"] == protocol.BOOTSTRAP_N
+    assert reading_verdict(same, same_model=True) == "same model"
     better = [{**r, "correct": True, "nll": 0.1} for r in rows]
-    boot = paired_bootstrap(better, rows)
-    assert boot["accuracy_ci95"][0] > 0 and reading_verdict(boot, same_model=False) == "unfreeze better"
-    assert reading_verdict(paired_bootstrap(rows, better), same_model=False) == "unfreeze worse"
-    assert paired_bootstrap(better, rows) == boot  # fixed seed: reproducible
+    boot = paired_bootstrap(better, rows, clusters=observers)
+    assert boot["primary_accuracy_ci95"][0] > 0 and reading_verdict(boot, same_model=False) == "improved"
+    assert reading_verdict(paired_bootstrap(rows, better, clusters=observers), same_model=False) == "worse"
+    assert paired_bootstrap(better, rows, clusters=observers) == boot  # fixed seed: reproducible
+    # log-loss is secondary: a log-loss gain alone never makes a verdict
+    lower_nll = [{**r, "nll": 0.1} for r in rows]
+    only_nll = paired_bootstrap(lower_nll, rows, clusters=observers)
+    assert only_nll["secondary_log_loss_ci95"][1] < 0
+    assert reading_verdict(only_nll, same_model=False) == "no detectable difference"
+    three_down = [{**r, "correct": False} if i in (0, 2, 4) else r for i, r in enumerate(rows)]
+    assert reading_verdict(paired_bootstrap(three_down, rows, clusters=observers), same_model=False) == "no detectable difference"
 
 
-# ---- rule items 3 and 5: reproductions and exploratory looks never overwrite
-def test_look_ledger_labels_a_repeat_as_a_reproduction(tmp_path):
-    ledger = LookLedger(tmp_path / "ledger.json")
-    assert ledger.next_look("preregistered") == (protocol.TEST_LOOK_PREREGISTERED, "")
-    assert ledger.next_look("preregistered") == (protocol.TEST_LOOK_REPRODUCTION, "_reproduction_1")
-    assert LookLedger(tmp_path / "ledger.json").next_look("preregistered")[1] == "_reproduction_2"  # survives re-creation
-    assert ledger.next_look("exploratory") == (protocol.TEST_LOOK_EXPLORATORY, "_exploratory_1")
-    assert ledger.next_look("masked")[1] == "_masked_1"
+def test_amendment_1_was_committed_alone_and_states_the_rule():
+    text = (ROOT / "docs" / "vit-preregistration-amendment-1.md").read_text(encoding="utf-8")
+    assert "resampled by observer" in text and "Primary endpoint" in text and "20261017" in text
+    assert "No fresh-test score exists when this is written" in text and "C1" in text
+
+
+# ---- look counting (F2): only completed, written scorings count; outputs decide the slot too
+def test_ledger_plans_without_recording_and_records_after_the_write(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    ledger = LookLedger(tmp_path / "work" / "ledger.json")
+    assert ledger.plan("preregistered") == (protocol.TEST_LOOK_PREREGISTERED, "")
+    assert ledger.plan("preregistered") == (protocol.TEST_LOOK_PREREGISTERED, "")  # planning spends nothing
+    protocol.atomic_write_text(tmp_path / "outputs" / f"{STEM}_evaluation_report.json", "{}")
+    ledger.record("preregistered", "")
+    assert ledger.plan("preregistered") == (protocol.TEST_LOOK_REPRODUCTION, "_reproduction_1")
+    assert ledger.plan("exploratory") == (protocol.TEST_LOOK_EXPLORATORY, "_exploratory_1")
+    assert ledger.plan("masked")[1] == "_masked_1"
+
+
+def test_e1_an_empty_or_corrupt_ledger_does_not_crash(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "work").mkdir()
+    (tmp_path / "work" / "ledger.json").write_text("", encoding="utf-8")
+    ledger = LookLedger(tmp_path / "work" / "ledger.json")
+    assert ledger.plan("preregistered")[1] == "" and ledger.touched() == 1
+    (tmp_path / "work" / "ledger.json").write_text("{not json", encoding="utf-8")
+    assert ledger.plan("exploratory")[1] == "_exploratory_1"
 
 
 def test_recorded_evaluation_is_none_until_the_hosted_run():
@@ -186,16 +214,26 @@ def _cell(marker):
 
 
 class _Pipe:
-    def __init__(self, fingerprint):
+    device = "cpu"
+
+    def __init__(self, fingerprint, accuracy=0.75):
         self.fingerprint = fingerprint
+        self.accuracy = accuracy
         self.evaluated = []
+
+    def knn_baseline(self, train, test, k=5):
+        return {"accuracy": 0.7, "macro_f1": 0.65}
+
+    @classmethod
+    def from_artifact(cls, *a, **k):
+        return cls("fp-probe")
 
     def state_fingerprint(self):
         return self.fingerprint
 
     def evaluate(self, records, per_record=False):
         self.evaluated.append(len(records))
-        out = {"accuracy": 0.75, "macro_f1": 0.7, "log_loss": 0.6, "n": len(records),
+        out = {"accuracy": self.accuracy, "macro_f1": 0.7, "log_loss": 0.6, "n": len(records),
                "per_class": {"a": {"recall": 1.0}, "b": {"recall": 0.5}}, "confusion": [[1, 0], [1, 1]]}
         if per_record:
             out["per_record"] = [{"id": r["id"], "label": r["label"], "predicted": r["label"], "correct": True, "nll": 0.2}
@@ -203,12 +241,12 @@ class _Pipe:
         return out
 
 
-def _namespace(tmp_path, monkeypatch, *, split_seed=42, grid=None, masked=False):
+def _namespace(tmp_path, monkeypatch, *, split_seed=42, grid=None, masked=False, fail_fetch=False):
     import vit_classification_pipeline as pkg
     from vit_classification_pipeline import samples
 
+    (tmp_path / "outputs").mkdir(parents=True)
     monkeypatch.chdir(tmp_path)
-    (tmp_path / "outputs").mkdir()
     if masked:
         monkeypatch.setenv("DIMER_MASK_FRESH_TEST", "1")
     else:
@@ -217,7 +255,9 @@ def _namespace(tmp_path, monkeypatch, *, split_seed=42, grid=None, masked=False)
 
     def fetch_fresh_test(**kwargs):
         fetched.append(kwargs)
-        return [{"id": f"f{i}", "label": "a", "image": i} for i in range(96)]
+        if fail_fetch:
+            raise OSError("network unreachable")
+        return [{"id": f"f{i}", "label": "a" if i % 2 else "b", "image": i, "observer": f"o{i % 79}"} for i in range(96)]
 
     ns = {name: getattr(protocol, name) for name in dir(protocol) if not name.startswith("__")}
     ns.update({name: getattr(samples, name) for name in dir(samples) if not name.startswith("__")})
@@ -233,6 +273,9 @@ def _namespace(tmp_path, monkeypatch, *, split_seed=42, grid=None, masked=False)
                               "test": {"digest": "d-test", "label_counts": {"a": 8, "b": 8}}},
         "grid_rows": rows, "selection": select_config(rows), "pipe": _Pipe("fp-C0"),
         "test_records": [{"id": "t1", "label": "a"}], "val_records": [{"id": "v1", "label": "a"}],
+        "train_records": [{"id": "r1", "label": "a"}, {"id": "r2", "label": "b"}],
+        "ViTClassificationPipeline": _Pipe, "numeric_settings": lambda device: {"device": device, "stand_in": True},
+        "math": __import__("math"),
         "floor": {"accuracy": 0.5, "macro_f1": 0.3}, "baseline_knn": {"accuracy": 0.6, "macro_f1": 0.5,
                                                                       "per_class": {"a": {"recall": 1.0}, "b": {"recall": 0.0}}},
         "frozen_test": {"accuracy": 0.75, "macro_f1": 0.7, "log_loss": 0.6, "per_class": {"a": {"recall": 1.0}, "b": {"recall": 0.5}}},
@@ -246,10 +289,12 @@ def _namespace(tmp_path, monkeypatch, *, split_seed=42, grid=None, masked=False)
     start = settings_cell.index("def current_settings():")
     end = settings_cell.index("\n\ngrid_to_run", start)
     exec(compile(settings_cell[start:end], "current_settings", "exec"), ns)
+    digests = {id(ns["train_records"]): "d-train", id(ns["val_records"]): "d-val"}
+    ns["dataset_digest"] = lambda records: digests.get(id(records), "edited")
     return ns, fetched
 
 
-SECTION_8 = "test_look, look_suffix = LOOK_LEDGER.next_look(mode)"
+SECTION_8 = "test_look, look_suffix = LOOK_LEDGER.plan(mode)"
 
 
 def _report(tmp_path, suffix=""):
@@ -262,12 +307,16 @@ def test_section_8_scores_the_fresh_test_once_and_a_rerun_is_a_reproduction(tmp_
     first = _report(tmp_path)
     assert first["preregistered"] and first["settings_differing"] == []
     assert first["test_look"] == protocol.TEST_LOOK_PREREGISTERED and first["fresh_test"]["scored"]
-    assert first["fresh_test"]["verdict"] == "same model (probe kept)" and len(fetched) == 1
-    assert first["exposed_development_test"]["comparison"]["verdicts"] == {
-        "frozen_vs_floor": "above floor", "selected_vs_floor": "above floor", "selected_vs_frozen_accuracy": "no gain"}
+    assert first["fresh_test"]["verdict"] == "same model" and len(fetched) == 1
+    assert first["fresh_test"]["paired_bootstrap"]["resampling_unit"] == "observer"
+    assert first["fresh_test"]["references_decide_nothing"]["knn5_frozen_base"]["accuracy"] == 0.7
+    assert first["exposed_development_test"]["comparison"]["descriptives_decide_nothing"] == {
+        "frozen_vs_floor": "above floor", "selected_vs_floor": "above floor", "selected_minus_frozen_photographs": 0}
+    assert first["preregistered"] and not first["masked"] and first["fresh_test_scored"] and first["matches_first"] is None
     exec(_cell(SECTION_8), ns)
     again = _report(tmp_path, "_reproduction_1")
     assert again["test_look"] == protocol.TEST_LOOK_REPRODUCTION
+    assert again["matches_first"] == {"first_report_readable": True, "selected_config": True, "fingerprint": True, "per_record_identical": True}
     assert _report(tmp_path) == first  # the first file is never overwritten
 
 
@@ -306,7 +355,9 @@ def test_section_8_masked_for_a_development_check_never_fetches(tmp_path, monkey
     ns, fetched = _namespace(tmp_path, monkeypatch, masked=True)
     exec(_cell(SECTION_8), ns)
     report = _report(tmp_path, "_masked_1")
-    assert report["preregistered"] and report["test_look"] == protocol.TEST_LOOK_MASKED and fetched == []
+    # F3: a masked development check is not a pre-registered scoring
+    assert not report["preregistered"] and report["preregistered_settings_hold"] and report["masked"]
+    assert report["test_look"] == protocol.TEST_LOOK_MASKED and not report["fresh_test_scored"] and fetched == []
 
 
 def test_section_10_makes_later_section_8_runs_exploratory(tmp_path, monkeypatch):
@@ -334,3 +385,70 @@ def test_the_preregistration_was_committed_before_the_code():
     text = (ROOT / "docs" / "vit-preregistration.md").read_text(encoding="utf-8")
     assert FRESH_TEST_DIGEST in text and "72.9 %" in text and "n_boot" in text
     assert re.search(r"C1 \| 4 \| 1e-4", text) and re.search(r"C2 \| 2 \| 3e-4", text)
+
+
+# ---- the reviewer's probe cases E2-E4 (F2) and the library mask (F9)
+def test_e2_losing_work_after_the_first_scoring_never_overwrites_the_main_report(tmp_path, monkeypatch):
+    import shutil
+
+    ns, fetched = _namespace(tmp_path, monkeypatch)
+    exec(_cell(SECTION_8), ns)
+    first = _report(tmp_path)
+    shutil.rmtree(tmp_path / "work")
+    ns["pipe"].accuracy = 0.5
+    exec(_cell(SECTION_8), ns)
+    assert _report(tmp_path) == first
+    assert _report(tmp_path, "_reproduction_1")["test_look"] == protocol.TEST_LOOK_REPRODUCTION
+
+
+def test_e3_a_truncated_main_report_is_rewritten_unless_the_ledger_proves_a_look(tmp_path, monkeypatch):
+    ns, fetched = _namespace(tmp_path, monkeypatch)
+    main = tmp_path / "outputs" / f"{STEM}_evaluation_report.json"
+    main.write_text('{"test_look": "pre-reg', encoding="utf-8")  # an interrupted non-atomic write
+    exec(_cell(SECTION_8), ns)
+    assert _report(tmp_path)["test_look"] == protocol.TEST_LOOK_PREREGISTERED
+    main.write_text("", encoding="utf-8")  # unreadable again, but the ledger now proves a completed look
+    exec(_cell(SECTION_8), ns)
+    assert _report(tmp_path, "_reproduction_1")["test_look"] == protocol.TEST_LOOK_REPRODUCTION
+
+
+def test_e4_a_failed_fetch_is_not_a_look_and_the_next_scoring_is_the_main_report(tmp_path, monkeypatch):
+    ns, fetched = _namespace(tmp_path, monkeypatch, fail_fetch=True)
+    with pytest.raises(OSError):
+        exec(_cell(SECTION_8), ns)
+    assert not list((tmp_path / "outputs").glob("*evaluation_report*"))
+    assert ns["LOOK_LEDGER"].touches() == 1
+    ns2, fetched2 = _namespace(tmp_path / "again", monkeypatch)
+    ns2["LOOK_LEDGER"] = ns["LOOK_LEDGER"].__class__(tmp_path / "work" / "ledger.json", tmp_path / "again" / "outputs")
+    exec(_cell(SECTION_8), ns2)
+    report = _report(tmp_path / "again")
+    assert report["test_look"] == protocol.TEST_LOOK_PREREGISTERED and report["fresh_test_fetches_in_this_runtime"] == 2
+
+
+def test_fetch_fresh_test_itself_refuses_while_masked(monkeypatch):
+    from vit_classification_pipeline import samples
+
+    monkeypatch.setenv("DIMER_MASK_FRESH_TEST", "1")
+    with pytest.raises(RuntimeError, match="masked"):
+        samples.fetch_fresh_test(fetcher=lambda url: pytest.fail("fetched while masked"))
+
+
+def test_edited_training_records_make_the_run_exploratory(tmp_path, monkeypatch):
+    ns, fetched = _namespace(tmp_path, monkeypatch)
+    ns["train_records"] = ns["train_records"][:1]  # F15: edited after Section 4
+    exec(_cell(SECTION_8), ns)
+    report = _report(tmp_path, "_exploratory_1")
+    assert "trained_records" in report["settings_differing"] and fetched == []
+
+
+def test_f14_a_byod_set_at_the_floor_is_exploratory_and_still_writes_its_report(tmp_path, monkeypatch):
+    ns, fetched = _namespace(tmp_path, monkeypatch)
+    ns["USE_BYOD"] = True
+    ns["floor"] = {"accuracy": 0.8, "macro_f1": 0.7}
+    ns["frozen_verdict"] = "at or below floor"
+    ns["pipe"].accuracy = 0.5
+    exec(_cell(SECTION_8), ns)
+    report = _report(tmp_path, "_exploratory_1")
+    assert report["settings_differing"] == ["data_source"] and fetched == []
+    assert report["exposed_development_test"]["comparison"]["descriptives_decide_nothing"] == {
+        "frozen_vs_floor": "at or below floor", "selected_vs_floor": "at or below floor", "selected_minus_frozen_photographs": -0}

@@ -2062,7 +2062,12 @@ def check_fresh_disjoint(
 
 
 def fetch_fresh_test(*, cache_dir: str | Path | None = None, fetcher: Any = None) -> list[dict[str, Any]]:
-    """Fetch, digest-verify and decode the fresh test. Call it only when the fresh test may be scored."""
+    """Fetch, digest-verify and decode the fresh test. Call it only when the fresh test may be scored.
+    Refuses while DIMER_MASK_FRESH_TEST=1 (development checks and CI never load it)."""
+    import os
+
+    if os.environ.get("DIMER_MASK_FRESH_TEST") == "1":
+        raise RuntimeError("the fresh test is masked (DIMER_MASK_FRESH_TEST=1): never fetched or decoded")
     check_fresh_disjoint()
     files = fetch_corpus(cache_dir=cache_dir, fetcher=fetcher, records=FRESH_TEST_RECORDS)
     return read_corpus(files, records=FRESH_TEST_RECORDS)

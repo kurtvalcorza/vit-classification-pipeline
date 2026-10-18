@@ -65,6 +65,7 @@ TEST_LOOK_PREREGISTERED = "pre-registered evaluation (this runtime)"
 TEST_LOOK_REPRODUCTION = "reproduction of the pre-registered evaluation"
 TEST_LOOK_EXPLORATORY = "not scored (exploratory)"
 TEST_LOOK_MASKED = "not scored (fresh test masked for a development check)"
+UNIFORM_LOG_LOSS_6 = 1.7918  # ln 6: the log-loss of a uniform guess over the six species (a reference point)
 
 
 def preregistration_differences(current: Mapping[str, Any]) -> list[str]:
@@ -183,40 +184,55 @@ def paired_bootstrap(
     selected: Sequence[Mapping[str, Any]],
     frozen: Sequence[Mapping[str, Any]],
     *,
+    clusters: Sequence[Any] | None = None,
     n_boot: int = BOOTSTRAP_N,
     seed: int = BOOTSTRAP_SEED,
 ) -> dict[str, Any]:
-    """Paired bootstrap over images of (selected - frozen probe) in accuracy and log-loss, 95 % percentile CI."""
+    """Paired bootstrap of (selected - frozen probe), 95 % percentile CIs. Amendment 1 (2026-10-18): on the fresh
+    test the resampling unit is the OBSERVER (`clusters`, one entry per image), so photographs by one observer move
+    together. Accuracy difference = primary endpoint; log-loss difference = secondary, never part of the verdict.
+    Without `clusters` every image is its own cluster (used only for the selection-time look on validation)."""
     if [r["id"] for r in selected] != [r["id"] for r in frozen]:
         raise ValueError("the two systems must be scored on the same images in the same order")
     d_acc = np.array([float(a["correct"]) - float(b["correct"]) for a, b in zip(selected, frozen, strict=True)])
     d_nll = np.array([a["nll"] - b["nll"] for a, b in zip(selected, frozen, strict=True)])
+    labels = list(clusters) if clusters is not None else list(range(len(d_acc)))
+    if len(labels) != len(d_acc):
+        raise ValueError("one cluster label per image is required")
+    order = sorted(set(labels), key=str)
+    index = {c: i for i, c in enumerate(order)}
+    cl = np.array([index[c] for c in labels])
+    count = np.bincount(cl, minlength=len(order)).astype(float)
+    sum_acc = np.bincount(cl, weights=d_acc, minlength=len(order))
+    sum_nll = np.bincount(cl, weights=d_nll, minlength=len(order))
     rng = np.random.default_rng(seed)
-    idx = rng.integers(0, len(d_acc), size=(n_boot, len(d_acc)))
-    acc, nll = d_acc[idx].mean(axis=1), d_nll[idx].mean(axis=1)
+    draw = rng.integers(0, len(order), size=(n_boot, len(order)))
+    n_draw = count[draw].sum(axis=1)
+    acc = sum_acc[draw].sum(axis=1) / n_draw
+    nll = sum_nll[draw].sum(axis=1) / n_draw
     return {
         "n_images": len(d_acc),
+        "n_clusters": len(order),
+        "resampling_unit": "observer" if clusters is not None else "image",
         "n_boot": n_boot,
         "seed": seed,
-        "accuracy_difference": float(d_acc.mean()),
-        "accuracy_ci95": [float(np.percentile(acc, 2.5)), float(np.percentile(acc, 97.5))],
-        "log_loss_difference": float(d_nll.mean()),
-        "log_loss_ci95": [float(np.percentile(nll, 2.5)), float(np.percentile(nll, 97.5))],
+        "primary_accuracy_difference": float(d_acc.mean()),
+        "primary_accuracy_ci95": [float(np.percentile(acc, 2.5)), float(np.percentile(acc, 97.5))],
+        "discordant_images": {"selected_only": int((d_acc > 0).sum()), "probe_only": int((d_acc < 0).sum())},
+        "secondary_log_loss_difference": float(d_nll.mean()),
+        "secondary_log_loss_ci95": [float(np.percentile(nll, 2.5)), float(np.percentile(nll, 97.5))],
     }
 
 
 def reading_verdict(boot: Mapping[str, Any], *, same_model: bool) -> str:
-    """The pre-registered verdict, read from the CIs only."""
+    """Amendment 1 verdict, from the primary accuracy CI only."""
     if same_model:
-        return "same model (probe kept)"
-    acc_lo, acc_hi = boot["accuracy_ci95"]
-    nll_lo, nll_hi = boot["log_loss_ci95"]
-    better = acc_lo > 0 or nll_hi < 0
-    worse = acc_hi < 0 or nll_lo > 0
-    if better and not worse:
-        return "unfreeze better"
-    if worse and not better:
-        return "unfreeze worse"
+        return "same model"
+    low, high = boot["primary_accuracy_ci95"]
+    if low > 0:
+        return "improved"
+    if high < 0:
+        return "worse"
     return "no detectable difference"
 
 
@@ -227,28 +243,92 @@ def scoring_mode(*, differences: Sequence[str], grid: Mapping[str, Any], state_m
     return "masked" if masked else "preregistered"
 
 
-class LookLedger:
-    """Counts scorings in this runtime (on disk, so re-running a cell or Section 4 does not reset it)."""
+def atomic_write_text(path: str | Path, text: str) -> Path:
+    """Write via a temporary file and os.replace: a reader never sees a half-written file."""
+    import os
 
-    def __init__(self, path: str | Path) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f"{path.name}.tmp-{os.getpid()}")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)
+    return path
+
+
+def read_json_or_none(path: str | Path) -> Any:
+    """The parsed file, or None when it is missing, empty or unreadable."""
+    try:
+        return json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+class LookLedger:
+    """Counts fresh-test scorings in this runtime, crash-safely (row 108 F2).
+
+    A look is recorded only by `record()`, after the report is safely on disk; `touched()` marks a fetch that started.
+    Whether the pre-registered slot is spent is decided from the outputs themselves as well as the ledger: a readable
+    main report means every later scoring is a reproduction, even if `work/` was lost; a missing or unreadable main
+    report is (re)written unless the ledger proves a completed look. A corrupt ledger reads as empty.
+    """
+
+    def __init__(self, path: str | Path, outputs_dir: str | Path = "outputs", stem: str = "vit_classification") -> None:
         self.path = Path(path)
+        self.outputs = Path(outputs_dir)
+        self.stem = stem
 
     def _load(self) -> dict[str, int]:
-        if self.path.is_file():
-            return {k: int(v) for k, v in json.loads(self.path.read_text(encoding="utf-8")).items()}
-        return {}
+        data = read_json_or_none(self.path)
+        if not isinstance(data, dict):
+            return {}
+        return {k: int(v) for k, v in data.items() if isinstance(v, int | float)}
 
-    def next_look(self, mode: str) -> tuple[str, str]:
-        """(test_look, file suffix) for the next scoring of kind `mode`, and record it."""
+    def _save(self, counts: Mapping[str, int]) -> None:
+        atomic_write_text(self.path, json.dumps(dict(counts)))
+
+    @property
+    def main_report(self) -> Path:
+        return self.outputs / f"{self.stem}_evaluation_report.json"
+
+    def _highest(self, kind: str) -> int:
+        import re
+
+        pattern = re.compile(rf"^{re.escape(self.stem)}_evaluation_report_{kind}_(\d+)\.json$")
+        found = [int(m.group(1)) for f in (self.outputs.glob("*.json") if self.outputs.is_dir() else [])
+                 if (m := pattern.match(f.name))]
+        return max(found, default=0)
+
+    def plan(self, mode: str) -> tuple[str, str]:
+        """(test_look, file suffix) for a scoring of kind `mode`. Records nothing."""
         if mode not in ("preregistered", "exploratory", "masked"):
             raise ValueError(f"unknown scoring mode {mode!r}")
         counts = self._load()
-        n = counts.get(mode, 0)
-        counts[mode] = n + 1
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.path.write_text(json.dumps(counts), encoding="utf-8")
         if mode == "preregistered":
-            return (TEST_LOOK_PREREGISTERED, "") if n == 0 else (TEST_LOOK_REPRODUCTION, f"_reproduction_{n}")
-        if mode == "masked":
-            return TEST_LOOK_MASKED, f"_masked_{n + 1}"
-        return TEST_LOOK_EXPLORATORY, f"_exploratory_{n + 1}"
+            if read_json_or_none(self.main_report) is not None or counts.get("preregistered_completed", 0) > 0:
+                n = max(self._highest("reproduction"), counts.get("reproductions", 0)) + 1
+                return TEST_LOOK_REPRODUCTION, f"_reproduction_{n}"
+            return TEST_LOOK_PREREGISTERED, ""
+        n = max(self._highest(mode), counts.get(mode, 0)) + 1
+        return (TEST_LOOK_MASKED if mode == "masked" else TEST_LOOK_EXPLORATORY), f"_{mode}_{n}"
+
+    def touched(self) -> int:
+        """Mark that a fresh-test fetch started (an aborted scoring stays visible). Returns the running count."""
+        counts = self._load()
+        counts["fresh_test_touched"] = counts.get("fresh_test_touched", 0) + 1
+        self._save(counts)
+        return counts["fresh_test_touched"]
+
+    def touches(self) -> int:
+        return self._load().get("fresh_test_touched", 0)
+
+    def record(self, mode: str, suffix: str) -> None:
+        """Count a completed scoring; call it only after its report is on disk."""
+        counts = self._load()
+        if mode == "preregistered":
+            if suffix == "":
+                counts["preregistered_completed"] = counts.get("preregistered_completed", 0) + 1
+            else:
+                counts["reproductions"] = max(counts.get("reproductions", 0), int(suffix.rsplit("_", 1)[1]))
+        else:
+            counts[mode] = max(counts.get(mode, 0), int(suffix.rsplit("_", 1)[1]))
+        self._save(counts)
