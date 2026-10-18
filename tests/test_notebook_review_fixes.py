@@ -200,7 +200,8 @@ def test_vit_m3_guided_layer_is_present(notebook):
 
 def test_vit_m3_infrastructure_cells_are_labelled_and_collapsed(notebook):
     infra = [c for c in _code_cells(notebook) if c["metadata"].get("cellView") == "form"]
-    assert len([c for c in infra if c["metadata"].get("dimer", {}).get("embedded_module")]) == 3
+    # pipeline, metrics, samples and (row 108) protocol
+    assert len([c for c in infra if c["metadata"].get("dimer", {}).get("embedded_module")]) == 4
     titled = [c["source"].splitlines()[0] for c in infra if not c["metadata"].get("dimer")]
     assert len(titled) == 3 and all(t.startswith("# @title Infrastructure:") for t in titled), titled
 
@@ -265,9 +266,10 @@ def _section_4(notebook: dict, path: str) -> str:
 def _section_4_namespace(restored: list) -> dict:
     from vit_classification_pipeline import metrics as mt
     from vit_classification_pipeline import pipeline as pl
+    from vit_classification_pipeline import protocol as pr
 
     ns = {}
-    for module in (pl, mt, sm):
+    for module in (pl, mt, sm, pr):
         ns.update({k: getattr(module, k) for k in dir(module) if not k.startswith("__")})
     pipe = types.SimpleNamespace(adapter={"policy": "x"}, restore_base=lambda: restored.append(True) or ["a"])
     ns.update({"os": __import__("os"), "Path": Path, "pipe": pipe, "__name__": "__main__"})
@@ -290,9 +292,12 @@ def test_vit_m1_byod_path_runs_section_4_outside_colab_from_the_base(notebook, t
 def test_vit_m1_upload_outside_colab_cancelled_and_bad_path_are_explained(notebook, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setitem(sys.modules, "google", None)
-    with pytest.raises(RuntimeError, match="upload dialog exists only in Google Colab"):
-        exec(_section_4(notebook, ""), _section_4_namespace([]))
-    with pytest.raises(FileNotFoundError, match="BYOD_PATH 'nowhere.zip' does not exist"):
+    # Row 108 (DAT20): every refusal is one RunStopped message ("BYOD refused, ...") that the router shows
+    # without a traceback, and the run stays invalid.
+    with pytest.raises(Exception, match="BYOD refused.*upload dialog exists only in Google Colab") as info:
+        exec(_section_4(notebook, ""), ns := _section_4_namespace([]))
+    assert type(info.value).__name__ == "RunStopped" and info.value.dimer_stop and ns["RUN_VALID"] is False
+    with pytest.raises(Exception, match="BYOD refused.*BYOD_PATH 'nowhere.zip' does not exist"):
         exec(_section_4(notebook, "nowhere.zip"), _section_4_namespace([]))
     for uploaded, message in (({}, "received 0"), ({"a.zip": b"", "b.zip": b""}, "received 2")):
         google, colab, files = (types.ModuleType(n) for n in ("google", "google.colab", "google.colab.files"))
@@ -300,8 +305,9 @@ def test_vit_m1_upload_outside_colab_cancelled_and_bad_path_are_explained(notebo
         colab.files, google.colab = files, colab
         for name, module in (("google", google), ("google.colab", colab), ("google.colab.files", files)):
             monkeypatch.setitem(sys.modules, name, module)
-        with pytest.raises(ValueError, match=message):
+        with pytest.raises(Exception, match=message) as info:
             exec(_section_4(notebook, ""), _section_4_namespace([]))
+        assert type(info.value).__name__ == "RunStopped" and info.value.dimer_stop
 
 
 # --- VIT-m2: quality outcomes are reported verdicts -------------------------------------------------------------
@@ -332,20 +338,25 @@ def test_vit_m2_a_result_at_the_floor_is_recorded_and_does_not_stop_the_notebook
         def adapt(self, *a, **k):
             return {"policy": "frozen backbone + linear probe", "probe_final_loss": 0.1, "history": [{"val": {"accuracy": 0.5}}], "trainable_names": []}
 
-        def evaluate(self, records):
-            return next(scores)
+        def evaluate(self, records, per_record=False):
+            return {**next(scores), "per_record": []}
+
+        def save_artifact(self, path, metadata=None):
+            Path(path).mkdir(parents=True)
+
+        def state_fingerprint(self):
+            return "fp-probe"
 
     ns = {
+        "RUN_VALID": True, "RunStopped": RuntimeError, "Path": Path, "shutil": __import__("shutil"),
         "pipe": StandIn(), "train_records": [{"label": "cat"}], "val_records": [], "test_records": [{"label": "cat"}, {"label": "dog"}], "time": __import__("time"), "json": json,
         "majority_baseline": lambda *a: _m(0.5), "classes": ["cat", "dog"],
         "MODEL_ID": "stand-in", "MODEL_REVISION": "0" * 40, "MODEL_KEY": "stand-in", "data_source": "stand-in", "dataset_manifests": {"test": {"digest": "d"}},
         "disjoint": {}, "overlap": {}, "adapt_result": {"policy": "frozen backbone + linear probe", "history": []}, "adapt_seconds": 0.0,
     }
     exec(_cell(notebook, "floor = majority_baseline("), ns)
-    assert ns["frozen_verdict"] == "at or below floor"
-    exec(_cell(notebook, "adapted_test = pipe.evaluate(test_records)"), ns)
-    verdicts = json.loads((tmp_path / "outputs" / f"{STEM}_evaluation_report.json").read_text(encoding="utf-8"))["comparison"]["verdicts"]
-    assert verdicts == {"frozen_vs_floor": "at or below floor", "selected_vs_floor": "at or below floor", "selected_vs_frozen_accuracy": "worse"}
+    assert ns["frozen_verdict"] == "at or below floor" and ns["probe_fingerprint"] == "fp-probe"
+    # Section 8 at the floor (a BYOD set): tests/test_score_once.py::test_f14_a_byod_set_at_the_floor_... (row 108).
 
 
 def test_vit_m2_policy_identity_stays_a_hard_check(notebook):

@@ -1848,6 +1848,115 @@ SAMPLE_RECORDS: tuple[tuple[str, str, int, int, str, int, str, str], ...] = (
         "jpeg",
     ),
 )
+# The fresh test (owner ruling R108-D1, 2026-10-17; docs/vit-preregistration.md, docs/fresh-test-draw.json):
+# 16 photographs per species from the fleet 360-photograph table (siglip2-vision-language-pipeline
+# src/siglip2_pipeline/samples.py at FRESH_TEST_SOURCE_REVISION), not among the 180 above, from observers
+# who contribute nothing to the 180, in ascending photo id. This model never scored them; six other fleet
+# repositories allocate them in their own splits. Same tuple layout as SAMPLE_RECORDS.
+FRESH_TEST_SOURCE = "kurtvalcorza/siglip2-vision-language-pipeline src/siglip2_pipeline/samples.py"
+FRESH_TEST_SOURCE_REVISION = "4fe334864548adcbc18d4173d0e1d38ce2991259"
+FRESH_TEST_BYTES = 10_659_247
+# FRESH_TEST_DIGEST: sha256 of the "<photo id>:<bytes>:<sha256>" lines (fresh_test_digest)
+FRESH_TEST_DIGEST = "01fffe006c19d873bdcb379e6345f3f8219490340a76ca8e42a68ff19e9dda84"
+FRESH_TEST_RECORDS: tuple[tuple[str, str, int, int, str, int, str, str], ...] = (
+    ("fresh-american_goldfinch-00", "american_goldfinch", 3279608, 2872951, "joed", 115964, "c2f1463bfef4c9b157f7e3ebd33fa37570592a4cdfa276f2b7c673f543cbc3ca", "jpeg"),  # noqa: E501
+    ("fresh-american_goldfinch-01", "american_goldfinch", 7669539, 6125334, "cuihenggang", 61287, "36d9570131caf33f3b5cfa6ab99a26c417e7cd8e38d0c1351d1a2938bb6e9bf9", "jpeg"),  # noqa: E501
+    ("fresh-american_goldfinch-02", "american_goldfinch", 9258865, 7182023, "fake_id", 151987, "131d2a52097c9ab18fad318b62e8213c1bd33acddc72065ec0e404c76220c5ee", "jpeg"),  # noqa: E501
+    ("fresh-american_goldfinch-03", "american_goldfinch", 12222432, 9054511, "myacadianforest", 107758, "69b1b5274d74bb28601afc2758e57a88f8d63743b5410c70284a9f4877c721fb", "jpeg"),  # noqa: E501
+    ("fresh-american_goldfinch-04", "american_goldfinch", 98669936, 61655828, "cloaca_enthusiast", 31964, "3ddcb2e2e6863ef08a40fae7640e05b36ccec9fab9892ac494f095c4588b746f", "jpg"),  # noqa: E501
+    ("fresh-american_goldfinch-05", "american_goldfinch", 99106353, 61899131, "thyg", 50544, "0272bf89b379c2689247f1dbd6f4b36d7f197898baad91d7a8ebdf1c87f88fbd", "jpg"),  # noqa: E501
+    ("fresh-american_goldfinch-06", "american_goldfinch", 118140282, 72458899, "melaniegaddy", 243713, "a3d70061032ac8c665f3d17a9118c8e592d53a3669182b23b502e3573a80d8f8", "jpg"),  # noqa: E501
+    ("fresh-american_goldfinch-07", "american_goldfinch", 118530525, 72675993, "seanwashington1", 38505, "d688edde61a079907cdf5011a32914432f8f7f35c12d355e308aae29b1988738", "jpeg"),  # noqa: E501
+    ("fresh-american_goldfinch-08", "american_goldfinch", 121016576, 74071097, "geenance", 110180, "fb4d1fef09311949043b3c9edc0d3a85d4c20386346093bb6ea39e1b95f756b9", "jpeg"),  # noqa: E501
+    ("fresh-american_goldfinch-09", "american_goldfinch", 128301260, 78400716, "natepow", 67416, "0c988080a47484802806ef14e0d1fdb9205680eacecedbe24f8bbac2aa2873f9", "jpg"),  # noqa: E501
+    ("fresh-american_goldfinch-10", "american_goldfinch", 129842959, 79296314, "nartb", 117002, "f23b2e68f4c10e2679f0a9fe2f34a894bd2deea9c90c2143462e0aa5a83a3daa", "jpg"),  # noqa: E501
+    ("fresh-american_goldfinch-11", "american_goldfinch", 194724999, 115367030, "vlatassa", 159105, "c456a23238f8f81f93df7919b92dd3fa0123fa16a875c22ec1f9d0ae6ef17324", "jpeg"),  # noqa: E501
+    ("fresh-american_goldfinch-12", "american_goldfinch", 219478221, 129171341, "cgmayers", 96993, "93bdee27bb526b60e0edfa518a923b3c10c41ba57221d6a23f4de15bf4a91600", "jpeg"),  # noqa: E501
+    ("fresh-american_goldfinch-13", "american_goldfinch", 223110598, 131133187, "marissa3", 89214, "6a2bb601ac3a70e80e6ccb33d4a24af43128d1e7afe3e92d42e803234bdf532e", "jpg"),  # noqa: E501
+    ("fresh-american_goldfinch-14", "american_goldfinch", 276388190, 159958623, "dianeclark6280", 39786, "284ca7c9e814fede2c5a15e427a46d7dd82fa6984c4c862c380b0dddff2f86db", "jpg"),  # noqa: E501
+    ("fresh-american_goldfinch-15", "american_goldfinch", 291016386, 167956837, "samallonthesciencemon", 128110, "489934bec3eb5682067cca11cb210c171198e616bb4920753b48bb0e1480bc32", "jpg"),  # noqa: E501
+    ("fresh-chipping_sparrow-00", "chipping_sparrow", 8076820, 6402608, "msieges", 166588, "6c379f94141a0bcdeb8c9743ea140ded50f8c7864baecd6cef0ee1c724b9fd80", "jpeg"),  # noqa: E501
+    ("fresh-chipping_sparrow-01", "chipping_sparrow", 27976676, 18310312, "schoenitz", 66424, "64a0186d15abaf1537a34bd329b67625f7580b7aa544dded6bc626dd389b72fe", "jpg"),  # noqa: E501
+    ("fresh-chipping_sparrow-02", "chipping_sparrow", 72765715, 45879059, "henryfrye", 146855, "f0b957698f5a600e3a6c45471848013f9c74d1602895e40d513e2116a9b7320a", "jpg"),  # noqa: E501
+    ("fresh-chipping_sparrow-03", "chipping_sparrow", 74100878, 46721618, "aredmer", 132045, "ce6f4d4324d684cfc0f40d6fe9c4a2b03a7024080e7448083ae7e3fc0c06ac6e", "jpg"),  # noqa: E501
+    ("fresh-chipping_sparrow-04", "chipping_sparrow", 81287617, 51172999, "thyg", 55659, "e1f075addb4bd1feea3ab256e37945a464d2e8c77768b7be131d0655382268d7", "jpg"),  # noqa: E501
+    ("fresh-chipping_sparrow-05", "chipping_sparrow", 131917390, 80486493, "tom_lazar", 137355, "10ab0a9c5af2ca2203a18e4e3df799dcf129494d7b637a3c46ffdcf0f3b3856c", "jpeg"),  # noqa: E501
+    ("fresh-chipping_sparrow-06", "chipping_sparrow", 141348323, 85865218, "j-dehoog", 71473, "d3fae9ca7f515c43c216d749f085231d19ddfd101bd37cc4ffae25fc946a34fb", "jpeg"),  # noqa: E501
+    ("fresh-chipping_sparrow-07", "chipping_sparrow", 147992761, 89606238, "benkeen", 461732, "8b6e8f03650c270624ebf82f85dd0b37db3e693157d4d3d7a1787c855846da9d", "png"),  # noqa: E501
+    ("fresh-chipping_sparrow-08", "chipping_sparrow", 184174664, 109291439, "chrismcv", 91566, "c5d9a1dbaf1fad839680c417c7be7d4a680396e38e7c2aba0ee78fd213f7d32c", "jpeg"),  # noqa: E501
+    ("fresh-chipping_sparrow-09", "chipping_sparrow", 190706448, 112884695, "jbeusmans", 109296, "1777945eeb6f916ec6f9c0dc10c81014e8dc0ba22d87268e7c7dc1173193b1e6", "jpeg"),  # noqa: E501
+    ("fresh-chipping_sparrow-10", "chipping_sparrow", 207498409, 122551474, "askalotl", 98446, "d84e28017be8142c22758e59f14b8c52990e79584a68e6f929123aab4997ac68", "jpeg"),  # noqa: E501
+    ("fresh-chipping_sparrow-11", "chipping_sparrow", 434553038, 243681621, "stariplativky", 57489, "e253bd9d70dea9d0438b795f6bebcbc2b26c48b16a90729f0d3155695fa812fd", "jpg"),  # noqa: E501
+    ("fresh-chipping_sparrow-12", "chipping_sparrow", 503555630, 280377982, "jtdavis05", 42352, "24ccb474659505cd785502295f385ec369a36c6248296aff85261ed3475a4372", "jpeg"),  # noqa: E501
+    ("fresh-chipping_sparrow-13", "chipping_sparrow", 509135437, 283351340, "martyndrabik", 125948, "1604bf4f5512207c59637a84c78842285c40f76a4cf5335bf6d39afe896ed03c", "jpg"),  # noqa: E501
+    ("fresh-chipping_sparrow-14", "chipping_sparrow", 535714979, 297462154, "dissectedfrog", 200498, "cd2f2e1be8c76240a1eeff9535e9a60b8f4fb9d771c7e487d65cde48b7e24cf6", "jpg"),  # noqa: E501
+    ("fresh-chipping_sparrow-15", "chipping_sparrow", 546647394, 303298450, "kzoebel", 86457, "c37a4aff4263de570ca82f94de92f82d9f9711922e5880547af836104f1883df", "jpg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-00", "dark_eyed_junco", 6485959, 5243663, "fake_id", 148254, "ce4dab6c5b37b7ebac07f69d4040d4686fea9fd4b753f91bdf15a3a440820712", "jpg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-01", "dark_eyed_junco", 11110817, 8359397, "giselle9", 71741, "b2e74f27ddca8d1e6dd4807251b07867cbfec8b6bf51d93ef7f142109f705520", "jpeg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-02", "dark_eyed_junco", 102027986, 63561089, "michaelnaumoff", 114346, "eccaa3c60fe575e28fc60f8f6896a99065bff4aee0a4fdc057d7220e7870ca4d", "jpg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-03", "dark_eyed_junco", 109385584, 67667584, "ninetoes", 64185, "64e9ee29cf017c292e1711b4c6482488a74c8f652e88e8b7c1df883dc91d75e2", "jpg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-04", "dark_eyed_junco", 116078128, 71308227, "msieges", 47042, "ecd4ade5abf058ac887fabe2706eb021ada3b9ab083d10728c9b1dc26de56bbc", "jpeg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-05", "dark_eyed_junco", 117580446, 72145931, "hewwowhy", 67000, "1a8ca3be627c192459440c2eb07bd85b348f0e876a7de32bfc6fe0fb2959a618", "jpg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-06", "dark_eyed_junco", 240712071, 140608440, "saintaardvark", 129995, "94c4dc30ca31804d6645a6be802cf87ccaffe974f0d3cb554b4fb3e9696ec6a5", "jpg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-07", "dark_eyed_junco", 242909841, 141750179, "calinsdad", 61773, "c49c5d22969552de0fc04ff95eefb8a2ffc76df528477b93c2e2c38cdebe8f6c", "jpg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-08", "dark_eyed_junco", 256191686, 148740024, "nartb", 194532, "e88b1449a989fc62c5da1c592e4987fa4db71eadf1ef29c0c5c1159b8f77a298", "jpg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-09", "dark_eyed_junco", 267851501, 154986181, "shanebustapbj", 203657, "217002a366779db0ccc3fddffa71e79472b1fcaa5d444049971dac4c31c910f5", "jpeg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-10", "dark_eyed_junco", 268597047, 155389350, "j-dehoog", 54916, "c0890844944f3d603f8220b0a75213051766c6a45b2ba1fed51381134832f69f", "jpeg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-11", "dark_eyed_junco", 509902416, 283764048, "loarie", 271588, "0c1e3897caca8ff3ff4f3eff7548e30ca50dfe2c2c972106303f9e21c259dbda", "jpg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-12", "dark_eyed_junco", 515881506, 286951393, "jubileej", 108221, "9cbecae915f1c96dcc31d5fd77cb5902181152cc3b918693191cc11fce18822c", "jpg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-13", "dark_eyed_junco", 518407567, 288278997, "zzphantom", 231733, "de2a5be329b583911babe0758c9ce8c0982191f743b8082eb826623256709f71", "jpg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-14", "dark_eyed_junco", 625101518, 343192310, "jtdavis05", 106387, "4642076ebc5e9bcde85dbba65eb16a49d3fabe6c82cc707b4863ad4b7a4531ae", "jpg"),  # noqa: E501
+    ("fresh-dark_eyed_junco-15", "dark_eyed_junco", 627787858, 344552039, "margohj", 54717, "a41e557077525b064fa16a7c0b140d608d323663519cfbf424f4454d79951244", "jpg"),  # noqa: E501
+    ("fresh-house_finch-00", "house_finch", 14590841, 10492098, "silvercat", 120515, "23934e0376c70dd6d5ce5e9a24c4176291c877432d25257f07e27694495c879a", "jpeg"),  # noqa: E501
+    ("fresh-house_finch-01", "house_finch", 17763955, 12337763, "jennifer510", 167368, "35355c603049fdf21fc3bf1fed827b50740cfdba134542707026bb4e1f32149b", "jpeg"),  # noqa: E501
+    ("fresh-house_finch-02", "house_finch", 83824778, 52720178, "beesbirdsbugs", 48816, "72731eb63fa9c5058f9911d11be929af9a58cfea805159d54010e9095948c39a", "jpg"),  # noqa: E501
+    ("fresh-house_finch-03", "house_finch", 124702263, 76228853, "janeyair", 162431, "5c86d7cbd28e09d44814735f1e0a21e8266bd4e6a4396b047d092d2f5f3f2111", "jpeg"),  # noqa: E501
+    ("fresh-house_finch-04", "house_finch", 125605349, 76831730, "sarahangulo", 60174, "236eb345f1cf1ab4c82fb3b2cc48b948e614f8ddfd958c87a62ce5b44a04f080", "jpeg"),  # noqa: E501
+    ("fresh-house_finch-05", "house_finch", 134287410, 81854554, "omcelroy", 90394, "6b4a5ea4c8aa1722332ccdf420af0ca0906cfdb87348e9f6c0904d5a92d8c203", "jpg"),  # noqa: E501
+    ("fresh-house_finch-06", "house_finch", 134699271, 82117365, "seanwashington1", 35334, "d6e0fe4a8cc690fd6369deff8ea67f4810e1f1297a6f1b9f125aae905742db2a", "jpeg"),  # noqa: E501
+    ("fresh-house_finch-07", "house_finch", 205914234, 121669780, "darylnolan", 44763, "c04e8d7c002ad0038dcb62843e776ffb8fc86f425c2399442dd1653bbaa4b904", "jpeg"),  # noqa: E501
+    ("fresh-house_finch-08", "house_finch", 269729570, 156011712, "kbkash", 59048, "3af407624c46ba4218d24a198ed22b812d4967380bd0e7f67e960f7fbb2defe7", "jpeg"),  # noqa: E501
+    ("fresh-house_finch-09", "house_finch", 296347840, 170825854, "susanaber", 96563, "47832989fc212f19631e55b63c23155817209c40c66af49e4e03e42863243770", "jpeg"),  # noqa: E501
+    ("fresh-house_finch-10", "house_finch", 341357046, 194221751, "haconra", 80643, "8e11937a5c6d5a47da47f562d52d4089d58ad3f2adefadc287b30c562c7ece85", "jpg"),  # noqa: E501
+    ("fresh-house_finch-11", "house_finch", 349400403, 198261102, "paulgraham", 105965, "b0d1f556ee4926e6a6f87201f6b73955dd9c530788e0ce57d5e09ced74ede001", "jpeg"),  # noqa: E501
+    ("fresh-house_finch-12", "house_finch", 404592864, 228025269, "logan_artz", 78971, "d0cf631b138d199951d96538903eeb1b56e3b8da3f28c7b042d8868060f27a44", "jpeg"),  # noqa: E501
+    ("fresh-house_finch-13", "house_finch", 484652323, 269544283, "robinlanark", 29863, "a1d6e8ffbcef10a83a2d3674c7228af89f8d39297f44cd569d1e031da02bc516", "jpeg"),  # noqa: E501
+    ("fresh-house_finch-14", "house_finch", 514877896, 286416757, "jubileej", 153667, "26cd596525a244d2ba82ec2d575834c15671080814400cf7862f614c0db68d07", "jpg"),  # noqa: E501
+    ("fresh-house_finch-15", "house_finch", 515309527, 286632225, "solunasilver", 29507, "72a6b495ed99de80504c6b1a86ac1fbfc9e5736bc6f43274bd6093cc91f9ea05", "jpg"),  # noqa: E501
+    ("fresh-song_sparrow-00", "song_sparrow", 4251416, 3670620, "swells", 49271, "8c53fa5c02e603227117293720d269c59a13555abd537a83640210805fbd844d", "JPG"),  # noqa: E501
+    ("fresh-song_sparrow-01", "song_sparrow", 118498513, 72671334, "seanwashington1", 80800, "940762ff238d94815922d06051ca00fe4a025279b1da08921a44733084adcdb6", "jpeg"),  # noqa: E501
+    ("fresh-song_sparrow-02", "song_sparrow", 118804811, 72823547, "heibudas", 191643, "8dbe5a56d5fea83b6c25257aa0f9e552ea971f1e0311f583691d24fc9668556f", "jpeg"),  # noqa: E501
+    ("fresh-song_sparrow-03", "song_sparrow", 119696805, 73327300, "rambryum", 68983, "65f7007d6b90654b77b7f4ec0557ff2d0f310c572368cb3492dd69f9d082e90d", "jpeg"),  # noqa: E501
+    ("fresh-song_sparrow-04", "song_sparrow", 130188079, 79482300, "fake_id", 180462, "1d9ad7b45536b85d46fa0fd9a29d4a8ae828bc223836796a3eb9df1fe8fe4fc4", "jpeg"),  # noqa: E501
+    ("fresh-song_sparrow-05", "song_sparrow", 136405967, 83075831, "tom_lazar", 178554, "f86c3c5899d20ac8fb73afb76d45666c610245636d7285a6d517b0081b9d6cc9", "jpeg"),  # noqa: E501
+    ("fresh-song_sparrow-06", "song_sparrow", 139129879, 84639025, "wewantashrubbery", 104736, "aabbffe279d90ffdf737175cc720bea92d634483b830c90acecf920901419643", "jpg"),  # noqa: E501
+    ("fresh-song_sparrow-07", "song_sparrow", 270614122, 156495271, "radkins21", 92783, "7bf8ceb5944de93cbf01aebe4d464b9acb848569c07fbe6e732b701d309f0b25", "jpg"),  # noqa: E501
+    ("fresh-song_sparrow-08", "song_sparrow", 280724703, 162358184, "shirleymorrison", 43015, "f64af9b3fc4559f251ba0f1e95bf8889bfa629123586532adeb2b81e4c2871b2", "jpg"),  # noqa: E501
+    ("fresh-song_sparrow-09", "song_sparrow", 303954368, 174929167, "dianeclark6280", 157478, "14446920b7c55472de3b172f417fbbeac312090add7356a3c947cfb16911dc95", "png"),  # noqa: E501
+    ("fresh-song_sparrow-10", "song_sparrow", 392544542, 221653008, "emckenziewhat", 138683, "7fd2f3ad3c835e541a7c720372d662a8f953f88f4d8223864a03e4b0f70a42d3", "jpeg"),  # noqa: E501
+    ("fresh-song_sparrow-11", "song_sparrow", 478733235, 266446909, "saintaardvark", 298253, "d3c8d3a58b44d28c6af4748e4e4195a9a2af7dc6fe91541429dc44aa3a659d21", "jpg"),  # noqa: E501
+    ("fresh-song_sparrow-12", "song_sparrow", 531314531, 295151228, "steveplumb", 128710, "8806861909c0833b29f43b10e9428e104deaccb99d41b42039b76f7da0ae4600", "jpg"),  # noqa: E501
+    ("fresh-song_sparrow-13", "song_sparrow", 583754170, 322666295, "rociherrera", 97743, "5e093fc6d59b13bbd7ee0889613cef115ef7bb14432634d0af753a8124951737", "jpg"),  # noqa: E501
+    ("fresh-song_sparrow-14", "song_sparrow", 623006598, 342147975, "ryman56", 60213, "73e18df350a69ce00158f03c7ec4fda8672539e0a7292b75f1dfa22dbec7ee30", "jpg"),  # noqa: E501
+    ("fresh-song_sparrow-15", "song_sparrow", 641009256, 351278414, "robinlanark", 49640, "e4af33fd4a504a876b6e7a111a5024cf4197fc888c90f2039df63e9be13d5f06", "jpg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-00", "white_throated_sparrow", 6236370, 5078910, "ruggedbynature", 126403, "3d6030593bf57bc5734fd6c0706c1e350bb117a32370a16b194ef4488668f123", "jpeg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-01", "white_throated_sparrow", 7072170, 5706496, "jmutter", 171582, "de90ea2739e8c65ca89f0e511abaf44219501e18377eb49d9e5c7f10d3a6d5b2", "jpeg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-02", "white_throated_sparrow", 7149657, 5761350, "bradleysaul", 108304, "adf755b8393fb6b4db99e788d4112c2c72197c33ecffeec2ca7b3ba5dd9d650e", "jpg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-03", "white_throated_sparrow", 16303076, 11431253, "robw", 61348, "e7d81cfe027c7b0914c79a0431f0ce1431db1ebe78368a2fe5f31e2aab59c3c7", "jpg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-04", "white_throated_sparrow", 32221828, 20882923, "christinan", 132485, "b92ce41128bb1c5b53a0c487b46ba80eea83b9a443ee9c72f100005e5d80e411", "jpeg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-05", "white_throated_sparrow", 36598789, 23643589, "jessm-c", 45861, "eda75171590418596e372c6cba058364acb64f1279d250dff6c5df61fa17868b", "jpeg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-06", "white_throated_sparrow", 67630852, 42591255, "schoenitz", 138616, "34594c49a4f601b17e49dfc4d4098db7b73ff5a69d3830b773378e4d695ff181", "jpg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-07", "white_throated_sparrow", 109241547, 67591707, "blkillin", 130154, "e5b8c1caa0f7cc7926d46eac42df582ccb0882b4a0733fc0740b8b4597a4e014", "jpeg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-08", "white_throated_sparrow", 162150240, 97493574, "c_burns802", 188464, "0fb2fb2e04bca82c436315b77a974adc665d2d1fb4e419dd61afa068ab412254", "jpeg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-09", "white_throated_sparrow", 165146429, 99107203, "philippthompson", 84518, "8582544ca8b3cb1c73174fc42a9d66971fdae0c90cd4739083eb4ef4983eb6e7", "jpeg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-10", "white_throated_sparrow", 177451999, 105722646, "natepow", 44983, "c81a68c46264d1a5fcae3042e7ab24653c3615665cef6293c31622d5f342d840", "jpg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-11", "white_throated_sparrow", 364738073, 205369541, "sandra1142", 144424, "4cd383751871426904f4d8ff7526a312ba33a6c894faf7121c6ec0ff6ce0d7b1", "jpeg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-12", "white_throated_sparrow", 370403033, 209307218, "kuykenwil", 124312, "d0700068b06ad0f79eeac331a92e5d633bd76be264c3d8801a9a6eb301193969", "jpg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-13", "white_throated_sparrow", 374502828, 211884837, "halliefromcali", 62476, "0073652fddd7378dc936f280c18d7e44c4a7160aadc2f051e7b5e2896b1a476c", "jpg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-14", "white_throated_sparrow", 500790892, 278893388, "quillipede", 186273, "0db918123c7f529ca76c04129886eb9aeb947bd3e90cdfd968c4605931c16f85", "jpeg"),  # noqa: E501
+    ("fresh-white_throated_sparrow-15", "white_throated_sparrow", 622732944, 342010560, "tom_lazar", 34257, "584070c4b5231db49087d1507aabec8f51adc4e09dcdda8b93b3a78159d47146", "jpg"),  # noqa: E501
+)
+
 SAMPLE_SEED = 42
 SAMPLE_SPLIT = {"train": 18, "validation": 4, "test": 8}  # per species; 6 species -> 108 / 24 / 48
 MIN_RECORDS = 8
@@ -1863,9 +1972,14 @@ def _sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+SERVED_EXTENSIONS = ("jpg", "jpeg", "png", "gif", "webp")  # case-insensitive; URL keeps case
+
+
 def photo_url(photo_id: int, ext: str = "jpg") -> str:
-    """The served object for a pinned photo; `ext` is its recorded original extension (jpg or jpeg)."""
-    if ext not in ("jpg", "jpeg"):
+    """The served object for a pinned photo. `ext` is its recorded original extension exactly as the bucket
+    serves it (case-sensitive: the pinned tables hold jpg, jpeg, JPG and png); the size and SHA-256 pins, not
+    the extension, decide whether the bytes are accepted."""
+    if not isinstance(ext, str) or ext.lower() not in SERVED_EXTENSIONS or not ext.isalpha():
         raise ValueError(f"unsupported photo extension {ext!r}")
     return f"{CORPUS_BASE_URL}{photo_id}/medium.{ext}"
 
@@ -1874,12 +1988,17 @@ def observation_url(observation_id: int) -> str:
     return f"https://www.inaturalist.org/observations/{observation_id}"
 
 
-def fetch_corpus(*, cache_dir: str | Path | None = None, fetcher: Any = None) -> dict[str, bytes]:
+def fetch_corpus(
+    *,
+    cache_dir: str | Path | None = None,
+    fetcher: Any = None,
+    records: Sequence[Sequence[Any]] | None = None,
+) -> dict[str, bytes]:
     """Return every pinned photo (bytes keyed by record id) from the cache or the open-data bucket."""
     cache = Path(cache_dir) if cache_dir is not None else DEFAULT_CACHE_DIR
     cache.mkdir(parents=True, exist_ok=True)
     out = {}
-    for rid, _label, photo_id, _obs, _user, size, digest, ext in SAMPLE_RECORDS:
+    for rid, _label, photo_id, _obs, _user, size, digest, ext in records or SAMPLE_RECORDS:
         local = cache / f"{photo_id}.jpg"
         data = local.read_bytes() if local.is_file() else b""
         if len(data) != size or _sha256_bytes(data) != digest:
@@ -1900,10 +2019,12 @@ def fetch_corpus(*, cache_dir: str | Path | None = None, fetcher: Any = None) ->
     return out
 
 
-def read_corpus(files: Mapping[str, bytes]) -> list[dict[str, Any]]:
+def read_corpus(
+    files: Mapping[str, bytes], *, records: Sequence[Sequence[Any]] | None = None
+) -> list[dict[str, Any]]:
     """Decode the verified photo bytes into `{id, image, label}` records with their provenance."""
     out = []
-    for rid, label, photo_id, obs_id, user, _size, _digest, _ext in SAMPLE_RECORDS:
+    for rid, label, photo_id, obs_id, user, _size, _digest, _ext in records or SAMPLE_RECORDS:
         if rid not in files:
             raise ValueError(f"corpus is missing {rid}")
         image = Image.open(io.BytesIO(files[rid]))
@@ -1921,6 +2042,40 @@ def read_corpus(files: Mapping[str, bytes]) -> list[dict[str, Any]]:
             }
         )
     return out
+
+
+def fresh_test_digest(records: Sequence[Sequence[Any]] = FRESH_TEST_RECORDS) -> str:
+    """The selection digest of a pinned table: sha256 over "<photo id>:<bytes>:<sha256>" lines in order."""
+    return _sha256_bytes("\n".join(f"{r[2]}:{r[5]}:{r[6]}" for r in records).encode("utf-8"))
+
+
+def check_fresh_disjoint(
+    fresh: Sequence[Sequence[Any]] = FRESH_TEST_RECORDS, corpus: Sequence[Sequence[Any]] = SAMPLE_RECORDS
+) -> dict[str, Any]:
+    """Static disjointness of the fresh table from the 180 (no download): photos, observations, observers."""
+    shared = {
+        "photos": len({r[2] for r in fresh} & {r[2] for r in corpus}),
+        "observations": len({r[3] for r in fresh} & {r[3] for r in corpus}),
+        "observers": len({r[4] for r in fresh} & {r[4] for r in corpus}),
+    }
+    digest = fresh_test_digest(fresh)
+    out = {"n": len(fresh), "shared_with_corpus": shared, "digest": digest}
+    out["digest_pinned"] = digest == FRESH_TEST_DIGEST
+    if any(shared.values()) or not out["digest_pinned"]:
+        raise ValueError(f"the fresh test is not the pinned, disjoint table: {out}")
+    return out
+
+
+def fetch_fresh_test(*, cache_dir: str | Path | None = None, fetcher: Any = None) -> list[dict[str, Any]]:
+    """Fetch, digest-verify and decode the fresh test. Call it only when the fresh test may be scored.
+    Refuses while DIMER_MASK_FRESH_TEST=1 (development checks and CI never load it)."""
+    import os
+
+    if os.environ.get("DIMER_MASK_FRESH_TEST") == "1":
+        raise RuntimeError("the fresh test is masked (DIMER_MASK_FRESH_TEST=1): never fetched or decoded")
+    check_fresh_disjoint()
+    files = fetch_corpus(cache_dir=cache_dir, fetcher=fetcher, records=FRESH_TEST_RECORDS)
+    return read_corpus(files, records=FRESH_TEST_RECORDS)
 
 
 def build_sample_dataset(

@@ -150,8 +150,11 @@ def test_pinned_record_table_is_complete_and_traceable():
         "https://inaturalist-open-data.s3.amazonaws.com/photos/"
     )
     assert sm.photo_url(1, "jpeg").endswith("/1/medium.jpeg") and sm.photo_url(1).endswith("/1/medium.jpg")
-    with pytest.raises(ValueError, match="extension"):
-        sm.photo_url(1, "png")
+    assert sm.photo_url(1, "png").endswith("/1/medium.png")
+    assert sm.photo_url(1, "JPG").endswith("/1/medium.JPG")
+    for bad in ("bmp", "../x", "", "jp g"):
+        with pytest.raises(ValueError, match="extension"):
+            sm.photo_url(1, bad)
     assert sum(r[5] for r in SAMPLE_RECORDS) == sm.CORPUS_BYTES
     assert sum(SAMPLE_SPLIT.values()) == 30 and set(SAMPLE_SPLIT) == {"train", "validation", "test"}
 

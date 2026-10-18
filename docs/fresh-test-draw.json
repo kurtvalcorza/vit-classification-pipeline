@@ -1,0 +1,1400 @@
+{
+ "rule": "R108-D1 (2026-10-17): 16 per species from the fleet 360-photograph table minus the 180, observers absent from the 180 only, ascending photo id, digest-verified, near-duplicate screened",
+ "pool": {
+  "repo": "kurtvalcorza/siglip2-vision-language-pipeline",
+  "path": "src/siglip2_pipeline/samples.py",
+  "revision": "4fe334864548adcbc18d4173d0e1d38ce2991259",
+  "n_records": 360
+ },
+ "per_species": 16,
+ "counts": {
+  "american_goldfinch": {
+   "pool_not_in_180": 33,
+   "new_observer_candidates": 24,
+   "drawn": 16
+  },
+  "chipping_sparrow": {
+   "pool_not_in_180": 35,
+   "new_observer_candidates": 29,
+   "drawn": 16
+  },
+  "dark_eyed_junco": {
+   "pool_not_in_180": 30,
+   "new_observer_candidates": 21,
+   "drawn": 16
+  },
+  "house_finch": {
+   "pool_not_in_180": 41,
+   "new_observer_candidates": 27,
+   "drawn": 16
+  },
+  "song_sparrow": {
+   "pool_not_in_180": 30,
+   "new_observer_candidates": 20,
+   "drawn": 16
+  },
+  "white_throated_sparrow": {
+   "pool_not_in_180": 31,
+   "new_observer_candidates": 20,
+   "drawn": 16
+  }
+ },
+ "near_duplicate_screen": {
+  "hamming_threshold": 10,
+  "dhash_bits": 64,
+  "skipped": [],
+  "closest_kept": {
+   "fresh-american_goldfinch-00": {
+    "nearest": "chipping_sparrow-03",
+    "hamming": 14
+   },
+   "fresh-american_goldfinch-01": {
+    "nearest": "dark_eyed_junco-05",
+    "hamming": 21
+   },
+   "fresh-american_goldfinch-02": {
+    "nearest": "house_finch-27",
+    "hamming": 21
+   },
+   "fresh-american_goldfinch-03": {
+    "nearest": "house_finch-16",
+    "hamming": 20
+   },
+   "fresh-american_goldfinch-04": {
+    "nearest": "white_throated_sparrow-13",
+    "hamming": 20
+   },
+   "fresh-american_goldfinch-05": {
+    "nearest": "dark_eyed_junco-04",
+    "hamming": 20
+   },
+   "fresh-american_goldfinch-06": {
+    "nearest": "white_throated_sparrow-08",
+    "hamming": 20
+   },
+   "fresh-american_goldfinch-07": {
+    "nearest": "american_goldfinch-00",
+    "hamming": 17
+   },
+   "fresh-american_goldfinch-08": {
+    "nearest": "american_goldfinch-00",
+    "hamming": 19
+   },
+   "fresh-american_goldfinch-09": {
+    "nearest": "chipping_sparrow-09",
+    "hamming": 18
+   },
+   "fresh-american_goldfinch-10": {
+    "nearest": "song_sparrow-23",
+    "hamming": 18
+   },
+   "fresh-american_goldfinch-11": {
+    "nearest": "dark_eyed_junco-10",
+    "hamming": 20
+   },
+   "fresh-american_goldfinch-12": {
+    "nearest": "white_throated_sparrow-00",
+    "hamming": 22
+   },
+   "fresh-american_goldfinch-13": {
+    "nearest": "song_sparrow-22",
+    "hamming": 20
+   },
+   "fresh-american_goldfinch-14": {
+    "nearest": "song_sparrow-11",
+    "hamming": 20
+   },
+   "fresh-american_goldfinch-15": {
+    "nearest": "dark_eyed_junco-17",
+    "hamming": 19
+   },
+   "fresh-chipping_sparrow-00": {
+    "nearest": "white_throated_sparrow-24",
+    "hamming": 19
+   },
+   "fresh-chipping_sparrow-01": {
+    "nearest": "song_sparrow-16",
+    "hamming": 22
+   },
+   "fresh-chipping_sparrow-02": {
+    "nearest": "dark_eyed_junco-19",
+    "hamming": 22
+   },
+   "fresh-chipping_sparrow-03": {
+    "nearest": "chipping_sparrow-16",
+    "hamming": 19
+   },
+   "fresh-chipping_sparrow-04": {
+    "nearest": "chipping_sparrow-20",
+    "hamming": 20
+   },
+   "fresh-chipping_sparrow-05": {
+    "nearest": "song_sparrow-11",
+    "hamming": 22
+   },
+   "fresh-chipping_sparrow-06": {
+    "nearest": "white_throated_sparrow-24",
+    "hamming": 17
+   },
+   "fresh-chipping_sparrow-07": {
+    "nearest": "white_throated_sparrow-19",
+    "hamming": 22
+   },
+   "fresh-chipping_sparrow-08": {
+    "nearest": "american_goldfinch-11",
+    "hamming": 19
+   },
+   "fresh-chipping_sparrow-09": {
+    "nearest": "american_goldfinch-02",
+    "hamming": 18
+   },
+   "fresh-chipping_sparrow-10": {
+    "nearest": "chipping_sparrow-07",
+    "hamming": 19
+   },
+   "fresh-chipping_sparrow-11": {
+    "nearest": "dark_eyed_junco-06",
+    "hamming": 21
+   },
+   "fresh-chipping_sparrow-12": {
+    "nearest": "dark_eyed_junco-07",
+    "hamming": 19
+   },
+   "fresh-chipping_sparrow-13": {
+    "nearest": "chipping_sparrow-15",
+    "hamming": 20
+   },
+   "fresh-chipping_sparrow-14": {
+    "nearest": "dark_eyed_junco-04",
+    "hamming": 20
+   },
+   "fresh-chipping_sparrow-15": {
+    "nearest": "dark_eyed_junco-15",
+    "hamming": 20
+   },
+   "fresh-dark_eyed_junco-00": {
+    "nearest": "dark_eyed_junco-26",
+    "hamming": 19
+   },
+   "fresh-dark_eyed_junco-01": {
+    "nearest": "white_throated_sparrow-17",
+    "hamming": 19
+   },
+   "fresh-dark_eyed_junco-02": {
+    "nearest": "chipping_sparrow-12",
+    "hamming": 18
+   },
+   "fresh-dark_eyed_junco-03": {
+    "nearest": "american_goldfinch-18",
+    "hamming": 19
+   },
+   "fresh-dark_eyed_junco-04": {
+    "nearest": "fresh-american_goldfinch-07",
+    "hamming": 19
+   },
+   "fresh-dark_eyed_junco-05": {
+    "nearest": "house_finch-02",
+    "hamming": 20
+   },
+   "fresh-dark_eyed_junco-06": {
+    "nearest": "song_sparrow-04",
+    "hamming": 21
+   },
+   "fresh-dark_eyed_junco-07": {
+    "nearest": "american_goldfinch-14",
+    "hamming": 19
+   },
+   "fresh-dark_eyed_junco-08": {
+    "nearest": "american_goldfinch-07",
+    "hamming": 22
+   },
+   "fresh-dark_eyed_junco-09": {
+    "nearest": "white_throated_sparrow-07",
+    "hamming": 18
+   },
+   "fresh-dark_eyed_junco-10": {
+    "nearest": "fresh-chipping_sparrow-00",
+    "hamming": 18
+   },
+   "fresh-dark_eyed_junco-11": {
+    "nearest": "song_sparrow-09",
+    "hamming": 18
+   },
+   "fresh-dark_eyed_junco-12": {
+    "nearest": "american_goldfinch-19",
+    "hamming": 22
+   },
+   "fresh-dark_eyed_junco-13": {
+    "nearest": "chipping_sparrow-19",
+    "hamming": 20
+   },
+   "fresh-dark_eyed_junco-14": {
+    "nearest": "american_goldfinch-24",
+    "hamming": 15
+   },
+   "fresh-dark_eyed_junco-15": {
+    "nearest": "dark_eyed_junco-25",
+    "hamming": 18
+   },
+   "fresh-house_finch-00": {
+    "nearest": "fresh-dark_eyed_junco-08",
+    "hamming": 19
+   },
+   "fresh-house_finch-01": {
+    "nearest": "white_throated_sparrow-01",
+    "hamming": 20
+   },
+   "fresh-house_finch-02": {
+    "nearest": "american_goldfinch-06",
+    "hamming": 20
+   },
+   "fresh-house_finch-03": {
+    "nearest": "house_finch-05",
+    "hamming": 18
+   },
+   "fresh-house_finch-04": {
+    "nearest": "white_throated_sparrow-02",
+    "hamming": 19
+   },
+   "fresh-house_finch-05": {
+    "nearest": "house_finch-26",
+    "hamming": 20
+   },
+   "fresh-house_finch-06": {
+    "nearest": "american_goldfinch-24",
+    "hamming": 18
+   },
+   "fresh-house_finch-07": {
+    "nearest": "song_sparrow-10",
+    "hamming": 22
+   },
+   "fresh-house_finch-08": {
+    "nearest": "fresh-dark_eyed_junco-11",
+    "hamming": 21
+   },
+   "fresh-house_finch-09": {
+    "nearest": "fresh-house_finch-02",
+    "hamming": 21
+   },
+   "fresh-house_finch-10": {
+    "nearest": "song_sparrow-04",
+    "hamming": 23
+   },
+   "fresh-house_finch-11": {
+    "nearest": "fresh-house_finch-10",
+    "hamming": 21
+   },
+   "fresh-house_finch-12": {
+    "nearest": "fresh-chipping_sparrow-06",
+    "hamming": 15
+   },
+   "fresh-house_finch-13": {
+    "nearest": "american_goldfinch-13",
+    "hamming": 16
+   },
+   "fresh-house_finch-14": {
+    "nearest": "fresh-house_finch-04",
+    "hamming": 21
+   },
+   "fresh-house_finch-15": {
+    "nearest": "house_finch-07",
+    "hamming": 21
+   },
+   "fresh-song_sparrow-00": {
+    "nearest": "fresh-house_finch-13",
+    "hamming": 21
+   },
+   "fresh-song_sparrow-01": {
+    "nearest": "house_finch-28",
+    "hamming": 14
+   },
+   "fresh-song_sparrow-02": {
+    "nearest": "chipping_sparrow-21",
+    "hamming": 20
+   },
+   "fresh-song_sparrow-03": {
+    "nearest": "house_finch-15",
+    "hamming": 19
+   },
+   "fresh-song_sparrow-04": {
+    "nearest": "song_sparrow-03",
+    "hamming": 20
+   },
+   "fresh-song_sparrow-05": {
+    "nearest": "house_finch-23",
+    "hamming": 21
+   },
+   "fresh-song_sparrow-06": {
+    "nearest": "chipping_sparrow-08",
+    "hamming": 22
+   },
+   "fresh-song_sparrow-07": {
+    "nearest": "song_sparrow-08",
+    "hamming": 22
+   },
+   "fresh-song_sparrow-08": {
+    "nearest": "fresh-chipping_sparrow-04",
+    "hamming": 17
+   },
+   "fresh-song_sparrow-09": {
+    "nearest": "american_goldfinch-12",
+    "hamming": 20
+   },
+   "fresh-song_sparrow-10": {
+    "nearest": "house_finch-21",
+    "hamming": 19
+   },
+   "fresh-song_sparrow-11": {
+    "nearest": "fresh-house_finch-07",
+    "hamming": 18
+   },
+   "fresh-song_sparrow-12": {
+    "nearest": "white_throated_sparrow-15",
+    "hamming": 21
+   },
+   "fresh-song_sparrow-13": {
+    "nearest": "american_goldfinch-20",
+    "hamming": 16
+   },
+   "fresh-song_sparrow-14": {
+    "nearest": "fresh-house_finch-04",
+    "hamming": 18
+   },
+   "fresh-song_sparrow-15": {
+    "nearest": "american_goldfinch-13",
+    "hamming": 16
+   },
+   "fresh-white_throated_sparrow-00": {
+    "nearest": "house_finch-12",
+    "hamming": 23
+   },
+   "fresh-white_throated_sparrow-01": {
+    "nearest": "house_finch-23",
+    "hamming": 18
+   },
+   "fresh-white_throated_sparrow-02": {
+    "nearest": "white_throated_sparrow-13",
+    "hamming": 17
+   },
+   "fresh-white_throated_sparrow-03": {
+    "nearest": "chipping_sparrow-15",
+    "hamming": 19
+   },
+   "fresh-white_throated_sparrow-04": {
+    "nearest": "fresh-house_finch-13",
+    "hamming": 14
+   },
+   "fresh-white_throated_sparrow-05": {
+    "nearest": "chipping_sparrow-10",
+    "hamming": 23
+   },
+   "fresh-white_throated_sparrow-06": {
+    "nearest": "white_throated_sparrow-03",
+    "hamming": 19
+   },
+   "fresh-white_throated_sparrow-07": {
+    "nearest": "fresh-chipping_sparrow-04",
+    "hamming": 20
+   },
+   "fresh-white_throated_sparrow-08": {
+    "nearest": "fresh-american_goldfinch-02",
+    "hamming": 20
+   },
+   "fresh-white_throated_sparrow-09": {
+    "nearest": "song_sparrow-06",
+    "hamming": 19
+   },
+   "fresh-white_throated_sparrow-10": {
+    "nearest": "chipping_sparrow-13",
+    "hamming": 21
+   },
+   "fresh-white_throated_sparrow-11": {
+    "nearest": "chipping_sparrow-23",
+    "hamming": 22
+   },
+   "fresh-white_throated_sparrow-12": {
+    "nearest": "fresh-dark_eyed_junco-07",
+    "hamming": 21
+   },
+   "fresh-white_throated_sparrow-13": {
+    "nearest": "white_throated_sparrow-13",
+    "hamming": 19
+   },
+   "fresh-white_throated_sparrow-14": {
+    "nearest": "white_throated_sparrow-15",
+    "hamming": 19
+   },
+   "fresh-white_throated_sparrow-15": {
+    "nearest": "fresh-white_throated_sparrow-04",
+    "hamming": 16
+   }
+  }
+ },
+ "n_records": 96,
+ "bytes": 10659247,
+ "distinct_observers": 79,
+ "selection_digest": "01fffe006c19d873bdcb379e6345f3f8219490340a76ca8e42a68ff19e9dda84",
+ "selection_digest_rule": "sha256 over '<photo id>:<bytes>:<sha256>' lines in record order, joined by newlines",
+ "records": [
+  {
+   "id": "fresh-american_goldfinch-00",
+   "label": "american_goldfinch",
+   "photo_id": 3279608,
+   "observation_id": 2872951,
+   "observer": "joed",
+   "bytes": 115964,
+   "sha256": "c2f1463bfef4c9b157f7e3ebd33fa37570592a4cdfa276f2b7c673f543cbc3ca",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-american_goldfinch-01",
+   "label": "american_goldfinch",
+   "photo_id": 7669539,
+   "observation_id": 6125334,
+   "observer": "cuihenggang",
+   "bytes": 61287,
+   "sha256": "36d9570131caf33f3b5cfa6ab99a26c417e7cd8e38d0c1351d1a2938bb6e9bf9",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-american_goldfinch-02",
+   "label": "american_goldfinch",
+   "photo_id": 9258865,
+   "observation_id": 7182023,
+   "observer": "fake_id",
+   "bytes": 151987,
+   "sha256": "131d2a52097c9ab18fad318b62e8213c1bd33acddc72065ec0e404c76220c5ee",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-american_goldfinch-03",
+   "label": "american_goldfinch",
+   "photo_id": 12222432,
+   "observation_id": 9054511,
+   "observer": "myacadianforest",
+   "bytes": 107758,
+   "sha256": "69b1b5274d74bb28601afc2758e57a88f8d63743b5410c70284a9f4877c721fb",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-american_goldfinch-04",
+   "label": "american_goldfinch",
+   "photo_id": 98669936,
+   "observation_id": 61655828,
+   "observer": "cloaca_enthusiast",
+   "bytes": 31964,
+   "sha256": "3ddcb2e2e6863ef08a40fae7640e05b36ccec9fab9892ac494f095c4588b746f",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-american_goldfinch-05",
+   "label": "american_goldfinch",
+   "photo_id": 99106353,
+   "observation_id": 61899131,
+   "observer": "thyg",
+   "bytes": 50544,
+   "sha256": "0272bf89b379c2689247f1dbd6f4b36d7f197898baad91d7a8ebdf1c87f88fbd",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-american_goldfinch-06",
+   "label": "american_goldfinch",
+   "photo_id": 118140282,
+   "observation_id": 72458899,
+   "observer": "melaniegaddy",
+   "bytes": 243713,
+   "sha256": "a3d70061032ac8c665f3d17a9118c8e592d53a3669182b23b502e3573a80d8f8",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-american_goldfinch-07",
+   "label": "american_goldfinch",
+   "photo_id": 118530525,
+   "observation_id": 72675993,
+   "observer": "seanwashington1",
+   "bytes": 38505,
+   "sha256": "d688edde61a079907cdf5011a32914432f8f7f35c12d355e308aae29b1988738",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-american_goldfinch-08",
+   "label": "american_goldfinch",
+   "photo_id": 121016576,
+   "observation_id": 74071097,
+   "observer": "geenance",
+   "bytes": 110180,
+   "sha256": "fb4d1fef09311949043b3c9edc0d3a85d4c20386346093bb6ea39e1b95f756b9",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-american_goldfinch-09",
+   "label": "american_goldfinch",
+   "photo_id": 128301260,
+   "observation_id": 78400716,
+   "observer": "natepow",
+   "bytes": 67416,
+   "sha256": "0c988080a47484802806ef14e0d1fdb9205680eacecedbe24f8bbac2aa2873f9",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-american_goldfinch-10",
+   "label": "american_goldfinch",
+   "photo_id": 129842959,
+   "observation_id": 79296314,
+   "observer": "nartb",
+   "bytes": 117002,
+   "sha256": "f23b2e68f4c10e2679f0a9fe2f34a894bd2deea9c90c2143462e0aa5a83a3daa",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-american_goldfinch-11",
+   "label": "american_goldfinch",
+   "photo_id": 194724999,
+   "observation_id": 115367030,
+   "observer": "vlatassa",
+   "bytes": 159105,
+   "sha256": "c456a23238f8f81f93df7919b92dd3fa0123fa16a875c22ec1f9d0ae6ef17324",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-american_goldfinch-12",
+   "label": "american_goldfinch",
+   "photo_id": 219478221,
+   "observation_id": 129171341,
+   "observer": "cgmayers",
+   "bytes": 96993,
+   "sha256": "93bdee27bb526b60e0edfa518a923b3c10c41ba57221d6a23f4de15bf4a91600",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-american_goldfinch-13",
+   "label": "american_goldfinch",
+   "photo_id": 223110598,
+   "observation_id": 131133187,
+   "observer": "marissa3",
+   "bytes": 89214,
+   "sha256": "6a2bb601ac3a70e80e6ccb33d4a24af43128d1e7afe3e92d42e803234bdf532e",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-american_goldfinch-14",
+   "label": "american_goldfinch",
+   "photo_id": 276388190,
+   "observation_id": 159958623,
+   "observer": "dianeclark6280",
+   "bytes": 39786,
+   "sha256": "284ca7c9e814fede2c5a15e427a46d7dd82fa6984c4c862c380b0dddff2f86db",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-american_goldfinch-15",
+   "label": "american_goldfinch",
+   "photo_id": 291016386,
+   "observation_id": 167956837,
+   "observer": "samallonthesciencemon",
+   "bytes": 128110,
+   "sha256": "489934bec3eb5682067cca11cb210c171198e616bb4920753b48bb0e1480bc32",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-chipping_sparrow-00",
+   "label": "chipping_sparrow",
+   "photo_id": 8076820,
+   "observation_id": 6402608,
+   "observer": "msieges",
+   "bytes": 166588,
+   "sha256": "6c379f94141a0bcdeb8c9743ea140ded50f8c7864baecd6cef0ee1c724b9fd80",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-chipping_sparrow-01",
+   "label": "chipping_sparrow",
+   "photo_id": 27976676,
+   "observation_id": 18310312,
+   "observer": "schoenitz",
+   "bytes": 66424,
+   "sha256": "64a0186d15abaf1537a34bd329b67625f7580b7aa544dded6bc626dd389b72fe",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-chipping_sparrow-02",
+   "label": "chipping_sparrow",
+   "photo_id": 72765715,
+   "observation_id": 45879059,
+   "observer": "henryfrye",
+   "bytes": 146855,
+   "sha256": "f0b957698f5a600e3a6c45471848013f9c74d1602895e40d513e2116a9b7320a",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-chipping_sparrow-03",
+   "label": "chipping_sparrow",
+   "photo_id": 74100878,
+   "observation_id": 46721618,
+   "observer": "aredmer",
+   "bytes": 132045,
+   "sha256": "ce6f4d4324d684cfc0f40d6fe9c4a2b03a7024080e7448083ae7e3fc0c06ac6e",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-chipping_sparrow-04",
+   "label": "chipping_sparrow",
+   "photo_id": 81287617,
+   "observation_id": 51172999,
+   "observer": "thyg",
+   "bytes": 55659,
+   "sha256": "e1f075addb4bd1feea3ab256e37945a464d2e8c77768b7be131d0655382268d7",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-chipping_sparrow-05",
+   "label": "chipping_sparrow",
+   "photo_id": 131917390,
+   "observation_id": 80486493,
+   "observer": "tom_lazar",
+   "bytes": 137355,
+   "sha256": "10ab0a9c5af2ca2203a18e4e3df799dcf129494d7b637a3c46ffdcf0f3b3856c",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-chipping_sparrow-06",
+   "label": "chipping_sparrow",
+   "photo_id": 141348323,
+   "observation_id": 85865218,
+   "observer": "j-dehoog",
+   "bytes": 71473,
+   "sha256": "d3fae9ca7f515c43c216d749f085231d19ddfd101bd37cc4ffae25fc946a34fb",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-chipping_sparrow-07",
+   "label": "chipping_sparrow",
+   "photo_id": 147992761,
+   "observation_id": 89606238,
+   "observer": "benkeen",
+   "bytes": 461732,
+   "sha256": "8b6e8f03650c270624ebf82f85dd0b37db3e693157d4d3d7a1787c855846da9d",
+   "ext": "png"
+  },
+  {
+   "id": "fresh-chipping_sparrow-08",
+   "label": "chipping_sparrow",
+   "photo_id": 184174664,
+   "observation_id": 109291439,
+   "observer": "chrismcv",
+   "bytes": 91566,
+   "sha256": "c5d9a1dbaf1fad839680c417c7be7d4a680396e38e7c2aba0ee78fd213f7d32c",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-chipping_sparrow-09",
+   "label": "chipping_sparrow",
+   "photo_id": 190706448,
+   "observation_id": 112884695,
+   "observer": "jbeusmans",
+   "bytes": 109296,
+   "sha256": "1777945eeb6f916ec6f9c0dc10c81014e8dc0ba22d87268e7c7dc1173193b1e6",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-chipping_sparrow-10",
+   "label": "chipping_sparrow",
+   "photo_id": 207498409,
+   "observation_id": 122551474,
+   "observer": "askalotl",
+   "bytes": 98446,
+   "sha256": "d84e28017be8142c22758e59f14b8c52990e79584a68e6f929123aab4997ac68",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-chipping_sparrow-11",
+   "label": "chipping_sparrow",
+   "photo_id": 434553038,
+   "observation_id": 243681621,
+   "observer": "stariplativky",
+   "bytes": 57489,
+   "sha256": "e253bd9d70dea9d0438b795f6bebcbc2b26c48b16a90729f0d3155695fa812fd",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-chipping_sparrow-12",
+   "label": "chipping_sparrow",
+   "photo_id": 503555630,
+   "observation_id": 280377982,
+   "observer": "jtdavis05",
+   "bytes": 42352,
+   "sha256": "24ccb474659505cd785502295f385ec369a36c6248296aff85261ed3475a4372",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-chipping_sparrow-13",
+   "label": "chipping_sparrow",
+   "photo_id": 509135437,
+   "observation_id": 283351340,
+   "observer": "martyndrabik",
+   "bytes": 125948,
+   "sha256": "1604bf4f5512207c59637a84c78842285c40f76a4cf5335bf6d39afe896ed03c",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-chipping_sparrow-14",
+   "label": "chipping_sparrow",
+   "photo_id": 535714979,
+   "observation_id": 297462154,
+   "observer": "dissectedfrog",
+   "bytes": 200498,
+   "sha256": "cd2f2e1be8c76240a1eeff9535e9a60b8f4fb9d771c7e487d65cde48b7e24cf6",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-chipping_sparrow-15",
+   "label": "chipping_sparrow",
+   "photo_id": 546647394,
+   "observation_id": 303298450,
+   "observer": "kzoebel",
+   "bytes": 86457,
+   "sha256": "c37a4aff4263de570ca82f94de92f82d9f9711922e5880547af836104f1883df",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-00",
+   "label": "dark_eyed_junco",
+   "photo_id": 6485959,
+   "observation_id": 5243663,
+   "observer": "fake_id",
+   "bytes": 148254,
+   "sha256": "ce4dab6c5b37b7ebac07f69d4040d4686fea9fd4b753f91bdf15a3a440820712",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-01",
+   "label": "dark_eyed_junco",
+   "photo_id": 11110817,
+   "observation_id": 8359397,
+   "observer": "giselle9",
+   "bytes": 71741,
+   "sha256": "b2e74f27ddca8d1e6dd4807251b07867cbfec8b6bf51d93ef7f142109f705520",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-02",
+   "label": "dark_eyed_junco",
+   "photo_id": 102027986,
+   "observation_id": 63561089,
+   "observer": "michaelnaumoff",
+   "bytes": 114346,
+   "sha256": "eccaa3c60fe575e28fc60f8f6896a99065bff4aee0a4fdc057d7220e7870ca4d",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-03",
+   "label": "dark_eyed_junco",
+   "photo_id": 109385584,
+   "observation_id": 67667584,
+   "observer": "ninetoes",
+   "bytes": 64185,
+   "sha256": "64e9ee29cf017c292e1711b4c6482488a74c8f652e88e8b7c1df883dc91d75e2",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-04",
+   "label": "dark_eyed_junco",
+   "photo_id": 116078128,
+   "observation_id": 71308227,
+   "observer": "msieges",
+   "bytes": 47042,
+   "sha256": "ecd4ade5abf058ac887fabe2706eb021ada3b9ab083d10728c9b1dc26de56bbc",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-05",
+   "label": "dark_eyed_junco",
+   "photo_id": 117580446,
+   "observation_id": 72145931,
+   "observer": "hewwowhy",
+   "bytes": 67000,
+   "sha256": "1a8ca3be627c192459440c2eb07bd85b348f0e876a7de32bfc6fe0fb2959a618",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-06",
+   "label": "dark_eyed_junco",
+   "photo_id": 240712071,
+   "observation_id": 140608440,
+   "observer": "saintaardvark",
+   "bytes": 129995,
+   "sha256": "94c4dc30ca31804d6645a6be802cf87ccaffe974f0d3cb554b4fb3e9696ec6a5",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-07",
+   "label": "dark_eyed_junco",
+   "photo_id": 242909841,
+   "observation_id": 141750179,
+   "observer": "calinsdad",
+   "bytes": 61773,
+   "sha256": "c49c5d22969552de0fc04ff95eefb8a2ffc76df528477b93c2e2c38cdebe8f6c",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-08",
+   "label": "dark_eyed_junco",
+   "photo_id": 256191686,
+   "observation_id": 148740024,
+   "observer": "nartb",
+   "bytes": 194532,
+   "sha256": "e88b1449a989fc62c5da1c592e4987fa4db71eadf1ef29c0c5c1159b8f77a298",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-09",
+   "label": "dark_eyed_junco",
+   "photo_id": 267851501,
+   "observation_id": 154986181,
+   "observer": "shanebustapbj",
+   "bytes": 203657,
+   "sha256": "217002a366779db0ccc3fddffa71e79472b1fcaa5d444049971dac4c31c910f5",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-10",
+   "label": "dark_eyed_junco",
+   "photo_id": 268597047,
+   "observation_id": 155389350,
+   "observer": "j-dehoog",
+   "bytes": 54916,
+   "sha256": "c0890844944f3d603f8220b0a75213051766c6a45b2ba1fed51381134832f69f",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-11",
+   "label": "dark_eyed_junco",
+   "photo_id": 509902416,
+   "observation_id": 283764048,
+   "observer": "loarie",
+   "bytes": 271588,
+   "sha256": "0c1e3897caca8ff3ff4f3eff7548e30ca50dfe2c2c972106303f9e21c259dbda",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-12",
+   "label": "dark_eyed_junco",
+   "photo_id": 515881506,
+   "observation_id": 286951393,
+   "observer": "jubileej",
+   "bytes": 108221,
+   "sha256": "9cbecae915f1c96dcc31d5fd77cb5902181152cc3b918693191cc11fce18822c",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-13",
+   "label": "dark_eyed_junco",
+   "photo_id": 518407567,
+   "observation_id": 288278997,
+   "observer": "zzphantom",
+   "bytes": 231733,
+   "sha256": "de2a5be329b583911babe0758c9ce8c0982191f743b8082eb826623256709f71",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-14",
+   "label": "dark_eyed_junco",
+   "photo_id": 625101518,
+   "observation_id": 343192310,
+   "observer": "jtdavis05",
+   "bytes": 106387,
+   "sha256": "4642076ebc5e9bcde85dbba65eb16a49d3fabe6c82cc707b4863ad4b7a4531ae",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-dark_eyed_junco-15",
+   "label": "dark_eyed_junco",
+   "photo_id": 627787858,
+   "observation_id": 344552039,
+   "observer": "margohj",
+   "bytes": 54717,
+   "sha256": "a41e557077525b064fa16a7c0b140d608d323663519cfbf424f4454d79951244",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-house_finch-00",
+   "label": "house_finch",
+   "photo_id": 14590841,
+   "observation_id": 10492098,
+   "observer": "silvercat",
+   "bytes": 120515,
+   "sha256": "23934e0376c70dd6d5ce5e9a24c4176291c877432d25257f07e27694495c879a",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-house_finch-01",
+   "label": "house_finch",
+   "photo_id": 17763955,
+   "observation_id": 12337763,
+   "observer": "jennifer510",
+   "bytes": 167368,
+   "sha256": "35355c603049fdf21fc3bf1fed827b50740cfdba134542707026bb4e1f32149b",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-house_finch-02",
+   "label": "house_finch",
+   "photo_id": 83824778,
+   "observation_id": 52720178,
+   "observer": "beesbirdsbugs",
+   "bytes": 48816,
+   "sha256": "72731eb63fa9c5058f9911d11be929af9a58cfea805159d54010e9095948c39a",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-house_finch-03",
+   "label": "house_finch",
+   "photo_id": 124702263,
+   "observation_id": 76228853,
+   "observer": "janeyair",
+   "bytes": 162431,
+   "sha256": "5c86d7cbd28e09d44814735f1e0a21e8266bd4e6a4396b047d092d2f5f3f2111",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-house_finch-04",
+   "label": "house_finch",
+   "photo_id": 125605349,
+   "observation_id": 76831730,
+   "observer": "sarahangulo",
+   "bytes": 60174,
+   "sha256": "236eb345f1cf1ab4c82fb3b2cc48b948e614f8ddfd958c87a62ce5b44a04f080",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-house_finch-05",
+   "label": "house_finch",
+   "photo_id": 134287410,
+   "observation_id": 81854554,
+   "observer": "omcelroy",
+   "bytes": 90394,
+   "sha256": "6b4a5ea4c8aa1722332ccdf420af0ca0906cfdb87348e9f6c0904d5a92d8c203",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-house_finch-06",
+   "label": "house_finch",
+   "photo_id": 134699271,
+   "observation_id": 82117365,
+   "observer": "seanwashington1",
+   "bytes": 35334,
+   "sha256": "d6e0fe4a8cc690fd6369deff8ea67f4810e1f1297a6f1b9f125aae905742db2a",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-house_finch-07",
+   "label": "house_finch",
+   "photo_id": 205914234,
+   "observation_id": 121669780,
+   "observer": "darylnolan",
+   "bytes": 44763,
+   "sha256": "c04e8d7c002ad0038dcb62843e776ffb8fc86f425c2399442dd1653bbaa4b904",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-house_finch-08",
+   "label": "house_finch",
+   "photo_id": 269729570,
+   "observation_id": 156011712,
+   "observer": "kbkash",
+   "bytes": 59048,
+   "sha256": "3af407624c46ba4218d24a198ed22b812d4967380bd0e7f67e960f7fbb2defe7",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-house_finch-09",
+   "label": "house_finch",
+   "photo_id": 296347840,
+   "observation_id": 170825854,
+   "observer": "susanaber",
+   "bytes": 96563,
+   "sha256": "47832989fc212f19631e55b63c23155817209c40c66af49e4e03e42863243770",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-house_finch-10",
+   "label": "house_finch",
+   "photo_id": 341357046,
+   "observation_id": 194221751,
+   "observer": "haconra",
+   "bytes": 80643,
+   "sha256": "8e11937a5c6d5a47da47f562d52d4089d58ad3f2adefadc287b30c562c7ece85",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-house_finch-11",
+   "label": "house_finch",
+   "photo_id": 349400403,
+   "observation_id": 198261102,
+   "observer": "paulgraham",
+   "bytes": 105965,
+   "sha256": "b0d1f556ee4926e6a6f87201f6b73955dd9c530788e0ce57d5e09ced74ede001",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-house_finch-12",
+   "label": "house_finch",
+   "photo_id": 404592864,
+   "observation_id": 228025269,
+   "observer": "logan_artz",
+   "bytes": 78971,
+   "sha256": "d0cf631b138d199951d96538903eeb1b56e3b8da3f28c7b042d8868060f27a44",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-house_finch-13",
+   "label": "house_finch",
+   "photo_id": 484652323,
+   "observation_id": 269544283,
+   "observer": "robinlanark",
+   "bytes": 29863,
+   "sha256": "a1d6e8ffbcef10a83a2d3674c7228af89f8d39297f44cd569d1e031da02bc516",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-house_finch-14",
+   "label": "house_finch",
+   "photo_id": 514877896,
+   "observation_id": 286416757,
+   "observer": "jubileej",
+   "bytes": 153667,
+   "sha256": "26cd596525a244d2ba82ec2d575834c15671080814400cf7862f614c0db68d07",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-house_finch-15",
+   "label": "house_finch",
+   "photo_id": 515309527,
+   "observation_id": 286632225,
+   "observer": "solunasilver",
+   "bytes": 29507,
+   "sha256": "72a6b495ed99de80504c6b1a86ac1fbfc9e5736bc6f43274bd6093cc91f9ea05",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-song_sparrow-00",
+   "label": "song_sparrow",
+   "photo_id": 4251416,
+   "observation_id": 3670620,
+   "observer": "swells",
+   "bytes": 49271,
+   "sha256": "8c53fa5c02e603227117293720d269c59a13555abd537a83640210805fbd844d",
+   "ext": "JPG"
+  },
+  {
+   "id": "fresh-song_sparrow-01",
+   "label": "song_sparrow",
+   "photo_id": 118498513,
+   "observation_id": 72671334,
+   "observer": "seanwashington1",
+   "bytes": 80800,
+   "sha256": "940762ff238d94815922d06051ca00fe4a025279b1da08921a44733084adcdb6",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-song_sparrow-02",
+   "label": "song_sparrow",
+   "photo_id": 118804811,
+   "observation_id": 72823547,
+   "observer": "heibudas",
+   "bytes": 191643,
+   "sha256": "8dbe5a56d5fea83b6c25257aa0f9e552ea971f1e0311f583691d24fc9668556f",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-song_sparrow-03",
+   "label": "song_sparrow",
+   "photo_id": 119696805,
+   "observation_id": 73327300,
+   "observer": "rambryum",
+   "bytes": 68983,
+   "sha256": "65f7007d6b90654b77b7f4ec0557ff2d0f310c572368cb3492dd69f9d082e90d",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-song_sparrow-04",
+   "label": "song_sparrow",
+   "photo_id": 130188079,
+   "observation_id": 79482300,
+   "observer": "fake_id",
+   "bytes": 180462,
+   "sha256": "1d9ad7b45536b85d46fa0fd9a29d4a8ae828bc223836796a3eb9df1fe8fe4fc4",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-song_sparrow-05",
+   "label": "song_sparrow",
+   "photo_id": 136405967,
+   "observation_id": 83075831,
+   "observer": "tom_lazar",
+   "bytes": 178554,
+   "sha256": "f86c3c5899d20ac8fb73afb76d45666c610245636d7285a6d517b0081b9d6cc9",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-song_sparrow-06",
+   "label": "song_sparrow",
+   "photo_id": 139129879,
+   "observation_id": 84639025,
+   "observer": "wewantashrubbery",
+   "bytes": 104736,
+   "sha256": "aabbffe279d90ffdf737175cc720bea92d634483b830c90acecf920901419643",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-song_sparrow-07",
+   "label": "song_sparrow",
+   "photo_id": 270614122,
+   "observation_id": 156495271,
+   "observer": "radkins21",
+   "bytes": 92783,
+   "sha256": "7bf8ceb5944de93cbf01aebe4d464b9acb848569c07fbe6e732b701d309f0b25",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-song_sparrow-08",
+   "label": "song_sparrow",
+   "photo_id": 280724703,
+   "observation_id": 162358184,
+   "observer": "shirleymorrison",
+   "bytes": 43015,
+   "sha256": "f64af9b3fc4559f251ba0f1e95bf8889bfa629123586532adeb2b81e4c2871b2",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-song_sparrow-09",
+   "label": "song_sparrow",
+   "photo_id": 303954368,
+   "observation_id": 174929167,
+   "observer": "dianeclark6280",
+   "bytes": 157478,
+   "sha256": "14446920b7c55472de3b172f417fbbeac312090add7356a3c947cfb16911dc95",
+   "ext": "png"
+  },
+  {
+   "id": "fresh-song_sparrow-10",
+   "label": "song_sparrow",
+   "photo_id": 392544542,
+   "observation_id": 221653008,
+   "observer": "emckenziewhat",
+   "bytes": 138683,
+   "sha256": "7fd2f3ad3c835e541a7c720372d662a8f953f88f4d8223864a03e4b0f70a42d3",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-song_sparrow-11",
+   "label": "song_sparrow",
+   "photo_id": 478733235,
+   "observation_id": 266446909,
+   "observer": "saintaardvark",
+   "bytes": 298253,
+   "sha256": "d3c8d3a58b44d28c6af4748e4e4195a9a2af7dc6fe91541429dc44aa3a659d21",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-song_sparrow-12",
+   "label": "song_sparrow",
+   "photo_id": 531314531,
+   "observation_id": 295151228,
+   "observer": "steveplumb",
+   "bytes": 128710,
+   "sha256": "8806861909c0833b29f43b10e9428e104deaccb99d41b42039b76f7da0ae4600",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-song_sparrow-13",
+   "label": "song_sparrow",
+   "photo_id": 583754170,
+   "observation_id": 322666295,
+   "observer": "rociherrera",
+   "bytes": 97743,
+   "sha256": "5e093fc6d59b13bbd7ee0889613cef115ef7bb14432634d0af753a8124951737",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-song_sparrow-14",
+   "label": "song_sparrow",
+   "photo_id": 623006598,
+   "observation_id": 342147975,
+   "observer": "ryman56",
+   "bytes": 60213,
+   "sha256": "73e18df350a69ce00158f03c7ec4fda8672539e0a7292b75f1dfa22dbec7ee30",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-song_sparrow-15",
+   "label": "song_sparrow",
+   "photo_id": 641009256,
+   "observation_id": 351278414,
+   "observer": "robinlanark",
+   "bytes": 49640,
+   "sha256": "e4af33fd4a504a876b6e7a111a5024cf4197fc888c90f2039df63e9be13d5f06",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-00",
+   "label": "white_throated_sparrow",
+   "photo_id": 6236370,
+   "observation_id": 5078910,
+   "observer": "ruggedbynature",
+   "bytes": 126403,
+   "sha256": "3d6030593bf57bc5734fd6c0706c1e350bb117a32370a16b194ef4488668f123",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-01",
+   "label": "white_throated_sparrow",
+   "photo_id": 7072170,
+   "observation_id": 5706496,
+   "observer": "jmutter",
+   "bytes": 171582,
+   "sha256": "de90ea2739e8c65ca89f0e511abaf44219501e18377eb49d9e5c7f10d3a6d5b2",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-02",
+   "label": "white_throated_sparrow",
+   "photo_id": 7149657,
+   "observation_id": 5761350,
+   "observer": "bradleysaul",
+   "bytes": 108304,
+   "sha256": "adf755b8393fb6b4db99e788d4112c2c72197c33ecffeec2ca7b3ba5dd9d650e",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-03",
+   "label": "white_throated_sparrow",
+   "photo_id": 16303076,
+   "observation_id": 11431253,
+   "observer": "robw",
+   "bytes": 61348,
+   "sha256": "e7d81cfe027c7b0914c79a0431f0ce1431db1ebe78368a2fe5f31e2aab59c3c7",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-04",
+   "label": "white_throated_sparrow",
+   "photo_id": 32221828,
+   "observation_id": 20882923,
+   "observer": "christinan",
+   "bytes": 132485,
+   "sha256": "b92ce41128bb1c5b53a0c487b46ba80eea83b9a443ee9c72f100005e5d80e411",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-05",
+   "label": "white_throated_sparrow",
+   "photo_id": 36598789,
+   "observation_id": 23643589,
+   "observer": "jessm-c",
+   "bytes": 45861,
+   "sha256": "eda75171590418596e372c6cba058364acb64f1279d250dff6c5df61fa17868b",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-06",
+   "label": "white_throated_sparrow",
+   "photo_id": 67630852,
+   "observation_id": 42591255,
+   "observer": "schoenitz",
+   "bytes": 138616,
+   "sha256": "34594c49a4f601b17e49dfc4d4098db7b73ff5a69d3830b773378e4d695ff181",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-07",
+   "label": "white_throated_sparrow",
+   "photo_id": 109241547,
+   "observation_id": 67591707,
+   "observer": "blkillin",
+   "bytes": 130154,
+   "sha256": "e5b8c1caa0f7cc7926d46eac42df582ccb0882b4a0733fc0740b8b4597a4e014",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-08",
+   "label": "white_throated_sparrow",
+   "photo_id": 162150240,
+   "observation_id": 97493574,
+   "observer": "c_burns802",
+   "bytes": 188464,
+   "sha256": "0fb2fb2e04bca82c436315b77a974adc665d2d1fb4e419dd61afa068ab412254",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-09",
+   "label": "white_throated_sparrow",
+   "photo_id": 165146429,
+   "observation_id": 99107203,
+   "observer": "philippthompson",
+   "bytes": 84518,
+   "sha256": "8582544ca8b3cb1c73174fc42a9d66971fdae0c90cd4739083eb4ef4983eb6e7",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-10",
+   "label": "white_throated_sparrow",
+   "photo_id": 177451999,
+   "observation_id": 105722646,
+   "observer": "natepow",
+   "bytes": 44983,
+   "sha256": "c81a68c46264d1a5fcae3042e7ab24653c3615665cef6293c31622d5f342d840",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-11",
+   "label": "white_throated_sparrow",
+   "photo_id": 364738073,
+   "observation_id": 205369541,
+   "observer": "sandra1142",
+   "bytes": 144424,
+   "sha256": "4cd383751871426904f4d8ff7526a312ba33a6c894faf7121c6ec0ff6ce0d7b1",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-12",
+   "label": "white_throated_sparrow",
+   "photo_id": 370403033,
+   "observation_id": 209307218,
+   "observer": "kuykenwil",
+   "bytes": 124312,
+   "sha256": "d0700068b06ad0f79eeac331a92e5d633bd76be264c3d8801a9a6eb301193969",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-13",
+   "label": "white_throated_sparrow",
+   "photo_id": 374502828,
+   "observation_id": 211884837,
+   "observer": "halliefromcali",
+   "bytes": 62476,
+   "sha256": "0073652fddd7378dc936f280c18d7e44c4a7160aadc2f051e7b5e2896b1a476c",
+   "ext": "jpg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-14",
+   "label": "white_throated_sparrow",
+   "photo_id": 500790892,
+   "observation_id": 278893388,
+   "observer": "quillipede",
+   "bytes": 186273,
+   "sha256": "0db918123c7f529ca76c04129886eb9aeb947bd3e90cdfd968c4605931c16f85",
+   "ext": "jpeg"
+  },
+  {
+   "id": "fresh-white_throated_sparrow-15",
+   "label": "white_throated_sparrow",
+   "photo_id": 622732944,
+   "observation_id": 342010560,
+   "observer": "tom_lazar",
+   "bytes": 34257,
+   "sha256": "584070c4b5231db49087d1507aabec8f51adc4e09dcdda8b93b3a78159d47146",
+   "ext": "jpg"
+  }
+ ]
+}

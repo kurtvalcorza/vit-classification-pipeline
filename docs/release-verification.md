@@ -36,7 +36,7 @@ CI runs `tools/validate_release_assets.py`, which checks:
   per-batch `evaluation_report`, `pipe.save_artifact`, `ViTClassificationPipeline.from_artifact` and the
   reload-parity assertion including `predict`, and the provenance fields `weight_format`, `weight_sha256` and the `corpus` block), the
   six expected `outputs/` paths, the learner-facing statements (the fixed ImageNet-1k label space, supervised
-  adaptation to a label space the checkpoint does not have under an explicit frozen-vs-unfrozen policy, the majority
+  adaptation to a label space its ImageNet-1k head does not have under an explicit frozen-vs-unfrozen policy, the majority
   floor, the cosine 5-NN vote, the frozen and unfrozen policies, lowest validation log-loss, the ImageNet head never
   trained or exported, no dispersion estimate, named exclusions, the CC0 licence) and the gated-off BYOD default; forbidden patterns (credential-in-URL, any `git
   clone` / `github.com` / repository import on the primary path, a mutable `revision='main'`, direct
@@ -77,7 +77,14 @@ Before changing the registry status from `Candidate` to `Release-grade`:
    iNaturalist open-data bucket, so neither directory may be seeded);
 3. run the notebook top-to-bottom without editing implementation cells (form parameters at their defaults:
    `USE_BYOD = False`, `SPLIT_SEED = 42`, `PROBE_STEPS = 300`, `PROBE_LR = 0.01`, `EPOCHS = 4`,
-   `LEARNING_RATE = 3e-5`, `BATCH_SIZE = 8`, `TRAINABLE_BLOCKS = 2`);
+   `BATCH_SIZE = 8`, `RUN_GRID = True`; `DIMER_MASK_FRESH_TEST` unset). **Rows below that describe Sections 6-9
+   predate the 2026-10-17 review fixes**: since then Section 7 runs the C0 / C1 / C2 grid and reloads the selected
+   config (read it from the run, it is not pre-stated; a masked CPU check selected C1), refusals raise `RunStopped`,
+   four modules are carried (`protocol.py` added), and Sections 8-9 write suffixed files (`…_evaluation_report.json`
+   for the first pre-registered evaluation, `_reproduction_<n>` / `_exploratory_<n>` / `_masked_<n>` otherwise) plus
+   `…_grid.json`; Section 8 asserts nothing about the floor. Check the report's `preregistered`, `test_look`,
+   `settings_differing`, `numeric_settings` (device `cuda:0`, GPU `Tesla T4`, TF32 off) and the fresh-test verdict
+   instead;
 4. verify that Section 1 reports `NOTEBOOK_SOURCE.repository_revision` equal to the revision recorded in
    `metadata.dimer.generated_from` and that the installed core package versions equal the inline `PINS`
    (= `pyproject.toml`): `torch==2.14.0`, `torchvision==0.29.0`, `timm==1.0.29`, `huggingface-hub==0.36.2`,
@@ -142,6 +149,8 @@ A known-failing default path in the supported runtime blocks release (REL11).
 
 | Notebook | Commit / notebook blob | Date (UTC) | Executor | Outcome |
 |---|---|---|---|---|
+| `vit_classification_colab.ipynb` (`E2E`) | `e96ee0e` / `bb9441e4` | 2026-10-18 | Colab CLI 0.7.4, fresh Colab Tesla T4 (CLI sequential execution, not a browser Run all; forms and uploads not exercised) | **PASSED** — 14/14 code cells, 0 errors, 262.5 s; **reproduction of the pre-registered evaluation** (REL13 label; reproduction 1 of the `1231036` / `94e67934` record): `test_look` `reproduction`, `matches_record` True on all seven fields; C1 selected; fresh test C1 0.8125 against the probe 0.8333, difference −0.0208, CI [−0.0632, 0.0204], `no detectable difference`, equal to the record; only `_reproduction_1` files written; evidence `execution-evidence/2026-10-18-e96ee0e/`; status stays Candidate |
+| `vit_classification_colab.ipynb` (`E2E`) | `1231036` / `94e67934` | 2026-10-18 | Colab CLI 0.7.4, fresh Colab Tesla T4 (CLI sequential execution, not a browser Run all; forms and uploads not exercised) | **PASSED** — 14/14 code cells, 0 errors, 317.0 s; **pre-registered evaluation of record** (REL13 label; first complete hosted run of the pre-registered settings and amendment 1, first scoring of the 96-photograph fresh test by any run): C1 selected; fresh test C1 0.8125 against the probe 0.8333, difference −0.0208, CI [−0.0632, 0.0204], `no detectable difference`; evidence `execution-evidence/2026-10-18-1231036/`; status stays Candidate |
 | `vit_classification_colab.ipynb` (`E2E`) | `8b26ec6` / `50462c07` | 2026-09-19 | Kaggle Tesla T4 (`kurtvalcorza/dimer-nb2-vit-classification` v4; image `torch 2.10.0+cu128` / `transformers 5.0.0` before the pinned install, `torch 2.14.0+cu130` / `transformers ?` after, Python 3.12.13, `cuda:0`) | **PASSED** — 11/11 code cells ok (1 restart after install cell); 188 files, 365 MB staged from the Hub into a clean cache; comparison {accuracy: {majority_floor: 0.1667, knn5: 0.75, frozen_policy: 0.7917, selected_policy: 0.7917}, macro_f1: {majority_floor: 0.0476, knn5: 0.7516, frozen_policy: 0.7885, selected_policy: 0.7885}, log_loss: {frozen_policy: 0.678, selected_policy: 0.678}, per_class_recall: {american_goldfinch: {knn5: 0.88, frozen: 0.88, selected: 0.88}, chipping_sparrow: {knn5: 0.75, frozen: 0.88, selected: 0.88}, dark_eyed_junco: {knn5: 0.62, frozen: 0.75, selected: 0.75}, house_finch: {knn5: 0.88, frozen: 0.88, selected: 0.88}, song_sparrow: {knn5: 0.5, frozen: 0.5, selected: 0.5}, white_throated_sparrow: {knn5: 0.88, frozen: 0.88, selected: 0.88}}, delta_vs_frozen: {accuracy: 0, macro_f1: 0}, selected_policy: frozen backbone + linear probe}; reload parity {probabilities_identical: True, accuracy_in_memory: 0.7917, accuracy_reloaded: 0.7917, classes_identical: True, predict_identical: True}; run summary and executed notebook archived under `.agent/backups/kaggle-e2e-2026-09-19/out/dimer-nb2-vit-classification/v4/evidence/` in the workspace |
 | `vit_classification_colab.ipynb` (`E2E`) | `9f24c9e` / `c1fdbadd` | 2026-09-19 | Local pre-flight harness (Windows, CPython 3.12.10, CPU, `google.colab` shim, pins pre-installed) | PASS — pre-flight only, **not** promotion evidence |
 | `vit_classification_colab.ipynb` (`TASK-INFERENCE`, superseded) | `83067a1` / `5b786a1e5767` | 2026-09-14 | Kaggle CPU (`kurtvalcorza/dimer-nb2-vit-classification` v1) | PASSED — 8/8 code cells, 435.0 s, 346 MB staged; evidence for the earlier inference-only notebook, not for the `E2E` blob |
@@ -155,7 +164,9 @@ runtime, not general estimates.
 
 | Date (UTC) | Commit / notebook blob | Executor | Path exercised | Wall | Outcome |
 |---|---|---|---|---|---|
-| 2026-10-09 (14:50:37 UTC start) | `2351f94` / `5738b645259c` (`NOTEBOOK_SOURCE.repository_revision` `7086c87`, equal to `metadata.dimer.generated_from.revision`; `7086c87..2351f94` adds only the worker's google.colab ModuleSpec stubs and the spec 2.2 declaration; embedded `module_sha256` `f02fdc7b582e…`, generator `build_notebook.py/2.2`, `notebook_spec` 2.2) | Colab CLI 0.7.4 sequential execution (`colab exec -f`, not a browser Run all), fresh Colab Tesla T4 VM (session `suite-vit-2351f94-7e62`), committed blob fetched at the 40-char SHA and Git-blob verified, no repository checkout; kernel Python 3.13.15; isolated `uv` environment CPython 3.12.12, 45 locked packages, built in 52 s; torch 2.14.0+cu130, timm 1.0.29; device `cuda:0` | Default sample path, every form field at its default (BYOD off, `PROBE_STEPS = 300`, `EPOCHS = 4`, `RUN_EXPERIMENT = False`); snapshot `e0bd370d` 3 files digest-verified; 180 photographs fetched and digest-verified | 185.4 s | **PASSED — one pass, no restart, 0 errors**: 13/13 code cells in order (`exec.log`); code cells 3–5 (the carried modules) print nothing; comparison {accuracy: {majority_floor: 0.1667, knn5: 0.75, frozen_policy: 0.7917, selected_policy: 0.7917}, macro_f1: {majority_floor: 0.0476, knn5: 0.7516, frozen_policy: 0.7885, selected_policy: 0.7885}}; validation kept the probe (epoch 0 log-loss 0.1621; unfrozen epochs 0.1634–0.166); verdicts above floor / above floor / no gain; song sparrow recall 0.5; reload parity identical (0.791667). Evidence: `execution-evidence/2026-10-09-2351f94/` — executed notebook sha256 `d1b8abc59ccd…`, `exec.log` sha256 `67cf7f21a7cc…`, `run_summary.json` sha256 `bfbb778919e4…`. Optional journeys (BYOD, Section 10 experiment) not exercised; not promotion evidence on its own (REL12 pending) |
+| 2026-10-18 (08:56:10 UTC start) | `e96ee0e` / `bb9441e4542c` (`NOTEBOOK_SOURCE.repository_revision` `f6b5b3a`, equal to `metadata.dimer.generated_from.revision`; `f6b5b3a..e96ee0e` only regenerates the notebook; embedded `module_sha256` `63e9daad404e…`, generator `build_notebook.py/2.3`, `notebook_spec` 2.5) | Colab CLI 0.7.4 sequential execution (`colab exec -f`, not a browser Run all), fresh Colab Tesla T4 VM (session `suite-vit-e96ee0e-7e62`, `Hardware: T4`), committed blob fetched at the 40-char SHA and Git-blob verified, no repository checkout; kernel Python 3.13.15; isolated `uv` environment CPython 3.12.12, 45 locked packages, built in 48 s; device `cuda:0` | Default pre-registered path, every form field at its default (BYOD off, `RUN_EXPERIMENT = False`); `preregistered` True, `settings_differing` []; snapshot `e0bd370d` 3 files digest-verified; 180 corpus photographs and the 96 fresh-test photographs fetched | 262.5 s (suite wall time, session request to stop) | **PASSED — one pass, no restart, 0 errors**: 14/14 code cells in order (`exec.log`); **reproduction of the pre-registered evaluation** (REL13; reproduction 1): `test_look` `reproduction`, `matches_record` True for selected config, selected and probe accuracy, primary difference, CI, discordant counts and verdict; grid C0 0.1621 / C1 0.1242 / C2 0.1375, **C1 selected**; fresh test C1 0.8125 (78/96) against the probe 0.8333 (80/96), −0.0208, CI [−0.0632, 0.0204], discordant 1 vs 3, `no detectable difference` — every printed result line equal to the record; files `*_reproduction_1` only. Evidence: `execution-evidence/2026-10-18-e96ee0e/` — executed notebook sha256 `417d78eec00f…`, `exec.log` sha256 `76d439cdf625…` (redacted; captured `8840ee4dc60c…`), `run_summary.json` sha256 `62b7c3a8d15b…`. BYOD and the Section 10 experiment not exercised; not promotion evidence on its own (REL12 pending) |
+| 2026-10-18 (07:26:15 UTC start) | `1231036` / `94e67934a115` (`NOTEBOOK_SOURCE.repository_revision` `e0d4282`, equal to `metadata.dimer.generated_from.revision`; `e0d4282..1231036` only regenerates the notebook; embedded `module_sha256` `3713487a3a2e…`, generator `build_notebook.py/2.3`, `notebook_spec` 2.5) | Colab CLI 0.7.4 sequential execution (`colab exec -f`, not a browser Run all), fresh Colab Tesla T4 VM (session `suite-vit-1231036-7e62`, `Hardware: T4`), committed blob fetched at the 40-char SHA and Git-blob verified, no repository checkout; kernel Python 3.13.15; isolated `uv` environment CPython 3.12.12, 45 locked packages, built in 55 s; torch 2.14.0+cu130, timm 1.0.29; device `cuda:0`; TF32 off in the carried code (see the record section) | Default pre-registered path, every form field at its default (BYOD off, `RUN_EXPERIMENT = False`); `preregistered` True, `settings_differing` []; snapshot `e0bd370d` 3 files digest-verified; 180 corpus photographs and the 96 fresh-test photographs fetched | 317.0 s (suite wall time, session request to stop) | **PASSED — one pass, no restart, 0 errors**: 14/14 code cells in order (`exec.log`); **pre-registered evaluation of record** (REL13): grid C0 0.1621 (probe kept) / C1 0.1242 (epoch 4) / C2 0.1375 (epoch 2), **C1 selected**; fresh test (n = 96) floor 0.1667, 5-NN 0.8542, frozen probe 0.8333, C1 0.8125; primary difference −0.0208, observer-cluster 95 % CI [−0.0632, 0.0204], discordant 1 vs 3, verdict `no detectable difference`, so **the adapted C1 did not beat the frozen probe**; exposed development test (decides nothing) probe 0.7917, C1 0.7292; reload parity identical (0.729167). Evidence: `execution-evidence/2026-10-18-1231036/` — executed notebook sha256 `f43bd2c13cbf…`, `exec.log` sha256 `e982129a47da…` (redacted; captured `65a0c96e15a7…`), `run_summary.json` sha256 `ca464c18db39…`. BYOD and the Section 10 experiment not exercised; not promotion evidence on its own (REL12 pending) |
+| 2026-10-09 (14:50:37 UTC start) | `2351f94` / `5738b645259c` (`NOTEBOOK_SOURCE.repository_revision` `7086c87`, equal to `metadata.dimer.generated_from.revision`; `7086c87..2351f94` adds only the worker's google.colab ModuleSpec stubs and the spec 2.2 declaration; embedded `module_sha256` `f02fdc7b582e…`, generator `build_notebook.py/2.2`, `notebook_spec` 2.2) | Colab CLI 0.7.4 sequential execution (`colab exec -f`, not a browser Run all), fresh Colab Tesla T4 VM (session `suite-vit-2351f94-7e62`), committed blob fetched at the 40-char SHA and Git-blob verified, no repository checkout; kernel Python 3.13.15; isolated `uv` environment CPython 3.12.12, 45 locked packages, built in 52 s; torch 2.14.0+cu130, timm 1.0.29; device `cuda:0` | Default sample path, every form field at its default (BYOD off, `PROBE_STEPS = 300`, `EPOCHS = 4`, `RUN_EXPERIMENT = False`); snapshot `e0bd370d` 3 files digest-verified; 180 photographs fetched and digest-verified | 185.4 s | **PASSED — one pass, no restart, 0 errors**: 13/13 code cells in order (`exec.log`); code cells 3–5 (the carried modules) print nothing; comparison {accuracy: {majority_floor: 0.1667, knn5: 0.75, frozen_policy: 0.7917, selected_policy: 0.7917}, macro_f1: {majority_floor: 0.0476, knn5: 0.7516, frozen_policy: 0.7885, selected_policy: 0.7885}}; validation kept the probe (epoch 0 log-loss 0.1621; unfrozen epochs 0.1634–0.166); verdicts above floor / above floor / no gain; song sparrow recall 0.5; reload parity identical (0.791667). Evidence: `execution-evidence/2026-10-09-2351f94/` — executed notebook sha256 `d1b8abc59ccd…`, `exec.log` sha256 `67cf7f21a7cc…` (redacted 2026-10-18, now `dec94e0cce44…`; see R108-S1 below), `run_summary.json` sha256 `bfbb778919e4…`. Optional journeys (BYOD, Section 10 experiment) not exercised; not promotion evidence on its own (REL12 pending) |
 | 2026-09-19 | `8b26ec6` / `50462c07` | Kaggle Tesla T4 (`kurtvalcorza/dimer-nb2-vit-classification` v4; image `torch 2.10.0+cu128` / `transformers 5.0.0` before the pinned install, `torch 2.14.0+cu130` / `transformers ?` after, Python 3.12.13, `cuda:0`) | Default sample path, `Run all` from a fresh interpreter with an empty Hugging Face cache and no repository checkout (blob SHA-1 verified against GitHub before execution) | 276.0 s | **PASSED** — 11/11 code cells ok (1 restart after install cell); 188 files, 365 MB staged from the Hub into a clean cache; comparison {accuracy: {majority_floor: 0.1667, knn5: 0.75, frozen_policy: 0.7917, selected_policy: 0.7917}, macro_f1: {majority_floor: 0.0476, knn5: 0.7516, frozen_policy: 0.7885, selected_policy: 0.7885}, log_loss: {frozen_policy: 0.678, selected_policy: 0.678}, per_class_recall: {american_goldfinch: {knn5: 0.88, frozen: 0.88, selected: 0.88}, chipping_sparrow: {knn5: 0.75, frozen: 0.88, selected: 0.88}, dark_eyed_junco: {knn5: 0.62, frozen: 0.75, selected: 0.75}, house_finch: {knn5: 0.88, frozen: 0.88, selected: 0.88}, song_sparrow: {knn5: 0.5, frozen: 0.5, selected: 0.5}, white_throated_sparrow: {knn5: 0.88, frozen: 0.88, selected: 0.88}}, delta_vs_frozen: {accuracy: 0, macro_f1: 0}, selected_policy: frozen backbone + linear probe}; reload parity {probabilities_identical: True, accuracy_in_memory: 0.7917, accuracy_reloaded: 0.7917, classes_identical: True, predict_identical: True}; run summary and executed notebook archived under `.agent/backups/kaggle-e2e-2026-09-19/out/dimer-nb2-vit-classification/v4/evidence/` in the workspace |
 | 2026-09-19 | `9f24c9e` / `c1fdbadd` | Local pre-flight harness (Windows, CPython 3.12.10, CPU float32, `torch 2.14.0+cu130` with `CUDA_VISIBLE_DEVICES=-1`, `timm 1.0.29`) | Default sample path (install skipped, pins pre-installed → three carried modules → inline manifest assert → `stage_missing_files` fetched 0 of 3 entries because the snapshot was pre-staged → `verify_snapshot` 3 files → `from_pretrained` on CPU at 224 × 224 → `fetch_corpus` served from the pre-staged cache after its 180 digest checks (0.3 s) → six species of 30 read, 108 / 24 / 48 drawn with `check_split_disjoint` clean, 31 of 117 observers in more than one split, digests `1e4cca7f…` / `d176b3ff…` / `0e787f09…` → four dataset refusals → input manifest with the oversized-image refusal → `predict` of three test photographs (0.11 s) with all four sanity checks `True` and the ImageNet top-5 lists printed (chipping sparrow → `ruffed grouse` 0.261; goldfinch → `goldfinch` 0.999; song sparrow → `brambling` 0.366) → majority floor → 5-NN vote → frozen-policy probe → unfrozen-policy `adapt` → validation + test evaluation → predictions before/after (a fresh probe pipeline for the frozen column) → adapter export → reload parity incl. `predict`) | 74.7 s | **PASSED** — 11/11 code cells; majority floor 16.7 % / macro-F1 0.048; cosine 5-NN 75.0 % / 0.752 (6.9 s); frozen policy (linear probe, 300 steps, 7.9 s incl. features) 79.2 % / 0.789, log-loss 0.678, validation 91.7 % / log-loss 0.162; `adapt` with the unfreeze: 14,175,744 block + 4,614 head parameters, 4 epochs, 38.5 s, validation log-loss 0.162 (probe) → 0.165 → 0.166 → 0.163 → 0.166 with accuracy 91.7 % throughout, selected `frozen backbone + linear probe` at `best_epoch` 0; **selected policy on the test split 79.2 % / macro-F1 0.789, log-loss 0.678 (Δ +0.0 accuracy, +0.0 macro-F1 vs the probe — the probe is the selected model)**; per-class recall 0.88 / 0.88 / 0.75 / 0.88 / 0.50 / 0.88 (goldfinch, chipping sparrow, junco, house finch, song sparrow, white-throated sparrow); six predictions printed — none changed (`test-005`, a chipping sparrow, labelled house finch by both); per-batch report `not-measurable`; adapter 18,632 B / 2 tensors, SHA-256 `d216f083…`; reload parity exact (probabilities identical, test accuracy 0.791667 both ways, `predict` identical); six exports written. Pre-flight; hosted clean-runtime run still required |
 | 2026-09-14 | `83067a1` / `5b786a1e5767` (`TASK-INFERENCE`, superseded) | Kaggle CPU (`kurtvalcorza/dimer-nb2-vit-classification` v1) | Default sample path of the inference-only notebook: one synthetic gradient image, `stage_missing_files` fetching the three manifest entries from the Hub, `verify_snapshot` over 3 files, `predict` top-5 with the ceilings printed, `not-measurable` report, CSV + JSON exports | 435.0 s | **PASSED** — 8/8 code cells, 346 MB staged; history only |
@@ -183,7 +194,197 @@ stays **Candidate** until a reviewer promotes it.
 
 ## Primary ViT tutorial status
 
-**Candidate.** The 2026-09-19 Kaggle T4 run of blob `50462c07` (commit `8b26ec6`) needed a manual restart after the install cell (11/11 ok (1 restart after install cell)), so it is not a one-pass `Run all` and not promotion evidence (review finding VIT-M1, 2026-10-05). The review-fix blob `5738b645259c` (commit `2351f94`; uv isolated environment, guided layer, VIT-M1..M3 / VIT-m1..m3 fixes) completed one pass with no restart and 0 errors on a fresh Colab Tesla T4 on 2026-10-09 (Colab CLI 0.7.4 sequential execution, 13/13 code cells, 185.4 s; floor 0.1667, 5-NN 0.75, frozen probe 0.7917, selected policy 0.7917 with the probe kept on validation log-loss 0.1621; reload parity identical). REL12 BYOD exercise (path-based and upload) and the optional Section 10 experiment are pending on a hosted runtime, so the status stays Candidate (REL14). The 2026-09-19 row and the local pre-flight rows above remain history. Any later change to the carried modules or to the notebook produces a new blob that needs its own clean run.
+**Candidate.** The 2026-09-19 Kaggle T4 run of blob `50462c07` (commit `8b26ec6`) needed a manual restart after the install cell (11/11 ok (1 restart after install cell)), so it is not a one-pass `Run all` and not promotion evidence (review finding VIT-M1, 2026-10-05). The review-fix blob `5738b645259c` (commit `2351f94`; uv isolated environment, guided layer, VIT-M1..M3 / VIT-m1..m3 fixes) completed one pass with no restart and 0 errors on a fresh Colab Tesla T4 on 2026-10-09 (Colab CLI 0.7.4 sequential execution, 13/13 code cells, 185.4 s; floor 0.1667, 5-NN 0.75, frozen probe 0.7917, selected policy 0.7917 with the probe kept on validation log-loss 0.1621; reload parity identical). On 2026-10-18 the review-fix blob `94e67934` (commit `1231036`) completed one pass with 0 errors on a fresh Colab Tesla T4 (Colab CLI 0.7.4 sequential execution, 14/14 code cells, 317.0 s): the pre-registered grid selected C1 (four blocks at 1e-4; validation log-loss 0.1242 against the probe's 0.1621), and on the 96-photograph fresh test, in this evaluation of record, **the adapted C1 did not beat the frozen probe**: 81.25 % (78/96) against 83.33 % (80/96), paired difference −0.0208, observer-cluster 95 % CI [−0.0632, 0.0204], 1 against 3 discordant photographs, verdict `no detectable difference`; record in "Primary ViT tutorial: hosted T4 evaluation of record (2026-10-18)" below. The regenerated blob `bb9441e4` (commit `e96ee0e`, carrying the record as `RECORDED_EVALUATION`) then ran the same pre-registered path on a new fresh Colab T4 (14/14, 0 errors, 262.5 s) as **reproduction 1 of the pre-registered evaluation**: every fresh-test number equals the record and only `_reproduction_1` files were written; see "Primary ViT tutorial: hosted T4 reproduction 1 (2026-10-18)". REL12 BYOD exercise (path-based and upload) and the optional Section 10 experiment are pending on a hosted runtime, so the status stays Candidate (REL14). The 2026-09-19 row and the local pre-flight rows above remain history. Any later change to the carried modules or to the notebook produces a new blob that needs its own clean run.
+
+## Primary ViT tutorial: 2026-10-17 review fixes (row 108)
+
+Review `row108-vit` (2026-10-17) found that the default recipe and the lesson "the probe is usually the honest
+choice" were set after the build sweep of 2026-09-18/19 (CPU pre-flight of blob `c1fdbadd`) had scored two
+unfreeze configurations on the 48-photograph test split: 4 blocks @ 1e-4 (72.9 %) and 2 blocks @ 3e-4 (66.7 %).
+That split is now the **exposed development test**. Every number on it in this file (including the 2026-10-09
+row above) is an exposed number, reported for continuity.
+
+- **Pre-registration** (`docs/vit-preregistration.md`, committed alone before any code): the C0 / C1 / C2
+  validation grid, every fixed setting, the 0.02 log-loss margin with the keep-frozen rule, and the fresh-test
+  reading rule (paired bootstrap of selected − probe, 10,000 resamples, seed 20261017, verdict from the 95 % CIs).
+- **Fresh test** (owner ruling R108-D1): 96 photographs (16 per species), 10,659,247 bytes, 79 observers, selection
+  digest `01fffe006c19d873bdcb379e6345f3f8219490340a76ca8e42a68ff19e9dda84`, drawn by `tools/draw_fresh_test.py`
+  from the 360-photograph table of `kurtvalcorza/siglip2-vision-language-pipeline` at
+  `4fe334864548adcbc18d4173d0e1d38ce2991259` minus the 180, observers absent from the 180, ascending photo id.
+  0 shared photographs, observations or observers; 0 near-duplicate hits (dHash-64 <= 10 or equal pixels).
+  This model has never scored them; six other fleet repositories allocate them in their own splits.
+- **Score-once wiring** (`protocol.py`, SCORE_ONCE_RULE items 1-8): Section 8 re-checks `preregistered` over all
+  fixed settings, the grid's completeness and settings, the split and the model-state fingerprint before it
+  touches the fresh test. Reproductions write `_reproduction_<n>`, exploratory runs `_exploratory_<n>`.
+- **Evaluation of record:** the 2026-10-18 Colab CLI T4 run of commit `1231036` / blob `94e67934` (hosted run #3
+  below; section "Primary ViT tutorial: hosted T4 evaluation of record (2026-10-18)"). Later identical hosted
+  runs are reproductions. **Reproductions:** 1 — the 2026-10-18 Colab CLI T4 run of commit `e96ee0e` / blob
+  `bb9441e4` (hosted run #4 below; section "Primary ViT tutorial: hosted T4 reproduction 1 (2026-10-18)"), equal
+  to the record. `RECORDED_EVALUATION` in `protocol.py` now carries this
+  record (re-derived from the executed notebook; `test_recorded_evaluation_equals_the_executed_evidence`), and the
+  notebook was regenerated from it (requote round, 2026-10-18; blob `bb9441e4`, executed as reproduction 1). From that blob on, a
+  pre-registered run in any runtime, a new one included, prints `test_look` `reproduction`, writes only
+  `*_reproduction_<n>` files and prints `matches_record`; the main report is never written again.
+- **Development looks at the fresh test:** none. The fixer's CPU checks ran with `DIMER_MASK_FRESH_TEST=1`
+  (validation and the exposed development test only).
+- **Masked CPU development check, 2026-10-18** (commit `9919e13`, blob `085cdcf7`; Windows CPU float32, fresh test
+  masked, nothing changed in response): grid validation log-loss C0 0.1621 (probe kept), C1 0.1242 (epoch 4),
+  C2 0.1375 (epoch 2); **C1 selected** (beats C0 by 0.0379); exposed development test C1 72.9 % / macro-F1 0.718
+  against the probe's 79.2 % / 0.789 (3 photographs of 48). Disclosed in amendment 1 before its code.
+- **Amendment 1** (`docs/vit-preregistration-amendment-1.md`, committed alone before its code): one primary endpoint
+  (paired accuracy difference, observer-cluster bootstrap), crash-safe look counting, TF32 off, the T4 run as record.
+- **Hosted looks at the fresh test** (every unmasked hosted run that reaches the fetch is numbered here, whether or
+  not it completes; the first COMPLETE one is the evaluation of record):
+  - **Hosted fetch attempt #1, aborted, 0 fresh photographs scored** — 2026-10-18 ~07:00 UTC, Colab CLI T4, commit
+    `7203721`, blob `793330fa`. Section 8 printed `preregistered` True, a complete grid, the model state matching and
+    **C1 selected** (equal to the masked CPU check: validation log-loss C0 0.1621 / C1 0.1242 / C2 0.1375), and the
+    exposed-test descriptives (C1 0.7292 against the probe's 0.7917). The fresh-test fetch then raised
+    `ValueError: unsupported photo extension 'png'` in `photo_url` before any photograph was downloaded or decoded,
+    so no fresh-test number exists and, by the amended look rule, this is not a look; Section 9 then failed with a
+    `NameError` (no Section 8 report). Fix (round 3): `photo_url` accepts every served extension in the pinned
+    tables (fresh: jpg 48, jpeg 45, png 2, JPG 1; corpus: jpg 93, jpeg 87), with the size and SHA-256 checks
+    unchanged; a CPU test resolves every pinned URL without downloading; Section 9 stops with `RunStopped` when
+    Section 8 did not complete. No pre-registered setting changed, so no amendment was needed.
+  - **Hosted fetch attempt #2, aborted, 0 fresh photographs scored** — 2026-10-18 07:22:10–07:26:07 UTC, Colab CLI
+    T4 (a new session `suite-vit-7203721-7e62`), the same commit `7203721` / blob `793330fa`, queued again by an
+    orchestrator re-queue error after the round-3 fix existed. It printed the same Section 8 lines as attempt #1
+    (`preregistered` True, grid complete, C1 selected with C0 0.1621 / C1 0.1242 / C2 0.1375, exposed-test
+    descriptives C1 0.7292 against 0.7917), then raised the same `ValueError: unsupported photo extension 'png'`
+    at the fresh-test fetch before any photograph was downloaded, and Section 9 failed with the same `NameError`.
+    Not a look. Its printed output equals attempt #1 apart from process ids and timings. The executed notebooks
+    of attempts #1 and #2 are not committed; both suite logs are kept in the maintainer's workspace.
+  - **Hosted run #3, complete: the evaluation of record** — 2026-10-18 07:26:15–07:31:30 UTC, commit `1231036` /
+    blob `94e67934`; the section below.
+  - **Hosted run #4, complete: reproduction 1** — 2026-10-18 08:56:10–09:00:32 UTC, commit `e96ee0e` / blob
+    `bb9441e4`, the same pre-registered settings, nothing changed in response to the test number; it scored the
+    fresh test again and every result equals the record (section "Primary ViT tutorial: hosted T4 reproduction 1
+    (2026-10-18)").
+- **Evidence-log redaction (R108-S1):** `docs/execution-evidence/2026-10-09-2351f94/exec.log` lines 1 and 70
+  named a local run directory; it is replaced by `<run-dir>/` (2 occurrences, nothing else changed). SHA-256
+  before `67cf7f21a7cce686b8aca64c74d019d66196d78c06c6485126dc33d2bfbc7e33`, after
+  `dec94e0cce4460918d0ad068a758c4e7a98dae262a8095251281a16c2fea03eb`. The executed notebook and
+  `run_summary.json` of that run are unchanged.
+
+## Primary ViT tutorial: hosted T4 evaluation of record (2026-10-18)
+
+**Label (REL13): pre-registered evaluation of record.** It is the first complete hosted run of the pre-registered
+settings and amendment 1, and the first time any run scored the 96-photograph fresh test. The fixer's CPU checks ran
+with the fresh test masked, so there was no development look. The two aborted hosted attempts before it (listed
+above) scored 0 fresh photographs.
+
+- **Identity.** Commit `12310362e09bcf47dda3000266a52c072c91f891`, notebook blob
+  `94e67934a115a3a3100c160681f7493753145a6d`; the run's `source.ipynb` hashes to that blob and is byte-equal to the
+  committed notebook. `inspect_run.py`: 39/39 cells, same ids and order, source identity OK; embedded revision
+  `e0d4282`, generator `build_notebook.py/2.3`, `module_sha256` `3713487a3a2e…`, spec 2.5. The CLI writes no execution
+  counts; 10 of 14 code cells have output (the carried-module cells print nothing).
+- **Runtime.** Colab Tesla T4 (`colab status`: `Hardware: T4`), device `cuda:0` (printed by Sections 3 and 5),
+  torch 2.14.0+cu130, timm 1.0.29, isolated CPython 3.12.12 (45 locked packages, built in 55 s). **TF32:** the
+  carried pipeline sets `torch.backends.cudnn.allow_tf32` and `torch.backends.cuda.matmul.allow_tf32` to `False` on
+  CUDA (`pipeline.py`, amendment 1). The runtime record with `gpu_name` and the two TF32 flags goes only into
+  `outputs/vit_classification_evaluation_report.json`, which stayed on the released VM. So TF32-off is confirmed
+  from the carried source, not from printed output.
+- **Score-once checks (Section 8).** `preregistered` True, `settings_differing` [], `grid_complete` True,
+  `grid_problems` [], `state_matches_selected_system` True, `test_look` `pre-registered evaluation (this runtime)`.
+
+**Validation grid** (validation log-loss by epoch; epoch 0 is the linear probe on frozen features):
+
+| Config | Blocks / LR | Epoch 0 | 1 | 2 | 3 | 4 | Best epoch | Val. accuracy | Seconds |
+|---|---|---|---|---|---|---|---|---|---|
+| C0 | 2 / 3e-5 | 0.1621 | 0.1648 | 0.1655 | 0.1634 | 0.1660 | 0 (probe kept) | 0.9167 | 13.2 |
+| C1 | 4 / 1e-4 | 0.1621 | 0.2370 | 0.1532 | 0.1282 | 0.1242 | 4 | 0.9583 | 15.8 |
+| C2 | 2 / 3e-4 | 0.1621 | 0.2428 | 0.1375 | 0.1632 | 0.1673 | 2 | 0.9583 | 13.8 |
+
+C1 is 0.0379 below C0 and C2 is 0.0246 below; both clear the 0.02 margin without lower validation accuracy, and the
+lower score wins, so **C1 is selected** (28,351,488 block + 4,614 head parameters of 86,567,656; grid and selection
+42.9 s). This **matches the masked CPU development check**: every config, epoch and summary line (train loss,
+validation log-loss, accuracy, macro-F1; 21 lines) is identical at printed precision to the masked CPU runs of
+`9919e13` and of round 2, with timings excluded. The selection-time validation look (+0.0417, CI [0, 0.125]) is
+optimistic and decides nothing.
+
+**Fresh test** (n = 96, 16 per species, 79 observers absent from the 180):
+
+| System | Correct | Accuracy | Macro-F1 | Log-loss |
+|---|---|---|---|---|
+| Majority floor | 16 | 0.1667 | 0.0476 | — |
+| Cosine 5-NN vote, frozen features (decides nothing) | 82 | 0.8542 | 0.8540 | — |
+| Frozen probe | 80 | 0.8333 | 0.8315 | 0.4922 |
+| Selected C1 (unfrozen last 4 blocks) | 78 | 0.8125 | 0.8115 | 0.5200 |
+
+Primary endpoint (amendment 1): paired accuracy difference C1 − probe **−0.0208**, observer-cluster bootstrap 95 % CI
+**[−0.0632, 0.0204]** (79 clusters, 10,000 resamples, seed 20261017); discordant photographs 1 (only C1 right) against
+3 (only the probe right). Secondary, decides nothing: log-loss difference +0.0277, CI [−0.044, 0.1159]. **Verdict:
+`no detectable difference`.** In plain words: **the adapted C1 did not beat the frozen probe.** It got two
+photographs fewer right, and the interval includes 0. The 5-NN vote on the frozen features scored higher than
+both; it decides nothing. This is one trained model (seed 0) against one probe, not a finding about unfreezing in
+general.
+
+**Exposed development test** (48 photographs; descriptives only, decides nothing): floor 0.1667 / macro-F1 0.0476,
+5-NN 0.75 / 0.7516, probe 0.7917 / 0.7885 (log-loss 0.678), C1 0.7292 / 0.7182 (log-loss 0.791); C1 − probe −0.0625
+accuracy, −0.0703 macro-F1, −3 photographs. These numbers equal the masked CPU check. Floor, 5-NN and probe equal the
+2026-10-09 run. Predictions: 6 printed, 0 changed. The C1 adapter (50 tensors, 113,429,024 B) reloads to identical
+probabilities, classes and `predict` output (exposed accuracy 0.729167 both ways). Section 10 was skipped
+(`RUN_EXPERIMENT = False`).
+
+**Re-derivation** (from the printed outputs; the bootstrap was not re-run because the per-photo predictions stayed
+on the VM): 0.8125 × 96 = 78 and 0.8333 × 96 = 80, so the difference is −2/96 = −0.0208. The discordant counts give
+the same net (1 − 3 = −2). The log-loss difference from the printed means is 0.0278, against 0.0277 printed (rounding
+of unrounded means). The CI spans 0, so the rule gives `no detectable difference`, as printed. Fresh floor 16/96, 5-NN
+82/96. Exposed: C1 35/48 (the confusion diagonal sums to 35), probe 38/48.
+
+**Evidence** (`docs/execution-evidence/2026-10-18-1231036/`, `-text`, byte-for-byte):
+`vit_classification_colab_1231036_colab-cli-t4_output.ipynb` sha256
+`f43bd2c13cbfa20393e37027eb36381256f5eb0363f3db8995b9cdc5c6f6c801`; `run_summary.json` sha256
+`ca464c18db397673d52153dfc4f71c9fb71ed6848d2ad805eb96ccfb324bb352`; `exec.log` redacted the same way as R108-S1: the
+local run directory on lines 1 and 95 is replaced by `<run-dir>/` (2 occurrences, nothing else changed). SHA-256 as
+captured `65a0c96e15a721200deeec21a1ba85668c580c52a6e4f9afe5b465dd644c86af`, as committed
+`e982129a47daad548ae08fd5077ccb8f5f15704ff28a97aea214e3bfa31b4e0e`. Evidence boundary: CLI sequential execution, not
+a browser Run all; forms and uploads not exercised; the status stays **Candidate** (REL12 BYOD and the Section 10
+experiment pending).
+
+## Primary ViT tutorial: hosted T4 reproduction 1 (2026-10-18)
+
+**Label (REL13): reproduction of the pre-registered evaluation** (reproduction 1 of the `1231036` / `94e67934`
+evaluation of record). Same pre-registered settings, run on a new fresh Colab T4 after the requote round; nothing was
+changed in response to the test number.
+
+- **Identity.** Commit `e96ee0e7a76ac5171dfb61ab7275a07fe5891c77`, notebook blob
+  `bb9441e4542c4466a89a6472ac1cdfe8a334fa1c`; the run's `source.ipynb` hashes to that blob and is byte-equal to the
+  committed notebook. `inspect_run.py`: 39/39 cells, same ids and order, source identity OK; embedded revision
+  `f6b5b3a` (carries `RECORDED_EVALUATION`), generator `build_notebook.py/2.3`, `module_sha256` `63e9daad404e…`, spec
+  2.5. 10 of 14 code cells have output. Session `suite-vit-e96ee0e-7e62`, `Hardware: T4`, device `cuda:0`, isolated
+  CPython 3.12.12 (45 locked packages, 48 s).
+- **Score-once checks (Section 8).** `preregistered` True, `settings_differing` [], `grid_complete` True,
+  `grid_problems` [], `state_matches_selected_system` True, `test_look` `reproduction`; the fresh-test block also
+  reads `reproduction`.
+- **Match with the record.** `matches_record` (record `2026-10-18 1231036 / blob 94e67934`): `selected_config`,
+  `selected_accuracy`, `probe_accuracy`, `primary_accuracy_difference`, `primary_accuracy_ci95`, `discordant_images`,
+  `verdict` all True. A line-by-line diff of the two CLI logs (commit, revision and blob ids normalised) finds no
+  result line that differs: grid curves and summaries for C0 / C1 / C2 (C1 selected, reason "C1 beat C0 by 0.0379
+  validation log-loss"), fresh test C1 0.8125 (78/96) against the probe 0.8333 (80/96), macro-F1 0.8115 / 0.8315,
+  log-loss 0.52 / 0.4922, difference −0.0208, CI [−0.0632, 0.0204], 79 clusters, discordant 1 vs 3, secondary
+  log-loss difference and CI, floor and 5-NN references, `no detectable difference`; exposed development test
+  descriptives and confusion; six predictions (0 changed); adapter 50 tensors, 113,429,024 B, same SHA-256 prefix
+  `df3a2850e17f7d03`; reload parity identical (0.729167).
+- **What differs** (expected): timings (session 262.5 s vs 317.0 s; environment 48 vs 55 s; corpus fetch 67.8 vs
+  91.9 s; grid C0 / C1 / C2 12.5 / 15.1 / 13.2 vs 13.2 / 15.8 / 13.8 s; selection 40.8 vs 42.9 s), worker pid,
+  embedded revision and `module_sha256`, `test_look`, the file suffixes, and the new `matches_record` line. The run
+  also printed `matches_first` with every field False, because `first_report_readable` is False: the record's main
+  report stayed on the record's released VM, so there was nothing on this VM to compare with. `matches_record` is the
+  comparison that applies.
+- **Files.** Section 8 and Section 9 wrote `vit_classification_evaluation_report_reproduction_1.json`,
+  `…_predictions_reproduction_1.csv`, `…_result_reproduction_1.json` and `…_adapter_reproduction_1`; no main
+  (unsuffixed) report, predictions, result or adapter was written. (`…_grid.json`, `…_input_manifest.json` and
+  `…_train.csv` are written by the earlier sections under their usual names.)
+
+**Evidence** (`docs/execution-evidence/2026-10-18-e96ee0e/`, `-text`, byte-for-byte):
+`vit_classification_colab_e96ee0e_colab-cli-t4_output.ipynb` sha256
+`417d78eec00f4452d22aa609f797722102cc262c76bbd865496982b4d2b4171b`; `run_summary.json` sha256
+`62b7c3a8d15b39d4846d0bf08099eec5923014f01cda7b160a2afddcae235862`; `exec.log` redacted the same way as R108-S1: the
+local run directory on lines 1 and 97 is replaced by `<run-dir>/` (2 occurrences, nothing else changed). SHA-256 as
+captured `8840ee4dc60ca3cbd95263d4f61d2eda63534804c6aea10a690e1d326701e7b0`, as committed
+`76d439cdf625609327cbbfa69b95948cd0976645e3574d514db42aec78ff64b9`. Evidence boundary: CLI sequential execution, not
+a browser Run all; forms and uploads not exercised; the status stays **Candidate** (REL12 BYOD and the Section 10
+experiment pending).
 
 ## Multi-model guided follow-up — 2026-09-26
 

@@ -11,8 +11,12 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      DIMER_MASK_FRESH_TEST: "1"  # CI never fetches or scores the fresh test (row 108 F9)
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # the provenance parity test reads the stamped commit (row 108)
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
