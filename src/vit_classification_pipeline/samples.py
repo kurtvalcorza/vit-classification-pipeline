@@ -1972,9 +1972,14 @@ def _sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+SERVED_EXTENSIONS = ("jpg", "jpeg", "png", "gif", "webp")  # case-insensitive; URL keeps case
+
+
 def photo_url(photo_id: int, ext: str = "jpg") -> str:
-    """The served object for a pinned photo; `ext` is its recorded original extension (jpg or jpeg)."""
-    if ext not in ("jpg", "jpeg"):
+    """The served object for a pinned photo. `ext` is its recorded original extension exactly as the bucket
+    serves it (case-sensitive: the pinned tables hold jpg, jpeg, JPG and png); the size and SHA-256 pins, not
+    the extension, decide whether the bytes are accepted."""
+    if not isinstance(ext, str) or ext.lower() not in SERVED_EXTENSIONS or not ext.isalpha():
         raise ValueError(f"unsupported photo extension {ext!r}")
     return f"{CORPUS_BASE_URL}{photo_id}/medium.{ext}"
 

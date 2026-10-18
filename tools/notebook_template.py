@@ -508,6 +508,7 @@ TEMPLATE = {
             "code": (
                 "if not globals().get('RUN_VALID'):\n"
                 "    raise RunStopped('Section 8: the last Section 4 run was refused or did not finish, so this run is invalid. Fix the input and choose Run after from Section 4.')\n"
+                "SECTION_8_COMPLETE = False  # set True only once this cell's report is on disk; Section 9 checks it\n"
                 "# Re-check everything here, immediately before the fresh test could be touched.\n"
                 "settings_now = current_settings()\n"
                 "settings_differing = preregistration_differences(settings_now)\n"
@@ -629,6 +630,7 @@ TEMPLATE = {
                 "}}\n"
                 "atomic_write_text(evaluation_report_path, json.dumps(evaluation_report_payload, indent=2, ensure_ascii=False))\n"
                 "LOOK_LEDGER.record(mode, look_suffix)  # the look counts only now that its report is on disk\n"
+                "SECTION_8_COMPLETE = True\n"
                 "print({{'exposed_development_test_descriptives (decide nothing)': comparison['descriptives_decide_nothing']}})\n"
                 "print({{'report': evaluation_report_path}})"
             ),
@@ -667,6 +669,8 @@ TEMPLATE = {
                 "import shutil\n\n"
                 "if not globals().get('RUN_VALID'):\n"
                 "    raise RunStopped('Section 9: the last Section 4 run was refused or did not finish, so this run is invalid. Fix the input and choose Run after from Section 4.')\n"
+                "if not globals().get('SECTION_8_COMPLETE'):\n"
+                "    raise RunStopped('Section 9: Section 8 did not complete (it stopped with an error or was not run), so there is no report to export beside. Fix the error shown there and choose Run after from Section 8.')\n"
                 "show = test_records[:6]  # the exposed development test\n"
                 "after = pipe.classify([r['image'] for r in show])\n"
                 "frozen_pipe = ViTClassificationPipeline.from_pretrained(weights_dir=WEIGHTS_DIR, device=pipe.device)\n"

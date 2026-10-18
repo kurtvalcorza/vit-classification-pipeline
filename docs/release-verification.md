@@ -223,7 +223,17 @@ row above) is an exposed number, reported for continuity.
 - **Amendment 1** (`docs/vit-preregistration-amendment-1.md`, committed alone before its code): one primary endpoint
   (paired accuracy difference, observer-cluster bootstrap), crash-safe look counting, TF32 off, the T4 run as record.
 - **Hosted looks at the fresh test** (every unmasked hosted run that reaches the fetch is numbered here, whether or
-  not it completes; hosted look #1, if complete, is the evaluation of record): none yet.
+  not it completes; the first COMPLETE one is the evaluation of record):
+  - **Hosted fetch attempt #1, aborted, 0 fresh photographs scored** — 2026-10-18 ~07:00 UTC, Colab CLI T4, commit
+    `7203721`, blob `793330fa`. Section 8 printed `preregistered` True, a complete grid, the model state matching and
+    **C1 selected** (equal to the masked CPU check: validation log-loss C0 0.1621 / C1 0.1242 / C2 0.1375), and the
+    exposed-test descriptives (C1 0.7292 against the probe's 0.7917). The fresh-test fetch then raised
+    `ValueError: unsupported photo extension 'png'` in `photo_url` before any photograph was downloaded or decoded,
+    so no fresh-test number exists and, by the amended look rule, this is not a look; Section 9 then failed with a
+    `NameError` (no Section 8 report). Fix (round 3): `photo_url` accepts every served extension in the pinned
+    tables (fresh: jpg 48, jpeg 45, png 2, JPG 1; corpus: jpg 93, jpeg 87), with the size and SHA-256 checks
+    unchanged; a CPU test resolves every pinned URL without downloading; Section 9 stops with `RunStopped` when
+    Section 8 did not complete. No pre-registered setting changed, so no amendment was needed.
 - **Evidence-log redaction (R108-S1):** `docs/execution-evidence/2026-10-09-2351f94/exec.log` lines 1 and 70
   named a local run directory; it is replaced by `<run-dir>/` (2 occurrences, nothing else changed). SHA-256
   before `67cf7f21a7cce686b8aca64c74d019d66196d78c06c6485126dc33d2bfbc7e33`, after

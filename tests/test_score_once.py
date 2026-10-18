@@ -452,3 +452,43 @@ def test_f14_a_byod_set_at_the_floor_is_exploratory_and_still_writes_its_report(
     assert report["settings_differing"] == ["data_source"] and fetched == []
     assert report["exposed_development_test"]["comparison"]["descriptives_decide_nothing"] == {
         "frozen_vs_floor": "at or below floor", "selected_vs_floor": "at or below floor", "selected_minus_frozen_photographs": -0}
+
+
+# ---- round 3: every pinned record resolves to its served URL (the hosted run failed on 'png'); no download
+@pytest.mark.parametrize("table", ["FRESH_TEST_RECORDS", "SAMPLE_RECORDS"])
+def test_every_pinned_record_resolves_to_its_served_url(table):
+    from vit_classification_pipeline import samples
+
+    records = getattr(samples, table)
+    for r in records:
+        url = samples.photo_url(r[2], r[7])
+        assert url == f"{samples.CORPUS_BASE_URL}{r[2]}/medium.{r[7]}", r[0]
+    if table == "FRESH_TEST_RECORDS":
+        assert {r[7] for r in records} == {"jpg", "jpeg", "png", "JPG"}
+
+
+def test_fetch_corpus_requests_every_pinned_fresh_url_without_a_network(tmp_path, monkeypatch):
+    from vit_classification_pipeline import samples
+
+    monkeypatch.delenv("DIMER_MASK_FRESH_TEST", raising=False)
+    asked = []
+
+    def refuse(url):
+        asked.append(url)
+        return b""  # wrong bytes: the digest check must refuse them, nothing is decoded
+
+    for r in samples.FRESH_TEST_RECORDS:
+        with pytest.raises(ValueError, match="pinned"):
+            samples.fetch_corpus(cache_dir=tmp_path, fetcher=refuse, records=[r])
+    assert len(asked) == 96 and any(u.endswith(".png") for u in asked) and any(u.endswith(".JPG") for u in asked)
+
+
+def test_section_9_stops_cleanly_when_section_8_did_not_complete(tmp_path, monkeypatch):
+    ns, fetched = _namespace(tmp_path, monkeypatch)
+    ns["SECTION_8_COMPLETE"] = False
+    ns["RunStopped"] = type("RunStopped", (Exception,), {"dimer_stop": True})
+    with pytest.raises(ns["RunStopped"], match="Section 8 did not complete"):
+        exec(_cell("show = test_records[:6]"), ns)
+    exec(_cell(SECTION_8), ns)
+    assert ns["SECTION_8_COMPLETE"] is True
+
