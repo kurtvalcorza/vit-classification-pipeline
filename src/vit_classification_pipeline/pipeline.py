@@ -482,8 +482,24 @@ class ViTClassificationPipeline:
             "model_revision": MODEL_REVISION,
         }
 
-    def evaluate(self, records: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-        """Score a validated labelled dataset with the trained head: accuracy, macro-F1, per-class scores."""
+    def state_fingerprint(self) -> str:
+        """SHA-256 over the selected policy, the classes, the head tensors and every backbone tensor: two
+        pipelines with equal fingerprints label every input identically."""
+        model = self._require_model()
+        head, classes = self._require_head()
+        digest = hashlib.sha256(
+            json.dumps({"policy": (self.adapter or {}).get("policy"), "classes": list(classes)}).encode()
+        )
+        for prefix, state in (("head.", head.state_dict()), ("model.", model.state_dict())):
+            for name in sorted(state):
+                digest.update((prefix + name).encode())
+                digest.update(state[name].detach().cpu().contiguous().numpy().tobytes())
+        return digest.hexdigest()
+
+    def evaluate(self, records: Sequence[Mapping[str, Any]], *, per_record: bool = False) -> dict[str, Any]:
+        """Score a validated labelled dataset with the trained head: accuracy, macro-F1, per-class scores.
+        `per_record=True` adds each image's prediction, correctness and negative log-probability (the inputs
+        of a paired bootstrap)."""
         from .metrics import classification_metrics
         from .samples import validate_dataset
 
@@ -491,6 +507,7 @@ class ViTClassificationPipeline:
         checked = validate_dataset(records, min_records=1, max_records=MAX_EVAL_RECORDS)["records"]
         started = time.perf_counter()
         predictions: list[str] = []
+        rows: list[dict[str, Any]] = []
         nll = 0.0
         index = {c: i for i, c in enumerate(classes)}
         for start in range(0, len(checked), MAX_BATCH):
@@ -500,7 +517,14 @@ class ViTClassificationPipeline:
             for record, row in zip(chunk, out["probabilities"], strict=True):
                 if record["label"] not in index:
                     raise ValueError(f"label {record['label']!r} is not one of the head's classes")
-                nll -= math.log(max(row[index[record["label"]]], 1e-12))
+                item = -math.log(max(row[index[record["label"]]], 1e-12))
+                nll += item
+                if per_record:
+                    predicted = classes[max(range(len(row)), key=row.__getitem__)]
+                    rows.append(
+                        {"id": record["id"], "label": record["label"], "predicted": predicted,
+                         "correct": predicted == record["label"], "nll": item}
+                    )
         metrics = classification_metrics([r["label"] for r in checked], predictions, classes)
         metrics.update(
             {
@@ -513,6 +537,8 @@ class ViTClassificationPipeline:
                 "model_revision": MODEL_REVISION,
             }
         )
+        if per_record:
+            metrics["per_record"] = rows
         return metrics
 
     def _trainable_names(self, trainable_blocks: int) -> list[str]:
@@ -537,6 +563,7 @@ class ViTClassificationPipeline:
         lr: float = 3e-5,
         batch_size: int = 8,
         seed: int = 0,
+        min_improvement: float = 0.0,
         progress: Callable[[dict[str, Any]], None] | None = None,
     ) -> dict[str, Any]:
         """Bounded supervised adaptation of a validated labelled-image dataset in two stages.
@@ -549,7 +576,10 @@ class ViTClassificationPipeline:
         clipping 1.0, seeded shuffling, no augmentation; the patch embedding, the position embedding, the
         earlier blocks and the final norm stay frozen), scored on validation after every epoch. The epoch with
         the lowest validation log-loss (mean negative log-probability of the gold label) is kept — it may be
-        the probe itself; accuracy and macro-F1 are reported beside it at every epoch. Every call starts
+        the probe itself; accuracy and macro-F1 are reported beside it at every epoch. **Keep frozen unless
+        beaten:** the best unfrozen epoch (lowest validation log-loss among epochs 1..`epochs`) replaces the
+        probe only if its log-loss is below the probe's and at least `min_improvement` below it (0.0 keeps the
+        plain "lower wins" rule; the tutorial's pre-registration uses 0.02). Every call starts
         from the pinned base: block tensors an earlier adapt() or load_artifact() changed are restored
         before the probe's features are computed, so epoch 0 is a probe on the frozen backbone whatever
         ran before."""
@@ -557,6 +587,9 @@ class ViTClassificationPipeline:
 
         if not isinstance(probe_steps, int) or not 1 <= probe_steps <= 5_000:
             raise ValueError("probe_steps must be an int in 1..5000")
+        if not isinstance(min_improvement, int | float) or not 0.0 <= float(min_improvement) <= 1.0:
+            raise ValueError("min_improvement must be a number in [0, 1]")
+        min_improvement = float(min_improvement)
         if not (0.0 < probe_lr <= 1.0):
             raise ValueError("probe_lr must be in (0, 1]")
         if not isinstance(epochs, int) or not 0 <= epochs <= 20:
@@ -623,6 +656,9 @@ class ViTClassificationPipeline:
             "blocks": {k: v.detach().clone() for k, v in model.state_dict().items() if k in wanted},
         }
         best_epoch = 0
+        probe_loss = best_loss
+        probe_state = best_state
+        best_loss = math.inf  # from here: the best unfrozen epoch; it must beat the probe by min_improvement
         # ---- stage B: bounded unfreeze of the last blocks, end to end with the head
         n_trainable_blocks = 0
         if names and epochs > 0:
@@ -695,6 +731,10 @@ class ViTClassificationPipeline:
                 self._head, self.classes, self.adapter = None, [], None
                 raise
             head.cpu()
+            if val_checked and best_epoch > 0 and not (
+                best_loss < probe_loss and probe_loss - best_loss >= min_improvement
+            ):
+                best_state, best_epoch = probe_state, 0  # keep frozen: the unfreeze did not beat the margin
             merged = dict(model.state_dict())
             merged.update(best_state["blocks"])
             model.load_state_dict(merged, strict=True)
@@ -721,8 +761,12 @@ class ViTClassificationPipeline:
             "epochs": epochs if names else 0,
             "best_epoch": best_epoch,
             "selection": "lowest validation log-loss (epoch 0 = linear probe)"
+            + (f"; an unfreeze must beat the probe by >= {min_improvement}" if min_improvement else "")
             if val_checked
             else "final epoch",
+            "min_improvement": min_improvement,
+            "probe_val_log_loss": probe_loss if val_checked else None,
+            "best_unfrozen_val_log_loss": best_loss if val_checked and math.isfinite(best_loss) else None,
             "lr": lr,
             "batch_size": batch_size,
             "n_train": len(train_checked),

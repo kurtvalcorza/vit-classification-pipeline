@@ -1,6 +1,6 @@
 """Static release-asset validation for the ViT-B/16 ImageNet-1k classification DIMER pipeline.
 
-Checks the STANDALONE tutorial notebook (DIMER Notebook Specification 2.2 §4), the tutorial
+Checks the STANDALONE tutorial notebook (DIMER Notebook Specification 2.5 §4), the tutorial
 registry, model card, README, STATUS.md and weight documentation for source conformance and
 cross-document identity consistency, and runs the generator parity checks (PAR1–PAR3).
 
@@ -33,10 +33,13 @@ BYOD_GATES = ("USE_BYOD",)
 EXPECTED_OUTPUTS = (
     "outputs/vit_classification_train.csv",
     "outputs/vit_classification_input_manifest.json",
-    "outputs/vit_classification_evaluation_report.json",
-    "outputs/vit_classification_predictions.csv",
-    "outputs/vit_classification_adapter",
-    "outputs/vit_classification_result.json",
+    # Section 8/9 files carry the look suffix ("" for the first pre-registered evaluation in a runtime,
+    # "_reproduction_<n>" / "_exploratory_<n>" / "_masked_<n>" otherwise): the prefixes are checked.
+    "outputs/vit_classification_evaluation_report' + look_suffix + '.json",
+    "outputs/vit_classification_grid.json",
+    "outputs/vit_classification_predictions' + look_suffix + '.csv",
+    "outputs/vit_classification_adapter' + look_suffix",
+    "outputs/vit_classification_result' + look_suffix + '.json",
 )
 CODE_MARKERS = (
     # Stage 4: pinned corpus, validation, stratified split, observer overlap, CSV, refusal probes
@@ -67,9 +70,25 @@ CODE_MARKERS = (
     "if not probe_result['policy'].startswith('frozen'):",
     "frozen_verdict = ",
     # Stage 7: the unfrozen policy with explicit hyperparameters
-    "adapt_result = pipe.adapt(",
-    "trainable_blocks=TRAINABLE_BLOCKS",
-    "lr=LEARNING_RATE",
+    # Stage 7: the pre-registered grid (R108-D2), keep-frozen margin, selection reloaded and fingerprint-checked
+    "result = pipe.adapt(train_records, val_records, probe_steps=PROBE_STEPS, probe_lr=PROBE_LR, trainable_blocks=config['trainable_blocks'], epochs=EPOCHS, lr=config['lr'], batch_size=BATCH_SIZE, seed=ADAPT_SEED, min_improvement=MIN_IMPROVEMENT, progress=report)",
+    "grid_to_run = list(GRID) if RUN_GRID else",
+    "selection = select_config(grid_rows)",
+    "if pipe.state_fingerprint() != selection['fingerprint']:",
+    "adapt_result = grid_results[selection['selected']]",
+    # Stage 8: score-once wiring (R108-M3, SCORE_ONCE_RULE items 1-8)
+    "settings_differing = preregistration_differences(settings_now)",
+    "grid_status = grid_check(grid_rows, settings_now, split_digests_now)",
+    "state_matches = selection_now['selected'] == selection['selected']",
+    "mode = scoring_mode(differences=settings_differing, grid=grid_status, state_matches=state_matches, masked=masked)",
+    "test_look, look_suffix = LOOK_LEDGER.next_look(mode)",
+    "if mode == 'preregistered':",
+    "fresh_records = fetch_fresh_test(cache_dir='weights/inat-birds')",
+    "boot = paired_bootstrap(selected_fresh['per_record'], frozen_fresh['per_record'], n_boot=BOOTSTRAP_N, seed=BOOTSTRAP_SEED)",
+    "'settings_differing': settings_differing,",
+    "fresh_check = check_fresh_disjoint()",
+    "raise RunStopped(f'BYOD refused, nothing was trained or scored:",
+    "experiment_ran = True",
     "'selected_policy': adapt_result['policy']",
     # Stage 8: held-out evaluation, comparison, recorded verdicts (2026-10-05 review fix VIT-m2: no quality assert)
     "adapted_test = pipe.evaluate(test_records)",
@@ -108,7 +127,12 @@ MARKDOWN_MARKERS = (
     "**Capability:** ImageNet-1k single-label image classification (argmax plus top-k softmax scores)",
     "a new linear head on the frozen 768-d pre-logits with an optional unfreeze of the last transformer blocks",
     "**The label space is fixed to the 1000 ImageNet-1k classes:**",
-    "**supervised adaptation to a label space the checkpoint does not have, under an explicit frozen-vs-unfrozen policy**",
+    "**supervised adaptation to a label space its ImageNet-1k head does not have, under an explicit frozen-vs-unfrozen policy**",
+    "**What the checkpoint already knew (DAT9):**",
+    "n01536035",
+    "**exposed development test**",
+    "docs/vit-preregistration.md",
+    "European goldfinch",
     "**majority floor**",
     "**cosine 5-NN vote**",
     "**frozen policy**",
@@ -118,6 +142,17 @@ MARKDOWN_MARKERS = (
     "no dispersion estimate",
     "object detection, segmentation, multi-label tagging, OCR, open-vocabulary or zero-shot classification",
     "CC0 by its own iNaturalist licence code",
+)
+# Claims the 2026-10-17 review (row 108) found false; none may come back (R108-M1, M2, m1, m2, m3).
+STALE_PROSE = (
+    "never used for training or policy selection",
+    "never by the test split",
+    "label space the checkpoint does not have",
+    "names three of the six",
+    "Kaggle T4 release run",
+    "independent test split",
+    "independent split",
+    "here it was",
 )
 # Direct-library use that must stay inside the carried module cell (G2: the notebook calls the
 # pipeline API, it does not reimplement it). Checked on every code cell except the embedded one.
@@ -152,7 +187,8 @@ INSTALL_CELL_MARKER = "# dimer: kernel cell"
 # Specification 2.2; see docs/release-verification.md for the release gate.
 # ---------------------------------------------------------------------------
 
-NOTEBOOK_SPEC = "2.2"
+NOTEBOOK_SPEC = "2.5"
+NOTEBOOK_KIND = "TUTORIAL"  # NOTEBOOK_SPEC 2.5 KND1
 ALLOWED_PROFILES = {"E2E", "ARTIFACT-INFERENCE", "TASK-INFERENCE", "MULTI-CAPABILITY", "SMOKE"}
 STATUS_TOKENS = ("Candidate", "Release-grade")
 PLACEHOLDER = re.compile(r"\b(TODO|TBD|FIXME)\b|Insert text here|Tooltip:", re.I)
@@ -485,6 +521,7 @@ def _validate_notebook_structure(path: Path, notebook: dict) -> tuple[list[tuple
     _check(profile == EXPECTED_PROFILE, f"{path.name}: profile {profile!r} != declared {EXPECTED_PROFILE!r}")
     spec = dimer.get("notebook_spec", dimer.get("notebook_spec_version"))
     _check(spec == NOTEBOOK_SPEC, f"{path.name}: metadata.dimer must declare notebook spec version '{NOTEBOOK_SPEC}'")
+    _check(dimer.get("notebook_kind") == NOTEBOOK_KIND, f"{path.name}: metadata.dimer.notebook_kind must be {NOTEBOOK_KIND!r} (KND1)")
     _check(dimer.get("notebook_mode") in ("REFERENCE", "GUIDED", "WORKSHOP"), f"{path.name}: metadata.dimer.notebook_mode must declare a §3.3 pedagogical mode")
     _check(dimer.get("standalone") is True, f"{path.name}: metadata.dimer.standalone must be true (ST6)")
     generated = dimer.get("generated_from")
@@ -669,6 +706,8 @@ def _validate_notebook_content(
     for filename in EXPECTED_OUTPUTS:
         _check(filename in code, f"{path.name}: must export {filename}")
     missing_md = [marker for marker in COMMON_MARKDOWN_MARKERS + MARKDOWN_MARKERS if marker not in markdown]
+    stale = [phrase for phrase in STALE_PROSE if phrase in markdown or phrase in code]
+    _check(not stale, f"{path.name}: carries claims the row-108 review found false: {stale}")
     _check(not missing_md, f"{path.name}: missing learner-facing markers: {missing_md}")
     _check(f"**Profile:** `{EXPECTED_PROFILE}`" in markdown, f"{path.name}: markdown must state the profile")
     _check(f"https://huggingface.co/{model_id}" in markdown, f"{path.name}: references must link {model_id}")

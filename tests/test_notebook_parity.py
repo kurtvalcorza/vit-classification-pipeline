@@ -123,3 +123,21 @@ def test_st1_primary_path_has_no_repository_dependency(notebook: dict) -> None:
     assert f"from {TEMPLATE['package']}" not in code
     # own-repository clone/install (ST1); SHA-pinned upstream git dependencies are allowed
     assert "github.com/kurtvalcorza" not in code
+
+
+def test_stamped_revision_contains_the_carried_modules():
+    """Row 108 provenance: `generated_from.revision` names a commit whose carried modules are byte-identical (after
+    LF normalisation) to the ones embedded in the notebook, so the stamp never names code that is not in it."""
+    import subprocess
+
+    notebook = json.loads((ROOT / "tutorials" / TEMPLATE["notebook_name"]).read_text(encoding="utf-8"))
+    revision = notebook["metadata"]["dimer"]["generated_from"]["revision"]
+    try:
+        subprocess.check_output(["git", "-C", str(ROOT), "cat-file", "-e", f"{revision}^{{commit}}"], stderr=subprocess.STDOUT)
+    except (OSError, subprocess.CalledProcessError):
+        pytest.skip(f"stamped commit {revision} is not in this clone (shallow checkout)")
+    for module in TEMPLATE["modules"]:
+        rel = f"src/{TEMPLATE['package']}/{module}"
+        committed = subprocess.check_output(["git", "-C", str(ROOT), "show", f"{revision}:{rel}"]).decode("utf-8")
+        current = (ROOT / rel).read_text(encoding="utf-8")
+        assert committed.replace("\r\n", "\n") == current.replace("\r\n", "\n"), f"{rel} differs from the stamped commit {revision}"

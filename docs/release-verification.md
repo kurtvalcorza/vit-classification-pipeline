@@ -36,7 +36,7 @@ CI runs `tools/validate_release_assets.py`, which checks:
   per-batch `evaluation_report`, `pipe.save_artifact`, `ViTClassificationPipeline.from_artifact` and the
   reload-parity assertion including `predict`, and the provenance fields `weight_format`, `weight_sha256` and the `corpus` block), the
   six expected `outputs/` paths, the learner-facing statements (the fixed ImageNet-1k label space, supervised
-  adaptation to a label space the checkpoint does not have under an explicit frozen-vs-unfrozen policy, the majority
+  adaptation to a label space its ImageNet-1k head does not have under an explicit frozen-vs-unfrozen policy, the majority
   floor, the cosine 5-NN vote, the frozen and unfrozen policies, lowest validation log-loss, the ImageNet head never
   trained or exported, no dispersion estimate, named exclusions, the CC0 licence) and the gated-off BYOD default; forbidden patterns (credential-in-URL, any `git
   clone` / `github.com` / repository import on the primary path, a mutable `revision='main'`, direct
@@ -184,6 +184,31 @@ stays **Candidate** until a reviewer promotes it.
 ## Primary ViT tutorial status
 
 **Candidate.** The 2026-09-19 Kaggle T4 run of blob `50462c07` (commit `8b26ec6`) needed a manual restart after the install cell (11/11 ok (1 restart after install cell)), so it is not a one-pass `Run all` and not promotion evidence (review finding VIT-M1, 2026-10-05). The review-fix blob `5738b645259c` (commit `2351f94`; uv isolated environment, guided layer, VIT-M1..M3 / VIT-m1..m3 fixes) completed one pass with no restart and 0 errors on a fresh Colab Tesla T4 on 2026-10-09 (Colab CLI 0.7.4 sequential execution, 13/13 code cells, 185.4 s; floor 0.1667, 5-NN 0.75, frozen probe 0.7917, selected policy 0.7917 with the probe kept on validation log-loss 0.1621; reload parity identical). REL12 BYOD exercise (path-based and upload) and the optional Section 10 experiment are pending on a hosted runtime, so the status stays Candidate (REL14). The 2026-09-19 row and the local pre-flight rows above remain history. Any later change to the carried modules or to the notebook produces a new blob that needs its own clean run.
+
+## Primary ViT tutorial: 2026-10-17 review fixes (row 108)
+
+Review `row108-vit` (2026-10-17) found that the default recipe and the lesson "the probe is usually the honest
+choice" were set after the build sweep of 2026-09-18/19 (CPU pre-flight of blob `c1fdbadd`) had scored two
+unfreeze configurations on the 48-photograph test split: 4 blocks @ 1e-4 (72.9 %) and 2 blocks @ 3e-4 (66.7 %).
+That split is now the **exposed development test**. Every number on it in this file (including the 2026-10-09
+row above) is an exposed number, reported for continuity.
+
+- **Pre-registration** (`docs/vit-preregistration.md`, committed alone before any code): the C0 / C1 / C2
+  validation grid, every fixed setting, the 0.02 log-loss margin with the keep-frozen rule, and the fresh-test
+  reading rule (paired bootstrap of selected − probe, 10,000 resamples, seed 20261017, verdict from the 95 % CIs).
+- **Fresh test** (owner ruling R108-D1): 96 photographs (16 per species), 10,659,247 bytes, 79 observers, selection
+  digest `01fffe006c19d873bdcb379e6345f3f8219490340a76ca8e42a68ff19e9dda84`, drawn by `tools/draw_fresh_test.py`
+  from the 360-photograph table of `kurtvalcorza/siglip2-vision-language-pipeline` at
+  `4fe334864548adcbc18d4173d0e1d38ce2991259` minus the 180, observers absent from the 180, ascending photo id.
+  0 shared photographs, observations or observers; 0 near-duplicate hits (dHash-64 <= 10 or equal pixels).
+  This model has never scored them; six other fleet repositories allocate them in their own splits.
+- **Score-once wiring** (`protocol.py`, SCORE_ONCE_RULE items 1-8): Section 8 re-checks `preregistered` over all
+  fixed settings, the grid's completeness and settings, the split and the model-state fingerprint before it
+  touches the fresh test. Reproductions write `_reproduction_<n>`, exploratory runs `_exploratory_<n>`.
+- **Evaluation of record:** none yet. `RECORDED_EVALUATION` is `None` until the first hosted T4 Run all with
+  the pre-registered settings; that run is THE evaluation, and later identical hosted runs are reproductions.
+- **Development looks at the fresh test:** none. The fixer's CPU checks ran with `DIMER_MASK_FRESH_TEST=1`
+  (validation and the exposed development test only).
 
 ## Multi-model guided follow-up — 2026-09-26
 
