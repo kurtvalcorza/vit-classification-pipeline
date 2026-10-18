@@ -209,6 +209,11 @@ row above) is an exposed number, reported for continuity.
   the pre-registered settings; that run is THE evaluation, and later identical hosted runs are reproductions.
 - **Development looks at the fresh test:** none. The fixer's CPU checks ran with `DIMER_MASK_FRESH_TEST=1`
   (validation and the exposed development test only).
+- **Evidence-log redaction (R108-S1):** `docs/execution-evidence/2026-10-09-2351f94/exec.log` lines 1 and 70
+  named a local run directory; it is replaced by `<run-dir>/` (2 occurrences, nothing else changed). SHA-256
+  before `67cf7f21a7cce686b8aca64c74d019d66196d78c06c6485126dc33d2bfbc7e33`, after
+  `dec94e0cce4460918d0ad068a758c4e7a98dae262a8095251281a16c2fea03eb`. The executed notebook and
+  `run_summary.json` of that run are unchanged.
 
 ## Multi-model guided follow-up — 2026-09-26
 
