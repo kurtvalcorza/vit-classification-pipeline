@@ -3,10 +3,10 @@
 `PREREGISTERED_SETTINGS` lists every setting the pre-registration fixes. A run is `preregistered` only when all
 of them hold, the validation grid is complete and matches them, and the model in hand is the selected system;
 only such a run scores the fresh test. Every other run is exploratory: validation and the labelled exposed
-development test only, written to `*_exploratory_<n>` files. A repeat of a pre-registered scoring in the same
-runtime is a reproduction and writes `*_reproduction_<n>` files; it never overwrites the first one. A runtime cannot
-see other runtimes: docs/release-verification.md says which hosted run is the evaluation of record
-(`RECORDED_EVALUATION`, None until that run exists).
+development test only, written to `*_exploratory_<n>` files. The evaluation of record is the 2026-10-18 hosted
+Colab T4 run (`RECORDED_EVALUATION`; docs/release-verification.md), so every later pre-registered scoring, in this
+runtime or a new one, is a reproduction: it writes `*_reproduction_<n>` files, never the main ones, and is compared
+with the record (`compare_with_record`).
 """
 
 # ruff: noqa: E501
@@ -58,11 +58,43 @@ PREREGISTERED_SETTINGS: dict[str, Any] = {
     "fresh_test_digest": FRESH_TEST_DIGEST,
 }
 
-# The hosted T4 run that is the evaluation of record (date, notebook blob, numbers); None until it exists.
-RECORDED_EVALUATION: dict[str, Any] | None = None
+# The hosted T4 run that is the evaluation of record (REL13 label, identity, numbers), re-derived from the executed
+# notebook in docs/execution-evidence/2026-10-18-1231036/ (tests/test_score_once.py checks every number against it).
+# With it set, no runtime writes the main report again: every pre-registered scoring is a reproduction.
+RECORDED_EVALUATION: dict[str, Any] | None = {
+    "label": "pre-registered evaluation of record",
+    "date": "2026-10-18",
+    "runner": "Colab CLI 0.7.4, fresh hosted Colab Tesla T4 runtime (cuda:0, float32, TF32 off)",
+    "commit": "12310362e09bcf47dda3000266a52c072c91f891",
+    "notebook_blob": "94e67934a115a3a3100c160681f7493753145a6d",
+    "evidence": "docs/execution-evidence/2026-10-18-1231036/",
+    "preregistered": True,
+    "settings_differing": [],
+    "selected_config": "C1",
+    "selected_policy": "unfrozen last 4 blocks + linear head",
+    "best_epoch": 4,
+    "grid_val_log_loss": {"C0": 0.1621, "C1": 0.1242, "C2": 0.1375},
+    "grid_val_accuracy": {"C0": 0.9167, "C1": 0.9583, "C2": 0.9583},
+    "fresh_test": {
+        "n": 96,
+        "selected": {"accuracy": 0.8125, "correct": 78, "macro_f1": 0.8115, "log_loss": 0.52},
+        "frozen_probe": {"accuracy": 0.8333, "correct": 80, "macro_f1": 0.8315, "log_loss": 0.4922},
+        "primary_accuracy_difference": -0.0208,
+        "primary_accuracy_ci95": [-0.0632, 0.0204],
+        "n_clusters": 79,
+        "discordant_images": {"selected_only": 1, "probe_only": 3},
+        "secondary_log_loss_difference": 0.0277,
+        "secondary_log_loss_ci95": [-0.044, 0.1159],
+        "verdict": "no detectable difference",
+        "references_decide_nothing": {"majority_floor": {"accuracy": 0.1667, "macro_f1": 0.0476},
+                                      "knn5_frozen_base": {"accuracy": 0.8542, "correct": 82, "macro_f1": 0.854}},
+    },
+    "exposed_development_test": {"n": 48, "majority_floor": 0.1667, "knn5": 0.75, "frozen_policy": 0.7917, "selected": 0.7292},
+    "reload_parity_accuracy": 0.729167,
+}
 
 TEST_LOOK_PREREGISTERED = "pre-registered evaluation (this runtime)"
-TEST_LOOK_REPRODUCTION = "reproduction of the pre-registered evaluation"
+TEST_LOOK_REPRODUCTION = "reproduction"
 TEST_LOOK_EXPLORATORY = "not scored (exploratory)"
 TEST_LOOK_MASKED = "not scored (fresh test masked for a development check)"
 UNIFORM_LOG_LOSS_6 = 1.7918  # ln 6: the log-loss of a uniform guess over the six species (a reference point)
@@ -263,6 +295,31 @@ def read_json_or_none(path: str | Path) -> Any:
         return None
 
 
+def compare_with_record(fresh_test: Mapping[str, Any], selected_config: str,
+                        record: Mapping[str, Any] | None = None) -> dict[str, Any] | None:
+    """How a reproduction compares with the evaluation of record (printed and saved; it asserts nothing).
+
+    None when there is no record or the fresh test was not scored. Values are compared at the record's 4-decimal
+    precision; a hosted GPU may still differ in the last digit, which is why this is reported, not enforced.
+    """
+    record = RECORDED_EVALUATION if record is None else record
+    if not record or not fresh_test.get("scored"):
+        return None
+    rec = record["fresh_test"]
+    boot = fresh_test.get("paired_bootstrap") or {}
+    r4 = lambda x: None if x is None else round(float(x), 4)  # noqa: E731
+    return {
+        "record": f"{record['date']} {record['commit'][:7]} / blob {record['notebook_blob'][:8]}",
+        "selected_config": selected_config == record["selected_config"],
+        "selected_accuracy": r4(fresh_test["selected"]["accuracy"]) == rec["selected"]["accuracy"],
+        "probe_accuracy": r4(fresh_test["frozen_probe"]["accuracy"]) == rec["frozen_probe"]["accuracy"],
+        "primary_accuracy_difference": r4(boot.get("primary_accuracy_difference")) == rec["primary_accuracy_difference"],
+        "primary_accuracy_ci95": [r4(x) for x in boot.get("primary_accuracy_ci95") or []] == rec["primary_accuracy_ci95"],
+        "discordant_images": boot.get("discordant_images") == rec["discordant_images"],
+        "verdict": fresh_test.get("verdict") == rec["verdict"],
+    }
+
+
 class LookLedger:
     """Counts fresh-test scorings in this runtime, crash-safely (row 108 F2).
 
@@ -304,7 +361,10 @@ class LookLedger:
             raise ValueError(f"unknown scoring mode {mode!r}")
         counts = self._load()
         if mode == "preregistered":
-            if read_json_or_none(self.main_report) is not None or counts.get("preregistered_completed", 0) > 0:
+            # With the evaluation of record set, a pre-registered scoring in ANY runtime (a new one included) is a
+            # reproduction and never writes the main files.
+            if (RECORDED_EVALUATION is not None or read_json_or_none(self.main_report) is not None
+                    or counts.get("preregistered_completed", 0) > 0):
                 n = max(self._highest("reproduction"), counts.get("reproductions", 0)) + 1
                 return TEST_LOOK_REPRODUCTION, f"_reproduction_{n}"
             return TEST_LOOK_PREREGISTERED, ""

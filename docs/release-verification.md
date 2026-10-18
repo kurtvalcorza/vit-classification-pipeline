@@ -216,10 +216,11 @@ row above) is an exposed number, reported for continuity.
   touches the fresh test. Reproductions write `_reproduction_<n>`, exploratory runs `_exploratory_<n>`.
 - **Evaluation of record:** the 2026-10-18 Colab CLI T4 run of commit `1231036` / blob `94e67934` (hosted run #3
   below; section "Primary ViT tutorial: hosted T4 evaluation of record (2026-10-18)"). Later identical hosted
-  runs are reproductions. **Reproductions:** none yet. `RECORDED_EVALUATION` in `protocol.py` is still `None`:
-  setting it regenerates the notebook (a new blob), which this docs-only record does not do, so until then a
-  later identical run still prints `pre-registered evaluation (this runtime)`; this file says which run is the
-  record.
+  runs are reproductions. **Reproductions:** none yet. `RECORDED_EVALUATION` in `protocol.py` now carries this
+  record (re-derived from the executed notebook; `test_recorded_evaluation_equals_the_executed_evidence`), and the
+  notebook was regenerated from it (requote round, 2026-10-18; a new blob, not run). From that blob on, a
+  pre-registered run in any runtime, a new one included, prints `test_look` `reproduction`, writes only
+  `*_reproduction_<n>` files and prints `matches_record`; the main report is never written again.
 - **Development looks at the fresh test:** none. The fixer's CPU checks ran with `DIMER_MASK_FRESH_TEST=1`
   (validation and the exposed development test only).
 - **Masked CPU development check, 2026-10-18** (commit `9919e13`, blob `085cdcf7`; Windows CPU float32, fresh test

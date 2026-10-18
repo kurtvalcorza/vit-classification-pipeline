@@ -176,6 +176,7 @@ def test_amendment_1_was_committed_alone_and_states_the_rule():
 
 # ---- look counting (F2): only completed, written scorings count; outputs decide the slot too
 def test_ledger_plans_without_recording_and_records_after_the_write(tmp_path, monkeypatch):
+    monkeypatch.setattr(protocol, "RECORDED_EVALUATION", None)  # the pre-record behaviour
     monkeypatch.chdir(tmp_path)
     ledger = LookLedger(tmp_path / "work" / "ledger.json")
     assert ledger.plan("preregistered") == (protocol.TEST_LOOK_PREREGISTERED, "")
@@ -188,6 +189,7 @@ def test_ledger_plans_without_recording_and_records_after_the_write(tmp_path, mo
 
 
 def test_e1_an_empty_or_corrupt_ledger_does_not_crash(tmp_path, monkeypatch):
+    monkeypatch.setattr(protocol, "RECORDED_EVALUATION", None)  # the pre-record behaviour
     monkeypatch.chdir(tmp_path)
     (tmp_path / "work").mkdir()
     (tmp_path / "work" / "ledger.json").write_text("", encoding="utf-8")
@@ -197,8 +199,131 @@ def test_e1_an_empty_or_corrupt_ledger_does_not_crash(tmp_path, monkeypatch):
     assert ledger.plan("exploratory")[1] == "_exploratory_1"
 
 
-def test_recorded_evaluation_is_none_until_the_hosted_run():
-    assert protocol.RECORDED_EVALUATION is None
+EVIDENCE_NOTEBOOK = ROOT / "docs" / "execution-evidence" / "2026-10-18-1231036" / "vit_classification_colab_1231036_colab-cli-t4_output.ipynb"
+
+
+def _evidence_rows():
+    """Every printed dict of the executed evaluation-of-record notebook, in order."""
+    import ast
+    import contextlib
+
+    nb = json.loads(EVIDENCE_NOTEBOOK.read_text(encoding="utf-8"))
+    rows = []
+    for cell in nb["cells"]:
+        for out in cell.get("outputs", []):
+            for line in "".join(out.get("text", "")).splitlines():
+                if line.startswith("{"):
+                    with contextlib.suppress(ValueError, SyntaxError):
+                        rows.append(ast.literal_eval(line))
+    return rows
+
+
+def _row(rows, key):
+    hits = [r for r in rows if key in r]
+    assert len(hits) == 1, key
+    return hits[0]
+
+
+def test_recorded_evaluation_equals_the_executed_evidence():
+    """RECORDED_EVALUATION is re-derived from the executed 2026-10-18 T4 notebook, not copied from a summary."""
+    rec = protocol.RECORDED_EVALUATION
+    rows = _evidence_rows()
+    assert rec["label"] == "pre-registered evaluation of record" and rec["date"] == "2026-10-18"
+    assert rec["commit"].startswith("1231036") and rec["notebook_blob"].startswith("94e67934")
+    assert EVIDENCE_NOTEBOOK.parent.name == "2026-10-18-1231036" and rec["evidence"] == "docs/execution-evidence/2026-10-18-1231036/"
+    header = _row(rows, "preregistered")
+    assert header["preregistered"] is True and header["settings_differing"] == [] and header["selected_config"] == rec["selected_config"]
+    assert header["test_look"] == protocol.TEST_LOOK_PREREGISTERED
+    selection = _row(rows, "reason")
+    assert selection["selected_config"] == "C1" and selection["selected_policy"] == rec["selected_policy"] and selection["best_epoch"] == rec["best_epoch"]
+    for name in ("C0", "C1", "C2"):
+        grid_row = [r for r in rows if r.get("name") == name and r.get("status") == "complete"]
+        assert len(grid_row) == 1
+        assert grid_row[0]["val_log_loss"] == rec["grid_val_log_loss"][name] and grid_row[0]["val_accuracy"] == rec["grid_val_accuracy"][name]
+    fresh = _row(rows, "fresh_test")["fresh_test"]
+    recf = rec["fresh_test"]
+    for system in ("selected", "frozen_probe"):
+        assert fresh[system]["n"] == recf["n"] == 96
+        assert fresh[system]["accuracy"] == recf[system]["accuracy"] and fresh[system]["macro_f1"] == recf[system]["macro_f1"]
+        assert fresh["log_loss"][system] == recf[system]["log_loss"]
+        assert round(recf[system]["accuracy"] * 96) == recf[system]["correct"]
+    boot_row = _row(rows, "paired_bootstrap")
+    boot = boot_row["paired_bootstrap"]
+    assert boot_row["verdict"] == recf["verdict"] == "no detectable difference"
+    for key in ("primary_accuracy_difference", "primary_accuracy_ci95", "discordant_images", "secondary_log_loss_difference", "secondary_log_loss_ci95"):
+        assert boot[key] == recf[key], key
+    assert boot["n_clusters"] == recf["n_clusters"] and boot["n_images"] == 96
+    assert round((recf["selected"]["correct"] - recf["frozen_probe"]["correct"]) / 96, 4) == recf["primary_accuracy_difference"]
+    refs = _row(rows, "fresh_test_references (decide nothing)")["fresh_test_references (decide nothing)"]
+    assert round(refs["knn5_frozen_base"]["accuracy"], 4) == recf["references_decide_nothing"]["knn5_frozen_base"]["accuracy"]
+    assert round(refs["knn5_frozen_base"]["macro_f1"], 4) == recf["references_decide_nothing"]["knn5_frozen_base"]["macro_f1"]
+    assert round(refs["knn5_frozen_base"]["accuracy"] * 96) == recf["references_decide_nothing"]["knn5_frozen_base"]["correct"]
+    assert round(refs["majority_floor"]["accuracy"], 4) == recf["references_decide_nothing"]["majority_floor"]["accuracy"]
+    exposed = _row(rows, "accuracy")["accuracy"]
+    assert exposed == {k: rec["exposed_development_test"][k] for k in ("majority_floor", "knn5", "frozen_policy")} | {"selected_policy": rec["exposed_development_test"]["selected"]}
+    parity = _row(rows, "reload_parity")["reload_parity"]
+    assert parity["accuracy_in_memory"] == parity["accuracy_reloaded"] == rec["reload_parity_accuracy"]
+
+
+def test_a_reproduction_is_labelled_exactly_reproduction():
+    assert protocol.TEST_LOOK_REPRODUCTION == "reproduction"
+
+
+def test_with_the_record_a_new_runtime_ledger_plans_a_reproduction(tmp_path):
+    assert protocol.RECORDED_EVALUATION is not None
+    ledger = LookLedger(tmp_path / "work" / "ledger.json", tmp_path / "outputs")
+    assert ledger.plan("preregistered") == ("reproduction", "_reproduction_1")
+    assert ledger.plan("exploratory") == (protocol.TEST_LOOK_EXPLORATORY, "_exploratory_1")
+
+
+def test_with_the_record_a_new_runtime_never_writes_the_main_files(tmp_path, monkeypatch):
+    """Row 88's bug: the first identical run in a NEW runtime, with the record set, must not write the main report."""
+    ns, fetched = _namespace(tmp_path, monkeypatch, recorded=True)
+    exec(_cell(SECTION_8), ns)
+    assert not (tmp_path / "outputs" / f"{STEM}_evaluation_report.json").exists()
+    first = _report(tmp_path, "_reproduction_1")
+    assert first["test_look"] == "reproduction" and first["preregistered"] and first["fresh_test"]["scored"] and len(fetched) == 1
+    assert first["recorded_evaluation"] == protocol.RECORDED_EVALUATION
+    assert set(first["matches_record"]) == {"record", "selected_config", "selected_accuracy", "probe_accuracy", "primary_accuracy_difference",
+                                            "primary_accuracy_ci95", "discordant_images", "verdict"}
+    assert first["matches_record"]["selected_config"] is False  # the stand-in keeps C0; the record selected C1
+    exec(_cell(SECTION_8), ns)
+    assert _report(tmp_path, "_reproduction_2")["test_look"] == "reproduction"
+    assert not (tmp_path / "outputs" / f"{STEM}_evaluation_report.json").exists()
+    assert _report(tmp_path, "_reproduction_1") == first
+
+
+def test_with_the_record_a_changed_setting_is_still_exploratory(tmp_path, monkeypatch):
+    ns, fetched = _namespace(tmp_path, monkeypatch, split_seed=7, recorded=True)
+    exec(_cell(SECTION_8), ns)
+    report = _report(tmp_path, "_exploratory_1")
+    assert report["test_look"] == protocol.TEST_LOOK_EXPLORATORY and not report["fresh_test"]["scored"] and fetched == []
+    assert report["matches_record"] is None
+    assert not (tmp_path / "outputs" / f"{STEM}_evaluation_report.json").exists()
+
+
+def test_compare_with_record_reports_an_exact_reproduction():
+    rec = protocol.RECORDED_EVALUATION["fresh_test"]
+    fresh = {"scored": True, "verdict": rec["verdict"], "selected": {"accuracy": 78 / 96}, "frozen_probe": {"accuracy": 80 / 96},
+             "paired_bootstrap": {"primary_accuracy_difference": -2 / 96, "primary_accuracy_ci95": [-0.06321, 0.02041],
+                                  "discordant_images": {"selected_only": 1, "probe_only": 3}}}
+    result = protocol.compare_with_record(fresh, "C1")
+    assert all(v is True for k, v in result.items() if k != "record") and result["record"].startswith("2026-10-18 1231036")
+    assert protocol.compare_with_record({"scored": False}, "C1") is None
+
+
+def test_requoted_prose_carries_the_record_not_the_old_run():
+    nb = json.loads(NOTEBOOK.read_text(encoding="utf-8"))
+    text = "\n".join("".join(c["source"]) for c in nb["cells"])
+    for phrase in ("9 October 2026", "2351f94", "that this model has never scored", "this model never scored",
+                   "a gain of roughly five photographs or more", "No fresh-test number existed", "no fresh-test number existed",
+                   "ran C0 alone and kept the probe", "accuracy 0.7917 in memory", "four blocks at a higher rate",
+                   "EXPERIMENT_LEARNING_RATE = 1e-4"):
+        assert phrase not in text, phrase
+    for phrase in ("2026-10-18 Colab T4 evaluation of record (`1231036`, blob `94e67934`)", "C1 got 78 of 96",
+                   "[−0.0632, 0.0204]", "The adapted C1 did not beat the frozen probe", "0.854 (82 of 96)",
+                   "0.729167 in memory and reloaded", "EXPERIMENT_LEARNING_RATE = 3e-5", "C0 kept the probe (validation log-loss 0.1621"):
+        assert phrase in text, phrase
 
 
 # ---- Section 8 executed with stand-ins
@@ -241,10 +366,13 @@ class _Pipe:
         return out
 
 
-def _namespace(tmp_path, monkeypatch, *, split_seed=42, grid=None, masked=False, fail_fetch=False):
+def _namespace(tmp_path, monkeypatch, *, split_seed=42, grid=None, masked=False, fail_fetch=False, recorded=False):
+    """Section 8's globals with stand-ins. `recorded=False` replays the pre-record build (RECORDED_EVALUATION None)."""
     import vit_classification_pipeline as pkg
     from vit_classification_pipeline import samples
 
+    if not recorded:
+        monkeypatch.setattr(protocol, "RECORDED_EVALUATION", None)
     (tmp_path / "outputs").mkdir(parents=True)
     monkeypatch.chdir(tmp_path)
     if masked:
@@ -285,6 +413,7 @@ def _namespace(tmp_path, monkeypatch, *, split_seed=42, grid=None, masked=False,
         "WEIGHTS_DIR": tmp_path, "brief": lambda m: {"accuracy": m["accuracy"], "n": m["n"]}, "data_source": "sample",
         "disjoint": {}, "overlap": {}, "probe_result": {"history": []}, "adapt_seconds": 1.0,
     })
+    ns["RECORDED_EVALUATION"] = protocol.RECORDED_EVALUATION
     settings_cell = _cell("def current_settings():")
     start = settings_cell.index("def current_settings():")
     end = settings_cell.index("\n\ngrid_to_run", start)
