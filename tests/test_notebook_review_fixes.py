@@ -292,12 +292,12 @@ def test_vit_m1_byod_path_runs_section_4_outside_colab_from_the_base(notebook, t
 def test_vit_m1_upload_outside_colab_cancelled_and_bad_path_are_explained(notebook, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setitem(sys.modules, "google", None)
-    # Row 108 (DAT20): every refusal is one RunStopped message ("BYOD refused, ...") that the router shows
+    # Row 108 (DAT20): every refusal is one RunStopped message ("Refused: <file>: ...") that the router shows
     # without a traceback, and the run stays invalid.
-    with pytest.raises(Exception, match="BYOD refused.*upload dialog exists only in Google Colab") as info:
+    with pytest.raises(Exception, match=r"^Refused: \(no file\): USE_BYOD is True.*upload dialog exists only in Google Colab") as info:
         exec(_section_4(notebook, ""), ns := _section_4_namespace([]))
     assert type(info.value).__name__ == "RunStopped" and info.value.dimer_stop and ns["RUN_VALID"] is False
-    with pytest.raises(Exception, match="BYOD refused.*BYOD_PATH 'nowhere.zip' does not exist"):
+    with pytest.raises(Exception, match="^Refused: nowhere.zip: BYOD_PATH does not exist"):
         exec(_section_4(notebook, "nowhere.zip"), _section_4_namespace([]))
     for uploaded, message in (({}, "received 0"), ({"a.zip": b"", "b.zip": b""}, "received 2")):
         google, colab, files = (types.ModuleType(n) for n in ("google", "google.colab", "google.colab.files"))
