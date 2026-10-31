@@ -1,0 +1,72 @@
+{
+  "repo": "vit-classification-pipeline",
+  "sha": "717f4175bad6cd460f50eb6e8dcb28b9296f345f",
+  "notebook": "tutorials/vit_classification_colab.ipynb",
+  "blob": "e95aa5ada58d1335ed8e708261909eb463d597fc",
+  "gpu": "T4",
+  "session": "suite-vit-717f417-7e62",
+  "started_utc": "2026-10-29T21:14:49+00:00",
+  "runner": "Colab CLI `colab exec -f` on a fresh session (not a browser Run all)",
+  "overrides": [
+    {
+      "name": "USE_BYOD",
+      "from": "False",
+      "to": "True"
+    },
+    {
+      "name": "BYOD_PATH",
+      "from": "''",
+      "to": "'/etc/hostname'"
+    }
+  ],
+  "run_copy_blob": "ecc8d6fa4a357649f7272497af7055eb467f5c34",
+  "run_copy_sha256": "288dff05777c6fcea4aba7fbac215a632b6ae8d8838aec7ef4869c9914cd3067",
+  "run_copy_note": "refusal run: the run copy is the committed notebook with the listed assignment overrides, cut immediately after the refusal cell and re-serialised (nbformat layout); input_unchanged compares against that copy",
+  "truncated_after_cell": "vit_classification-18",
+  "refusal_cell_ref": "vit_classification-18",
+  "refusal_cell_index": 8,
+  "cells_dropped": 20,
+  "code_cells_dropped": 6,
+  "original_sha256": "53a5549ba29f7b5ebcfb1a4e1bd3f5653ff7ba363379f5a0a05beb1ee68001a2",
+  "status": "[suite-vit-717f417-7e62] gpu-t4-s-usw4a2-13zpi2nyk1nc4 | Hardware: T4 | Shape: Standard | Variant: GPU | Status: IDLE",
+  "exec_exit_code": 0,
+  "stopped": true,
+  "stop_verified": true,
+  "wall_s": 81.6,
+  "input_unchanged": true,
+  "executed_file": "vit_classification_colab_717f417_colab-cli-t4_output.ipynb",
+  "log_cells": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "log_total": 8,
+  "code_cells": 8,
+  "executed_cells": 4,
+  "errors": [
+    {
+      "cell": "vit_classification-18",
+      "ename": "IsolatedCellStop",
+      "evalue": "Refused: hostname: BYOD datasets must be a directory or a .zip holding labels.csv and the image files. Nothing was trained or scored; this run is invalid until Section 4 succeeds; earlier files were moved out of outputs/."
+    }
+  ],
+  "execution_counts": [],
+  "sequential": null,
+  "executed_sha256": "83d063a1e79bda8dbf2f81ea84c23896ee47f059aa878d8d90ca65c16cf7542f",
+  "log_sequential_complete": true,
+  "mode": "expect_refusal",
+  "refusal_line": "Refused: hostname: BYOD datasets must be a directory or a .zip holding labels.csv and the image files. Nothing was trained or scored; this run is invalid until Section 4 succeeds; earlier files were moved out of outputs/.",
+  "halting_cell_index": 8,
+  "halting_cell_id": "vit_classification-18",
+  "error_cells": [
+    8
+  ],
+  "refusal_fail_reasons": [],
+  "refusal_ok": true,
+  "verdict": "PASS"
+}

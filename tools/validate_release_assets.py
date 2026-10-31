@@ -93,7 +93,7 @@ CODE_MARKERS = (
     "boot = paired_bootstrap(selected_fresh['per_record'], frozen_fresh['per_record'], clusters=[r['observer'] for r in fresh_records], n_boot=BOOTSTRAP_N, seed=BOOTSTRAP_SEED)",
     "'settings_differing': settings_differing,",
     "fresh_check = check_fresh_disjoint()",
-    "raise RunStopped(f'BYOD refused, nothing was trained or scored:",
+    "raise RunStopped(f'Refused: {file_name}: ",
     "experiment_ran = True",
     "'selected_policy': adapt_result['policy']",
     # Stage 8: held-out evaluation, comparison, recorded verdicts (2026-10-05 review fix VIT-m2: no quality assert)
