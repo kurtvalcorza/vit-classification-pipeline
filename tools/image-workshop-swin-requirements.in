@@ -1,6 +1,6 @@
 # Isolated "swin" environment of DIMER_MultiModel_Image_Classification_Workshop.ipynb (2026-10-03).
 # Exact pins carried over from the notebook's former per-environment pip install (ENV_PINS["swin"] in section 7):
-# SwinV2's live carrier pins timm 1.0.28 and Pillow 12.3.0. Used only by FULL-tier SwinV2-Tiny feature extraction.
+# SwinV2's live carrier pins timm 1.0.28 and Pillow 13.0.0. Used only by FULL-tier SwinV2-Tiny feature extraction.
 torch==2.14.0
 torchaudio==2.11.0
 torchvision==0.29.0
