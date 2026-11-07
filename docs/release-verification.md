@@ -192,11 +192,13 @@ runtime. As for the other notebooks, this table is the evidence record: `metadat
 stays `pending` as authored, because editing it would change the blob these runs verify, and the registry status
 stays **Candidate** until a reviewer promotes it.
 
+The current workshop blob is `84ff4082` (commit `c870c26`, 2026-11-07: two text lines now say Pillow 13.0.0, with no notebook code change, after commit `90086bb`, 2026-11-02, where the pillow 13 lock upgrade changed the embedded hash locks and made blob `f87d93d5`). It has **no hosted run yet**, so the workshop's hosted-run gate is open again; the rows above, through blob `be5203b841ea`, are history for it (REL14).
+
 ## Primary ViT tutorial status
 
-**Candidate.** The 2026-09-19 Kaggle T4 run of blob `50462c07` (commit `8b26ec6`) needed a manual restart after the install cell (11/11 ok (1 restart after install cell)), so it is not a one-pass `Run all` and not promotion evidence (review finding VIT-M1, 2026-10-05). The review-fix blob `5738b645259c` (commit `2351f94`; uv isolated environment, guided layer, VIT-M1..M3 / VIT-m1..m3 fixes) completed one pass with no restart and 0 errors on a fresh Colab Tesla T4 on 2026-10-09 (Colab CLI 0.7.4 sequential execution, 13/13 code cells, 185.4 s; floor 0.1667, 5-NN 0.75, frozen probe 0.7917, selected policy 0.7917 with the probe kept on validation log-loss 0.1621; reload parity identical). On 2026-10-18 the review-fix blob `94e67934` (commit `1231036`) completed one pass with 0 errors on a fresh Colab Tesla T4 (Colab CLI 0.7.4 sequential execution, 14/14 code cells, 317.0 s): the pre-registered grid selected C1 (four blocks at 1e-4; validation log-loss 0.1242 against the probe's 0.1621), and on the 96-photograph fresh test, in this evaluation of record, **the adapted C1 did not beat the frozen probe**: 81.25 % (78/96) against 83.33 % (80/96), paired difference −0.0208, observer-cluster 95 % CI [−0.0632, 0.0204], 1 against 3 discordant photographs, verdict `no detectable difference`; record in "Primary ViT tutorial: hosted T4 evaluation of record (2026-10-18)" below. The regenerated blob `bb9441e4` (commit `e96ee0e`, carrying the record as `RECORDED_EVALUATION`) then ran the same pre-registered path on a new fresh Colab T4 (14/14, 0 errors, 262.5 s) as **reproduction 1 of the pre-registered evaluation**: every fresh-test number equals the record and only `_reproduction_1` files were written; see "Primary ViT tutorial: hosted T4 reproduction 1 (2026-10-18)". REL12 BYOD exercise (path-based and upload) and the optional Section 10 experiment are pending on a hosted runtime, so the status stays Candidate (REL14). The 2026-09-19 row and the local pre-flight rows above remain history. Any later change to the carried modules or to the notebook produces a new blob that needs its own clean run.
+The current blob `ee84c14d` (run at commit `5d23a72`, the lock-upgrade revision of PRs #16 and #17; this blob is unchanged at `main` `48a9a13`) passed on a hosted Colab T4 on 2026-11-03: its default path (14/14 code cells, one pass, no restart, 0 errors) and its scripted DAT20 refusal (`USE_BYOD=True;BYOD_PATH='/etc/hostname'`: exactly one `Refused:` line at cell `vit_classification-18`, no traceback, earlier cells clean, VM released); REL14 for this blob. The remaining gates for this blob are REL12 (a hosted BYOD run with an accepted input), REL2 (a browser `Run all` of the interactive journeys) and the optional Section 10 experiment. The workshop notebook `DIMER_MultiModel_Image_Classification_Workshop.ipynb` changed on `main` to blob `f87d93d5` (`90086bb`, the pillow 13 lock upgrade): its runs through blob `be5203b841ea` are history, and blob `f87d93d5` has no hosted run yet, so the workshop's hosted-run gate is open again. Blob `e95aa5ad` (code commit `b5f6285`), which was the current blob on 2026-10-29 and is history now (REL14), shows a refused BYOD input as exactly one `Refused: <file>: <reason>` line (previously a differently prefixed line), with no traceback, and stops Run all at that cell; genuine failures keep their traceback (NOTEBOOK_SPEC DAT19/DAT20). Its default path (2026-10-29; 14 code cells, exit 0, 0 errors) and its scripted DAT20 refusal (2026-10-29; `USE_BYOD=True;BYOD_PATH=/etc/hostname`: exactly one `Refused:` line at cell `vit_classification-18`, no traceback, earlier cells clean, VM released) both passed on a hosted Colab Tesla T4 (Colab CLI `colab exec -f`, not a browser `Run all`), and the hosted runs of earlier blobs, including `bb9441e4`, are history for it (REL14). The supplemental workshop notebook `tutorials/DIMER_MultiModel_Image_Classification_Workshop.ipynb` is a separate gate: its current blob `84ff4082` (`c870c26`) has no hosted run yet, so that gate is open.
 
-The current blob `e95aa5ad` (code commit `b5f6285`) shows a refused BYOD input as exactly one `Refused: <file>: <reason>` line (previously a differently prefixed line), with no traceback, and stops Run all at that cell; genuine failures keep their traceback (NOTEBOOK_SPEC DAT19/DAT20). Its default path (2026-10-29; 14 code cells, exit 0, 0 errors) and its scripted DAT20 refusal (2026-10-29; `USE_BYOD=True;BYOD_PATH=/etc/hostname`: exactly one `Refused:` line at cell `vit_classification-18`, no traceback, earlier cells clean, VM released) both passed on a hosted Colab Tesla T4 (Colab CLI `colab exec -f`, not a browser `Run all`), and the hosted runs of earlier blobs, including `bb9441e4`, are history for it (REL14).
+**History (before REL14): Candidate.** The 2026-09-19 Kaggle T4 run of blob `50462c07` (commit `8b26ec6`) needed a manual restart after the install cell (11/11 ok (1 restart after install cell)), so it is not a one-pass `Run all` and not promotion evidence (review finding VIT-M1, 2026-10-05). The review-fix blob `5738b645259c` (commit `2351f94`; uv isolated environment, guided layer, VIT-M1..M3 / VIT-m1..m3 fixes) completed one pass with no restart and 0 errors on a fresh Colab Tesla T4 on 2026-10-09 (Colab CLI 0.7.4 sequential execution, 13/13 code cells, 185.4 s; floor 0.1667, 5-NN 0.75, frozen probe 0.7917, selected policy 0.7917 with the probe kept on validation log-loss 0.1621; reload parity identical). On 2026-10-18 the review-fix blob `94e67934` (commit `1231036`) completed one pass with 0 errors on a fresh Colab Tesla T4 (Colab CLI 0.7.4 sequential execution, 14/14 code cells, 317.0 s): the pre-registered grid selected C1 (four blocks at 1e-4; validation log-loss 0.1242 against the probe's 0.1621), and on the 96-photograph fresh test, in this evaluation of record, **the adapted C1 did not beat the frozen probe**: 81.25 % (78/96) against 83.33 % (80/96), paired difference −0.0208, observer-cluster 95 % CI [−0.0632, 0.0204], 1 against 3 discordant photographs, verdict `no detectable difference`; record in "Primary ViT tutorial: hosted T4 evaluation of record (2026-10-18)" below. The regenerated blob `bb9441e4` (commit `e96ee0e`, carrying the record as `RECORDED_EVALUATION`) then ran the same pre-registered path on a new fresh Colab T4 (14/14, 0 errors, 262.5 s) as **reproduction 1 of the pre-registered evaluation**: every fresh-test number equals the record and only `_reproduction_1` files were written; see "Primary ViT tutorial: hosted T4 reproduction 1 (2026-10-18)". REL12 BYOD exercise (path-based and upload) and the optional Section 10 experiment are pending on a hosted runtime, so the status stays Candidate (REL14). The 2026-09-19 row and the local pre-flight rows above remain history. Any later change to the carried modules or to the notebook produces a new blob that needs its own clean run.
 
 ## Primary ViT tutorial: 2026-10-17 review fixes (row 108)
 
@@ -388,7 +390,7 @@ captured `8840ee4dc60ca3cbd95263d4f61d2eda63534804c6aea10a690e1d326701e7b0`, as 
 a browser Run all; forms and uploads not exercised; the status stays **Candidate** (REL12 BYOD and the Section 10
 experiment pending).
 
-### Hosted Colab T4 runs of blob `e95aa5ad` (2026-10-29)
+### Hosted Colab T4 runs of blob `e95aa5ad` (2026-10-29; history, REL14)
 
 These runs executed the PR head `717f4175bad6cd460f50eb6e8dcb28b9296f345f`, notebook `tutorials/vit_classification_colab.ipynb` blob `e95aa5ada58d1335ed8e708261909eb463d597fc`, fetched at the 40-character SHA and Git-blob verified, with the Colab CLI (`colab exec -f`) on a fresh Colab Tesla T4 session (not a browser `Run all`). Each `run_summary.json` records `verdict` `PASS`, `exec_exit_code` 0, `input_unchanged` true and `stop_verified` true (the VM was released), and the SHA-256 of each executed notebook equals the summary's `executed_sha256`.
 
@@ -431,6 +433,49 @@ This run says nothing about the 20 cut cells, which did not run in it. Session `
 | `run_copy.ipynb` | `288dff05777c6fcea4aba7fbac215a632b6ae8d8838aec7ef4869c9914cd3067` | `288dff05777c6fcea4aba7fbac215a632b6ae8d8838aec7ef4869c9914cd3067` (unchanged, no local path) |
 
 Not exercised by these runs: an accepted BYOD input (REL12), a browser `Run all` of the interactive journeys (REL2), and every other open gate named in this file; these runs close none of them.
+
+### REL14 hosted runs of blob `ee84c14d` (2026-11-03)
+
+These 2 runs executed commit `5d23a7257069bb8b23e0833f7be0563da49f4956` (`main` at the time; `tutorials/vit_classification_colab.ipynb` blob `ee84c14d70d571032ca3e28a740d0fdbdbeedf3a`, unchanged at `main` `48a9a13`) as Colab CLI sequential executions (`colab exec -f`) on fresh Colab Tesla T4 VMs (session `suite-vit-5d23a72-7e62`), not a browser `Run all`. The Colab CLI version is not recorded in `exec.log` or `run_summary.json`. The saved notebooks have no execution counts; cell order is taken from `exec.log`. Each `run_summary.json` records the commit and notebook blob above, `verdict` `PASS`, `exec_exit_code` 0, `input_unchanged` true and `stop_verified` true (the VM was released); the SHA-256 of each executed notebook equals the summary's `executed_sha256`. Local paths in the exec logs are redacted byte-wise to `<local-run-dir>`; the notebooks and summaries carried none.
+
+| Date (UTC) | Commit / notebook blob | Executor | Path exercised | Code cells | Wall time | Outcome |
+|---|---|---|---|---:|---:|---|
+| 2026-11-03 13:21 | `5d23a72` / `ee84c14d` | Colab CLI sequential execution, fresh Colab Tesla T4 | default settings, no overrides | 14/14 | 236.3 s | **One pass, no restart, 0 errors**; [retained evidence](execution-evidence/2026-11-03-5d23a72/) |
+| 2026-11-03 13:27 | `5d23a72` / `ee84c14d` | Colab CLI sequential execution, fresh Colab Tesla T4 | scripted DAT20 refusal: `USE_BYOD` `False` → `True` and `BYOD_PATH` `''` → `'/etc/hostname'` | 8/8 of the cut copy | 117.2 s | **Refused as designed**: one `Refused:` line, no traceback, earlier cells clean; [retained evidence](execution-evidence/2026-11-03-5d23a72-refusal/) |
+
+Lines printed by the default run (quoted from the executed notebook):
+
+```text
+{'verified_files': 3, 'revision': 'e0bd370de6799e8d1f47a911174ff4c3708e2323'}
+{'accuracy': {'majority_floor': 0.1667, 'knn5': 0.75, 'frozen_policy': 0.7917, 'selected_policy': 0.7292}}
+{'delta_vs_frozen': {'accuracy': -0.0625, 'macro_f1': -0.0703}}
+{'reload_parity': {'probabilities_identical': True, 'accuracy_in_memory': 0.729167, 'accuracy_reloaded': 0.729167, 'classes_identical': True, 'predict_identical': True}, 'reloaded_policy': 'unfrozen last 4 blocks + linear head', 'reloaded_best_epoch': 4}
+```
+
+Apart from timings, run ids, process ids and the carried source revision, the printed output equals the 2026-10-29 default run of blob `e95aa5ad` line for line.
+
+**DAT20 refusal record (2026-11-03).** Overrides, set by `--set` on a copy of the blob: `USE_BYOD` `False` → `True` and `BYOD_PATH` `''` → `'/etc/hostname'` (the run copy differs from the blob in exactly those 2 source lines). The suite cut the run copy right after the refusing cell `vit_classification-18`, dropping 20 cells (6 of them code cells), which reproduces `Run all` stopping at the first error; the cut copy is `run_copy.ipynb`, SHA-256 `6588d5617f04b2a218f3f691019e1ddee179f7ee062bee6ab3157227ddfb6f30` (Git blob `69502032`), equal to the summary's `run_copy_sha256`. The 7 earlier code cells completed without an error. The refusing cell halted with `ename` `IsolatedCellStop` and printed exactly one `Refused:` line, with no traceback:
+
+```text
+Refused: hostname: BYOD datasets must be a directory or a .zip holding labels.csv and the image files. Nothing was trained or scored; this run is invalid until Section 4 succeeds; earlier files were moved out of outputs/.
+```
+
+This run says nothing about the 20 cut cells, which did not run in it.
+
+| File (under `docs/execution-evidence/2026-11-03-5d23a72/`) | Captured SHA-256 | Committed SHA-256 |
+|---|---|---|
+| `vit_classification_colab_5d23a72_colab-cli-t4_default.ipynb` | `56ee47bc862e5951764b27979f7a5aca360a445ad88e0995216bfac0c1d49583` | `56ee47bc862e5951764b27979f7a5aca360a445ad88e0995216bfac0c1d49583` (unchanged, no local path) |
+| `exec.log` | `931024134a73b5afcd4a221f60f956dfb93be1a6f08f9921589a52bc5578e4c2` | `ee8c0b357552b18552de68ff1eac8ef7a140c499307716412707c6d11b8d6ec1` (2 local-path replacements) |
+| `run_summary.json` | `d3cc4445e0b60d0a7f9bf305ae5ce0af6fe643cf69d2c392c0e629a518a11def` | `d3cc4445e0b60d0a7f9bf305ae5ce0af6fe643cf69d2c392c0e629a518a11def` (unchanged, no local path) |
+
+| File (under `docs/execution-evidence/2026-11-03-5d23a72-refusal/`) | Captured SHA-256 | Committed SHA-256 |
+|---|---|---|
+| `vit_classification_colab_5d23a72_colab-cli-t4_refusal.ipynb` | `78f3701bd89138fed2bc94abcc4e387ce66404793b7881556c5bae398e0293b2` | `78f3701bd89138fed2bc94abcc4e387ce66404793b7881556c5bae398e0293b2` (unchanged, no local path) |
+| `exec.log` | `552035506ca54a007101aa92dfb88052ed64a533bd305f0b234ba73978b36f3c` | `20f40365151202d4373602a04256608f9f7fe007ef03ef6f0cf3eb65ceeef506` (2 local-path replacements) |
+| `run_summary.json` | `00efc0b5c6291577c3221aae05b51357c24b426401cf32e5f3edc8a12db2ba41` | `00efc0b5c6291577c3221aae05b51357c24b426401cf32e5f3edc8a12db2ba41` (unchanged, no local path) |
+| `run_copy.ipynb` | `6588d5617f04b2a218f3f691019e1ddee179f7ee062bee6ab3157227ddfb6f30` | `6588d5617f04b2a218f3f691019e1ddee179f7ee062bee6ab3157227ddfb6f30` (unchanged, no local path) |
+
+Not exercised by these runs: an accepted BYOD input (REL12), a browser `Run all` of the interactive journeys (REL2), and the workshop notebook `DIMER_MultiModel_Image_Classification_Workshop.ipynb` (blob `84ff4082`, no hosted run yet).
 
 ## Multi-model guided follow-up — 2026-09-26
 
